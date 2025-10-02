@@ -8,13 +8,12 @@
 #  include <sys/types.h>
 #endif
 
-#define NON_RECOVERABLE_ERROR 57
 #define PID_NOT_RUNNING ((pid_t) -1)
 
 typedef struct {
-    const char*  name;
-    const char*  program;
-    const char** args;
+    const char*        name;
+    const char*        program;
+    const char* const* args;
 } WatchdogProgram;
 
 void watchdog_start(WatchdogProgram const* programs, size_t programs_sz);

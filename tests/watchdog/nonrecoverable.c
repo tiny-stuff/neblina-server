@@ -1,4 +1,4 @@
-#include "watchdog/watchdog.h"
+#include "util/error.h"
 
 int main()
 {

@@ -7,6 +7,8 @@
 #  define ATTR_PRINTF(a, b)
 #endif
 
+extern bool logs_verbose;
+
 void DBG(const char* fmt, ...) ATTR_PRINTF(1, 2);
 void LOG(const char* fmt, ...) ATTR_PRINTF(1, 2);
 void ERR(const char* fmt, ...) ATTR_PRINTF(1, 2);

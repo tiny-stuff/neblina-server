@@ -1,11 +1,17 @@
 #include "logs.h"
 
-#include "common.h"
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
+
 #include "os/window.h"
+
+bool logs_verbose = false;
+int  logging_color = 31;
 
 void DBG(const char* fmt, ...)
 {
-    if (!args.verbose)
+    if (!logs_verbose)
         return;
     va_list ap;
     va_start(ap, fmt);

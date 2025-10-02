@@ -6,6 +6,7 @@
 
 #include "util/logs.h"
 #include "os/os.h"
+#include "util/error.h"
 
 typedef struct {
     size_t program_idx;
@@ -14,6 +15,8 @@ typedef struct {
     time_t last_attempt;
 } Task;
 
+static WatchdogProgram const* programs;
+static size_t programs_sz;
 static Task*         tasks = NULL;
 static size_t        n_tasks = 0;
 static volatile bool watchdog_running = true;
@@ -26,16 +29,16 @@ static void start_task_if_stopped(Task* task)
 {
     if (task->pid == -1) {
         if (task->recent_attempts == MAX_ATTEMPS) {
-            LOG("Giving up on service '%s'", task->service->name);
+            LOG("Giving up on service '%s'", programs[task->program_idx].name);
             ++task->recent_attempts;
         } else if (task->recent_attempts < MAX_ATTEMPS) {
-            LOG("Starting service '%s' with (attempt %d)", task->service->name, task->recent_attempts);
-            task->pid = os_start_service(task->service);
+            LOG("Starting service '%s' with (attempt %d)", programs[task->program_idx].name, task->recent_attempts);
+            task->pid = os_start_service(programs[task->program_idx].program, (char* const*) programs[task->program_idx].args);
             if (task->pid == 0) {
-                ERR("Could not start process '%s': %s", task->service->name, last_error);
+                ERR("Could not start process '%s': %s", programs[task->program_idx].name, n_error(errno));
                 return;
             }
-            LOG("Service '%s' started with pid %d", task->service->name, task->pid);
+            LOG("Service '%s' started with pid %d", programs[task->program_idx].name, task->pid);
             time(&task->last_attempt);
             ++task->recent_attempts;
         }
@@ -46,7 +49,7 @@ static void mark_task_as_terminated_if_dead(Task *task)
 {
     int status;
     if (!os_process_still_running(task->pid, &status)) {
-        LOG("Sevice process '%s' has died with status %d%s", task->service->name, status,
+        LOG("Sevice process '%s' has died with status %d%s", programs[task->program_idx].name, status,
             status == NON_RECOVERABLE_ERROR ? " (non-recoverable)" : "");
         task->pid = PID_NOT_RUNNING;
         if (status == NON_RECOVERABLE_ERROR)
@@ -55,12 +58,14 @@ static void mark_task_as_terminated_if_dead(Task *task)
 }
 
 
-void watchdog_start(WatchdogProgram const* programs, size_t programs_sz)
+void watchdog_start(WatchdogProgram const* programs_, size_t programs_sz_)
 {
+    programs = programs_;
+    programs_sz = programs_sz_;
     tasks = calloc(programs_sz, sizeof(Task));
 
     // create list of services
-    for (int i = 0; i < programs_sz; ++i) {
+    for (size_t i = 0; i < programs_sz; ++i) {
         tasks[n_tasks++] = (Task) {
             .program_idx = i,
             .pid = PID_NOT_RUNNING,

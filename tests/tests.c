@@ -2,14 +2,16 @@
 #include <stdio.h>
 
 #include "os/os.h"
+#include "util/logs.h"
 #include "watchdog/watchdog.h"
 
 bool termination_requested = false;
+const char* service = "tests";
 
 static void test_watchdog()
 {
     WatchdogProgram programs[] = {
-            { "infloop", "tests/watchdog/infloop", (const char*[]) { "infloop", NULL } },
+            {"infloop", "tests/watchdog/infloop", (char const* const[]) {"infloop", NULL}},
     };
     watchdog_start(programs, sizeof programs / sizeof programs[0]);
 
@@ -30,6 +32,9 @@ static void test_watchdog()
 
 int main()
 {
+    logs_verbose = true;
+
     test_watchdog();
+
     printf("\x1b[0;32mTests successful!\x1b[0m\n");
 }
