@@ -17,8 +17,9 @@ void vnprintf(const char *restrict fmt, va_list ap)
 
 void vnprintf_error(const char *restrict fmt, va_list ap)
 {
-    fprintf(stderr, "%s: \n", service);
+    fprintf(stderr, "%s: ", service);
     vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
 }
 
 void window_init()

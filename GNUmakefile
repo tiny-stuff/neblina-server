@@ -67,7 +67,7 @@ ifndef DEV
 endif
 
 $(PROJECT)-test: CFLAGS=-D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200112L -D_DEFAULT_SOURCE $(INCLUDES) -I../src -O0 -ggdb -fno-inline-functions -fstack-protector-strong -fno-common $(WARNINGS)
-$(PROJECT)-test: tests/tests.o $(OBJ) tests/error tests/nonrecoverable
+$(PROJECT)-test: tests/tests.o $(OBJ) tests/error tests/nonrecoverable tests/infloop
 	$(CC) -o $@ tests/tests.o $(OBJ) $(LDFLAGS)
 
 tests/infloop: tests/watchdog/infloop.o

@@ -11,11 +11,12 @@ const char* service = "tests";
 static void test_watchdog()
 {
     WatchdogProgram programs[] = {
-            {"infloop", "tests/watchdog/infloop", (char const* const[]) {"infloop", NULL}},
+            { "infloop", "tests/infloop", NULL, 0},
     };
-    watchdog_start(programs, sizeof programs / sizeof programs[0]);
+    watchdog_init(programs, sizeof programs / sizeof programs[0]);
 
-    os_sleep_ms(200);
+    watchdog_step();
+    watchdog_step();
 
     WatchdogProgramState infloop_state = watchdog_program_state(0);
     assert(infloop_state.status == WPS_RUNNING);
@@ -24,7 +25,7 @@ static void test_watchdog()
 
     assert(os_process_still_running(infloop_state.pid, NULL));
 
-    watchdog_stop();
+    watchdog_finalize();
 
     os_sleep_ms(100);
     assert(!os_process_still_running(infloop_state.pid, NULL));

@@ -14,7 +14,7 @@
 void os_handle_ctrl_c();
 void os_sleep_ms(size_t ms);
 
-pid_t os_start_service(const char* program, char* const* args);
+pid_t os_start_service(const char* program, const char** args, size_t args_sz);
 bool  os_process_still_running(pid_t pid, int* status);
 
 #endif //NEBLINA_OS_H

@@ -19,7 +19,6 @@ static WatchdogProgram const* programs;
 static size_t programs_sz;
 static Task*         tasks = NULL;
 static size_t        n_tasks = 0;
-static volatile bool watchdog_running = true;
 
 #define MAX_ATTEMPS          10
 #define SEC_TO_RESET_ATTEMPS 10
@@ -33,7 +32,7 @@ static void start_task_if_stopped(Task* task)
             ++task->recent_attempts;
         } else if (task->recent_attempts < MAX_ATTEMPS) {
             LOG("Starting service '%s' with (attempt %d)", programs[task->program_idx].name, task->recent_attempts);
-            task->pid = os_start_service(programs[task->program_idx].program, (char* const*) programs[task->program_idx].args);
+            task->pid = os_start_service(programs[task->program_idx].program, programs[task->program_idx].args, programs[task->program_idx].args_sz);
             if (task->pid == 0) {
                 ERR("Could not start process '%s': %s", programs[task->program_idx].name, n_error(errno));
                 return;
@@ -58,7 +57,7 @@ static void mark_task_as_terminated_if_dead(Task *task)
 }
 
 
-void watchdog_start(WatchdogProgram const* programs_, size_t programs_sz_)
+void watchdog_init(WatchdogProgram const* programs_, size_t programs_sz_)
 {
     programs = programs_;
     programs_sz = programs_sz_;
@@ -73,34 +72,42 @@ void watchdog_start(WatchdogProgram const* programs_, size_t programs_sz_)
         };
         time(&tasks[i].last_attempt);
     }
-
-    // keep track of services, restart if down
-    while (watchdog_running) {
-
-        // start/restart stopped services
-        for (size_t i = 0; i < n_tasks; ++i)
-            start_task_if_stopped(&tasks[i]);
-
-        // check if any services have died
-        for (size_t i = 0; i < n_tasks; ++i)
-            mark_task_as_terminated_if_dead(&tasks[i]);
-
-        // reset recent attempts
-        time_t now; time(&now);
-        for (size_t i = 0; i < n_tasks; ++i)
-            if (tasks[i].recent_attempts >= MAX_ATTEMPS && difftime(now, tasks[i].last_attempt) > SEC_TO_RESET_ATTEMPS)
-                tasks[i].recent_attempts = 0;
-
-        os_sleep_ms(MS_BETWEEN_RETRIES);
-    }
 }
 
-void watchdog_stop()
+void watchdog_step()
 {
-    watchdog_running = false;
+    // start/restart stopped services
+    for (size_t i = 0; i < n_tasks; ++i)
+        start_task_if_stopped(&tasks[i]);
+
+    // check if any services have died
+    for (size_t i = 0; i < n_tasks; ++i)
+        mark_task_as_terminated_if_dead(&tasks[i]);
+
+    // reset recent attempts
+    time_t now; time(&now);
+    for (size_t i = 0; i < n_tasks; ++i)
+        if (tasks[i].recent_attempts >= MAX_ATTEMPS && difftime(now, tasks[i].last_attempt) > SEC_TO_RESET_ATTEMPS)
+            tasks[i].recent_attempts = 0;
+
+    os_sleep_ms(MS_BETWEEN_RETRIES);
+}
+
+void watchdog_finalize()
+{
     // TODO - kill all children
 }
 
 WatchdogProgramState watchdog_program_state(size_t idx)
 {
+    WatchdogProgramState state;
+    state.attempts = tasks[idx].recent_attempts;
+    state.pid = tasks[idx].pid;
+    if (state.pid == PID_NOT_RUNNING)
+        state.status = WPS_STOPPED;
+    else if (tasks[idx].recent_attempts >= MAX_ATTEMPS)
+        state.status = WPS_GAVE_UP;
+    else
+        state.status = WPS_RUNNING;
+    return state;
 }

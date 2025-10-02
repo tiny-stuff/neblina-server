@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "util/error.h"
 #include "util/logs.h"
@@ -29,24 +30,30 @@ void os_sleep_ms(size_t ms)
     usleep(ms * 1000);
 }
 
-pid_t os_start_service(const char* program, char* const* args)
+pid_t os_start_service(const char* program, const char** args, size_t args_sz)
 {
     // print command line
     if (logs_verbose) {
         char cmd_line[1024] = {0}; char* s = cmd_line;
-        for (char* const* str = args; *str; ++str) {
-            s = strcat(s, (const char *) str);
+        for (size_t i = 0; i < args_sz; ++i) {
+            s = strcat(s, args[i]);
             s = strcat(s, " ");
         }
-        DBG("Command line: %s", cmd_line);
+        DBG("Command line: %s %s", program, cmd_line);
     }
+
+    char** pargs = calloc(args_sz + 2, sizeof (char *));
+    pargs[0] = (char *) (uintptr_t) program;
+    for (size_t i = 0; i < args_sz; ++i)
+        pargs[i + 1] = (char *) (uintptr_t) args[i];
 
     pid_t pid = fork();
     if (pid == 0) {  // child process
-        execvp(program, args);
+        execvp(program, pargs);
         FATAL_NON_RECOVERABLE("execvp failed when starting a new service: %s", strerror(errno));
     } else if (pid > 0) {
         setpgid(pid, getpid());  // register child
+        free(pargs);
     } else {
         ERR("fork error: %s", strerror(errno));
     }
