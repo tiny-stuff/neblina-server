@@ -1,10 +1,10 @@
 #include "os/os.h"
 
-#include "common.h"
-
 #include <signal.h>
 
 static HANDLE g_job = NULL;   // Global job handle to tie children to parent
+
+bool termination_requested = false;
 
 void handle_sigint(int signum)
 {

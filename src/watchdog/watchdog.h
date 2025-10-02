@@ -3,10 +3,7 @@
 
 #include <stddef.h>
 
-#ifdef _WIN32
-#else
-#  include <sys/types.h>
-#endif
+#include "os/os.h"
 
 #define PID_NOT_RUNNING ((pid_t) -1)
 
