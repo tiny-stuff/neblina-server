@@ -54,5 +54,5 @@ dkms.conf
 # debug information files
 *.dwo
 
-/tiny-template
-/tiny-template-test
+/neblina
+/neblina-test

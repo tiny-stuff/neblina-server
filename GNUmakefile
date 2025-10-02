@@ -1,4 +1,4 @@
-PROJECT=tiny-template
+PROJECT=neblina
 
 all: ${PROJECT}
 
