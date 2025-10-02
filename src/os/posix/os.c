@@ -65,3 +65,8 @@ bool os_process_still_running(pid_t pid, int* status)
 {
     return waitpid(pid, status, WNOHANG) != pid;
 }
+
+void os_kill(pid_t pid)
+{
+    kill(pid, SIGINT);
+}

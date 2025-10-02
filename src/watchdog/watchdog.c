@@ -95,7 +95,10 @@ void watchdog_step()
 
 void watchdog_finalize()
 {
-    // TODO - kill all children
+    for (size_t i = 0; i < n_tasks; ++i)
+        if (tasks[i].pid != PID_NOT_RUNNING)
+            os_kill(tasks[i].pid);
+    free(tasks);
 }
 
 WatchdogProgramState watchdog_program_state(size_t idx)
