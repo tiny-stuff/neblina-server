@@ -1,6 +1,8 @@
 #ifndef NEBLINA_LOG_H
 #define NEBLINA_LOG_H
 
+#include <stdbool.h>
+
 #ifndef _MSC_VER
 #  define ATTR_PRINTF(a, b) __attribute__ ((format (printf, a, b)))
 #else

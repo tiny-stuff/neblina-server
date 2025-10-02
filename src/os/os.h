@@ -1,6 +1,7 @@
 #ifndef NEBLINA_OS_H
 #define NEBLINA_OS_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #ifdef _WIN32

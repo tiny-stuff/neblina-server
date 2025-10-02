@@ -10,7 +10,7 @@
 #include "util/error.h"
 #include "util/logs.h"
 
-extern bool termination_requested;
+bool termination_requested = false;
 
 void handle_sigint(int signum)
 {
@@ -27,7 +27,7 @@ void os_handle_ctrl_c()
 
 void os_sleep_ms(size_t ms)
 {
-    usleep(ms * 1000);
+    usleep((useconds_t) (ms * 1000));
 }
 
 pid_t os_start_service(const char* program, const char** args, size_t args_sz)

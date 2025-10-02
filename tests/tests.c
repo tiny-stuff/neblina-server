@@ -5,7 +5,6 @@
 #include "util/logs.h"
 #include "watchdog/watchdog.h"
 
-bool termination_requested = false;
 const char* service = "tests";
 
 static void test_watchdog()

@@ -25,7 +25,7 @@ include objects.mk
 # warnings
 # 
 
-WARNINGS=-Wall -Wextra -Wpedantic -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wfloat-equal -Wnull-dereference -Wshadow -Wstack-protector -Wswitch-enum -Wundef -Wvla -Wno-sign-conversion
+WARNINGS=-Wall -Wextra -Wpedantic -Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Wfloat-equal -Wnull-dereference -Wshadow -Wstack-protector -Wswitch-enum -Wundef -Wvla -Wno-sign-conversion -Wno-newline-eof
 WARNINGS_GCC=-Wduplicated-branches -Wduplicated-cond -Wformat-signedness -Wjump-misses-init -Wlogical-op -Wnested-externs -Wnormalized -Wshift-negative-value -Wshift-overflow=2 -Wstrict-overflow=3 -Wsuggest-attribute=malloc -Wtrampolines -Wwrite-strings -Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=format -Wsuggest-attribute=cold -Wsuggest-attribute=returns_nonnull
 WARNINGS_CLANG=-Warray-bounds-pointer-arithmetic -Wassign-enum -Wcast-function-type -Wcomma -Wcovered-switch-default -Wduplicate-enum -Widiomatic-parentheses -Wloop-analysis -Wformat-non-iso -Wformat-pedantic -Wformat-type-confusion -Wfour-char-constants  -Wimplicit-fallthrough -Wpointer-arith -Wreserved-identifier -Wshift-sign-overflow -Wsigned-enum-bitfield -Wstatic-in-inline  -Wtautological-constant-in-range-compare  -Wthread-safety -Wunreachable-code -Wunreachable-code-aggressive -Wunused-macros -Wused-but-marked-unused -Wvariadic-macros -Wzero-as-null-pointer-constant -Wno-strict-prototypes
 
