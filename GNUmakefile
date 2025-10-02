@@ -1,6 +1,6 @@
 PROJECT=neblina
 
-all: ${PROJECT}
+all: ${PROJECT} ${PROJECT}-test
 
 #
 # objects
@@ -42,7 +42,7 @@ endif
 
 INCLUDES=-I. -Isrc
 
-CFLAGS=-std=c17 -D_XOPEN_SOURCE=700 -MMD $(INCLUDES)
+CFLAGS=-std=c17 -D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200112L -D_DEFAULT_SOURCE -MMD $(INCLUDES)
 
 ifdef DEV
   CFLAGS += -O0 -ggdb -fno-inline-functions -fstack-protector-strong -fno-common $(WARNINGS)
@@ -66,9 +66,18 @@ ifndef DEV
 	strip ./$@
 endif
 
-$(PROJECT)-test: CFLAGS=-D_XOPEN_SOURCE=700 $(INCLUDES) -O0 -ggdb -fno-inline-functions -fstack-protector-strong -fno-common $(WARNINGS)
-$(PROJECT)-test: tests/tests.o $(OBJ)
-	$(CC) -o $@ $^ $(LDFLAGS)
+$(PROJECT)-test: CFLAGS=-D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200112L -D_DEFAULT_SOURCE $(INCLUDES) -I../src -O0 -ggdb -fno-inline-functions -fstack-protector-strong -fno-common $(WARNINGS)
+$(PROJECT)-test: tests/tests.o $(OBJ) tests/error tests/nonrecoverable
+	$(CC) -o $@ tests/tests.o $(OBJ) $(LDFLAGS)
+
+tests/infloop: tests/watchdog/infloop.o
+	$(CC) -o $@ $^
+
+tests/error: tests/watchdog/error.o
+	$(CC) -o $@ $^
+
+tests/nonrecoverable: tests/watchdog/nonrecoverable.o
+	$(CC) -o $@ $^
 
 check: $(PROJECT)-test
 	./$(PROJECT)-test

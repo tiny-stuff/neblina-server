@@ -56,3 +56,6 @@ dkms.conf
 
 /neblina
 /neblina-test
+/tests/error
+/tests/nonrecoverable
+/tests/infloop
