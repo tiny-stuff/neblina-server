@@ -7,7 +7,7 @@
 #include "os/window.h"
 
 bool logs_verbose = false;
-int  logging_color = 31;
+int  logging_color = 0;
 
 void DBG(const char* fmt, ...)
 {

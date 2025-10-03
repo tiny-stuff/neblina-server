@@ -1,12 +1,12 @@
 ## Tasks
 
-- [ ] Rename project
-- [ ] Orchestrator
+- [x] Rename project
+- [x] Orchestrator
+- [ ] TCP server + SSL server
+- [ ] Line by line + Parrot + SParrot
 - [ ] Process config file
-- [ ] TCP client
-- [ ] TCP server + Line by line + Parrot
 - [ ] Multithreading
-- [ ] SSL server + SParrot
+- [ ] TCP client
 - [ ] HTTP structs
 - [ ] HTTP server and request handlers
   - [ ] Default 404
