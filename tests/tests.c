@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "os/os.h"
 #include "util/logs.h"
@@ -54,9 +55,9 @@ static void test_watchdog()
 
 volatile int order = 1;
 
-static void task0(int lane, void* data) { (void) lane; int* array = data; array[0] = order++; os_sleep_ms(100); }
-static void task1(int lane, void* data) { (void) lane; int* array = data; array[1] = order++; os_sleep_ms(100); }
-static void task2(int lane, void* data) { (void) lane; int* array = data; array[2] = order++; os_sleep_ms(100); }
+char sequence[4] = { 0, 0, 0, 0 };
+
+static void task(int fd, uint8_t const* data, size_t data_sz) { (void) fd; strcat(sequence, (const char *) data); os_sleep_ms(100); }
 
 static void test_thread_pool(size_t n_threads)
 {
@@ -64,23 +65,16 @@ static void test_thread_pool(size_t n_threads)
 
     // the idea here is that tasks that don't have the same idx should not happen at the same time
     // so: it the code bellow should happen in this order: task0, task1, task2
-    int array[3] = { 0, 0, 0 };
-    tpool_add_task(task0, 1, array);
-    tpool_add_task(task2, 1, array);
+    tpool_add_task(task, 1, (uint8_t const *) "0", 2);
+    tpool_add_task(task, 1, (uint8_t const *) "1", 2);
     os_sleep_ms(30);
-    tpool_add_task(task1, 2, array);
+    tpool_add_task(task, 2, (uint8_t const *) "2", 2);
     os_sleep_ms(300);
 
     if (n_threads == SINGLE_THREADED) {
-        assert(array[0] == 1);
-        assert(array[1] == 3);
-        assert(array[2] == 2);
+        assert(strcmp(sequence, "012") == 0);
     } else {
-        /*
-        assert(array[0] == 1);
-        assert(array[1] == 2);
-        assert(array[2] == 3);
-         */
+        assert(strcmp(sequence, "021") == 0);
     }
 
     tpool_finalize();

@@ -13,33 +13,16 @@ static size_t  n_threads = 0;
 static thrd_t* threads = NULL;
 static bool*   thread_running = NULL;
 
-// task management
-static mtx_t   task_queue_mutex;
-
-typedef struct Task {
-    TPoolTask        task;
-    void*            args;
-    struct Task* prev;
-    struct Task* next;
-} Task;
-
-typedef struct LaneQueue {
-    int            lane;
-    Task*          queue;
+// store buffers
+typedef struct Buffer {
+    int            fd;
+    char*          buffer;
+    size_t         buffer_sz;
+    mtx_t          mutex;
     UT_hash_handle hh;
-} LaneQueue;
+} Buffer;
 
-static LaneQueue* queues_per_lane;
-
-// lane ready queue
-
-typedef struct LaneReadyQueue {
-    int                    line;
-    struct LaneReadyQueue* prev;
-    struct LaneReadyQueue* next;
-} LaneReadyQueue;
-
-
+static Buffer* buffers = NULL;
 
 static int thread_function(void* arg)
 {
@@ -55,6 +38,7 @@ static int thread_function(void* arg)
 
 void tpool_init(size_t n_threads_)
 {
+    // create threads
     n_threads = n_threads_;
     if (n_threads != SINGLE_THREADED) {
         thread_running = calloc(n_threads, sizeof thread_running[0]);
@@ -69,39 +53,40 @@ void tpool_init(size_t n_threads_)
 
 void tpool_finalize()
 {
+    // end threads
     for (size_t i = 0; i < n_threads; ++i)
         thread_running[i] = false;
     for (size_t i = 0; i < n_threads; ++i) {
         thrd_join(threads[i], NULL);
         DBG("Thread %zi finalized", i);
     }
+
+    // cleanup
     free(threads);
     free(thread_running);
 }
 
-void tpool_add_task(TPoolTask task, int lane, void* data)
+void tpool_add_task(TPoolTask task, int fd, uint8_t const* data, size_t data_sz)
 {
     if (n_threads == SINGLE_THREADED) {
-        task(lane, data);
-    } else {
-        mtx_lock(&task_queue_mutex);
+        task(fd, data, data_sz);
 
-        // find or create queue per lane
-        LaneQueue* q;
-        HASH_FIND_INT(queues_per_lane, &lane, q);
-        if (!q) {
-            q = malloc(sizeof(LaneQueue));
-            q->lane = lane;
-            q->queue = NULL;
-            HASH_ADD_INT(queues_per_lane, lane, q);
+    } else {
+
+        // find/create index in hash table
+        Buffer* buffer;
+        HASH_FIND_INT(buffers, &fd, buffer);
+        if (buffer == NULL) {
+            buffer = calloc(1, sizeof(Buffer));
+            buffer->fd = fd;
+            HASH_ADD_INT(buffers, fd, buffer);
         }
 
-        // add task to the queue
-        Task* ntask = malloc(sizeof(Task));
-        ntask->task = task;
-        ntask->args = data;
-        DL_APPEND(q->queue, ntask);
-
-        mtx_unlock(&task_queue_mutex);
+        // lock mutex and add to buffer
+        mtx_lock(&buffer->mutex);
+        buffer->buffer = realloc(buffer->buffer, buffer->buffer_sz + data_sz);
+        memcpy(&buffer->buffer[buffer->buffer_sz], buffer->buffer, data_sz);
+        buffer->buffer_sz += data_sz;
+        mtx_unlock(&buffer->mutex);
     }
 }
