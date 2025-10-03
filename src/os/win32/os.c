@@ -1,8 +1,7 @@
 #include "os/os.h"
 
-#include "common.h"
-
 #include <signal.h>
+#include <string.h>
 
 static HANDLE g_job = NULL;   // Global job handle to tie children to parent
 
@@ -24,7 +23,7 @@ void os_sleep_ms(size_t ms)
     Sleep((DWORD) ms);
 }
 
-DWORD os_start_service(ConfigService const* service)
+DWORD os_start_service(const char* program, const char** args, size_t args_sz)
 {
     if (!g_job) {
 
@@ -40,17 +39,13 @@ DWORD os_start_service(ConfigService const* service)
         }
     }
 
-    char cmd_line[1024] = { 0 };
-    snprintf(cmd_line, sizeof(cmd_line),
-        "\"%s\" -D \"%s\" -s %s -P %d -c %d%s%s",
-        args.program_name,
-        args.data_dir,
-        service->name,
-        service->port,
-        service->logging_color,
-        service->open_to_world ? " -w" : "",
-        args.verbose ? " -v" : ""
-    );
+    char cmd_line[1024] = {0}; char* s = cmd_line;
+    s = strcat(s, program);
+    s = strcat(s, " ");
+    for (size_t i = 0; i < args_sz; ++i) {
+        s = strcat(s, args[i]);
+        s = strcat(s, " ");
+    }
 
     DBG("Command line: %s\n", cmd_line);
 
@@ -59,7 +54,7 @@ DWORD os_start_service(ConfigService const* service)
     si.cb = sizeof(si);
 
     BOOL ok = CreateProcessA(
-        args.program_name,   // application
+        program,             // application
         cmd_line,            // command line
         NULL,                // proc security
         NULL,                // thread security
@@ -104,4 +99,25 @@ bool os_process_still_running(DWORD dwProcessId, int* status)
     }
 
     return code == STILL_ACTIVE;
+}
+
+void os_kill(DWORD pid)
+{
+    // Open the process with rights to terminate it
+    HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+    if (hProcess == NULL) {
+        DWORD err = GetLastError();
+        ERR("OpenProcess failed (PID=%lu), error=%lu", pid, err);
+        return;
+    }
+
+    // Terminate the process
+    if (!TerminateProcess(hProcess, 1)) {
+        DWORD err = GetLastError();
+        ERR("TerminateProcess failed (PID=%lu), error=%lu", pid, err);
+        CloseHandle(hProcess);
+        return;
+    }
+
+    CloseHandle(hProcess);
 }
