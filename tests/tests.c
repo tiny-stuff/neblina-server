@@ -10,12 +10,13 @@ const char* service = "tests";
 static void test_watchdog()
 {
     WatchdogProgram programs[] = {
-            { "infloop", "tests/infloop", NULL, 0 },
-            { "nonrec", "tests/nonrecoverable", NULL, 0 },
+            { "infloop", "tests/infloop",        NULL, 0 },
+            { "nonrec",  "tests/nonrecoverable", NULL, 0 },
+            { "error",   "tests/error",          NULL, 0 },
     };
     watchdog_init(programs, sizeof programs / sizeof programs[0]);
 
-    for (size_t i = 0; i < 3; ++i)
+    for (size_t i = 0; i < 5; ++i)
         watchdog_step();
 
     WatchdogProgramState infloop_state = watchdog_program_state(0);
@@ -27,6 +28,10 @@ static void test_watchdog()
     assert(nonrec_state.status == WPS_GAVE_UP);
     assert(nonrec_state.attempts == 11);
     assert(nonrec_state.pid == PID_NOT_RUNNING);
+
+    WatchdogProgramState error_state = watchdog_program_state(2);
+    assert(error_state.attempts > 2);
+    assert(error_state.pid == PID_NOT_RUNNING);
 
     assert(os_process_still_running(infloop_state.pid, NULL));
 
