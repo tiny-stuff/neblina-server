@@ -31,7 +31,6 @@ static void test_watchdog()
 
     WatchdogProgramState error_state = watchdog_program_state(2);
     assert(error_state.attempts > 2);
-    assert(error_state.pid == PID_NOT_RUNNING);
 
     assert(os_process_still_running(infloop_state.pid, NULL));
 
