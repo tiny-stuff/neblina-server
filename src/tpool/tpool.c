@@ -37,56 +37,41 @@ static cnd_t    fd_condition_variable;
 
 static int thread_function(void* arg)
 {
-    size_t n = (size_t)(intptr_t)arg;
+    intptr_t n = (intptr_t) arg;
 
-    DBG("Creating thread %zu", n);
+    DBG("Creating thread %zi", n);
 
-    for (;;) {
+    while (thread_running[n]) {
         mtx_lock(&fd_queue_mutex);
-        while (fd_queue == NULL && thread_running[n]) {
-            cnd_wait(&fd_condition_variable, &fd_queue_mutex);
-        }
+        cnd_wait(&fd_condition_variable, &fd_queue_mutex);
 
-        /* if shutting down and no work, exit */
-        if (!thread_running[n] && fd_queue == NULL) {
-            mtx_unlock(&fd_queue_mutex);
-            break;
-        }
-
-        /* dequeue front */
+        // get item at the front of the queue
         int fd = -1;
-        TPoolTask task = NULL;
+        TPoolTask task;
         if (fd_queue != NULL) {
             fd = fd_queue->fd;
             task = fd_queue->task;
             DL_DELETE(fd_queue, fd_queue);
         }
         mtx_unlock(&fd_queue_mutex);
-
         if (fd == -1)
             continue;
 
-        /* find buffer: protected by fd_queue_mutex in other side, but here
-           we only read the hash — still need synchronization. We'll use
-           the same fd_queue_mutex for consistency (lighter to re-lock briefly). */
-        Buffer* buffer = NULL;
-        mtx_lock(&fd_queue_mutex);
+        // find buffer
+        Buffer* buffer;
         HASH_FIND_INT(buffers, &fd, buffer);
-        mtx_unlock(&fd_queue_mutex);
-
         if (!buffer)
             continue;
 
+        // lock, execute task, and clear buffer
         mtx_lock(&buffer->mutex);
-        if (task)
-            task(fd, buffer->buffer, buffer->buffer_sz);
+        task(fd, buffer->buffer, buffer->buffer_sz);
         buffer->buffer_sz = 0;
         mtx_unlock(&buffer->mutex);
     }
 
     return 0;
 }
-
 
 void tpool_init(size_t n_threads_)
 {
@@ -119,6 +104,7 @@ void tpool_finalize()
         DBG("Thread %zu finalized", i);
     }
 
+    // wake up all threads
     mtx_lock(&fd_queue_mutex);
     cnd_broadcast(&fd_condition_variable);
     mtx_unlock(&fd_queue_mutex);
@@ -132,54 +118,33 @@ void tpool_add_task(TPoolTask task, int fd, uint8_t const* data, size_t data_sz)
 {
     if (n_threads == SINGLE_THREADED) {
         task(fd, data, data_sz);
-        return;
-    }
 
-    /* Lock queue mutex — also protects buffers hash to keep ordering consistent. */
-    mtx_lock(&fd_queue_mutex);
+    } else {
 
-    /* find/create buffer while holding fd_queue_mutex */
-    Buffer* buffer = NULL;
-    HASH_FIND_INT(buffers, &fd, buffer);
-    if (buffer == NULL) {
-        buffer = calloc(1, sizeof(Buffer));
-        if (!buffer) {
-            mtx_unlock(&fd_queue_mutex);
-            FATAL_NON_RECOVERABLE("OOM");
+        // find/create index in hash table
+        Buffer* buffer;
+        HASH_FIND_INT(buffers, &fd, buffer);
+        if (buffer == NULL) {
+            buffer = calloc(1, sizeof(Buffer));
+            buffer->fd = fd;
+            mtx_init(&buffer->mutex, mtx_plain);
+            HASH_ADD_INT(buffers, fd, buffer);
         }
-        buffer->fd = fd;
-        mtx_init(&buffer->mutex, mtx_plain);
-        HASH_ADD_INT(buffers, fd, buffer);
-    }
 
-    /* Now lock the buffer mutex (we hold fd_queue_mutex; worker will lock same order) */
-    mtx_lock(&buffer->mutex);
-
-    /* grow buffer — check realloc result */
-    uint8_t* p = realloc(buffer->buffer, buffer->buffer_sz + data_sz);
-    if (!p) {
-        /* allocation failed — handle error. For now, we unlock and abort */
+        // lock mutex and add to buffer
+        mtx_lock(&buffer->mutex);
+        buffer->buffer = realloc(buffer->buffer, buffer->buffer_sz + data_sz);
+        memcpy(&buffer->buffer[buffer->buffer_sz], data, data_sz);
+        buffer->buffer_sz += data_sz;
         mtx_unlock(&buffer->mutex);
+
+        // add to fd queue
+        mtx_lock(&fd_queue_mutex);
+        FdQueue* item = calloc(1, sizeof(FdQueue));
+        item->fd = fd;
+        item->task = task;
+        DL_APPEND(fd_queue, item);
+        cnd_signal(&fd_condition_variable);
         mtx_unlock(&fd_queue_mutex);
-        FATAL_NON_RECOVERABLE("OOM");
     }
-    buffer->buffer = p;
-    memcpy(&buffer->buffer[buffer->buffer_sz], data, data_sz);
-    buffer->buffer_sz += data_sz;
-    mtx_unlock(&buffer->mutex);
-
-    /* enqueue a task for this fd */
-    FdQueue* item = calloc(1, sizeof(FdQueue));
-    if (!item) {
-        mtx_unlock(&fd_queue_mutex);
-        FATAL_NON_RECOVERABLE("OOM");
-    }
-    item->fd = fd;
-    item->task = task;
-    DL_APPEND(fd_queue, item);
-
-    /* signal one worker */
-    cnd_signal(&fd_condition_variable);
-
-    mtx_unlock(&fd_queue_mutex);
 }
