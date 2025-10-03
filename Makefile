@@ -43,7 +43,16 @@ CFLAGS_CONTRIB = /nologo /MD /I. /O2 /GL
 $(PROJECT).exe: src\main.obj $(OBJ)
 	link /nologo $(LDFLAGS) /OUT:$@ $**
 
-$(PROJECT)-test.exe: tests\tests.obj $(OBJ)
+$(PROJECT)-test.exe: tests\tests.obj $(OBJ) tests\error.exe tests\nonrecoverable.exe tests\infloop.exe
+	link /nologo $(LDFLAGS) /OUT:$@ $**
+
+tests\infloop.exe: tests\watchdog\infloop.obj
+	link /nologo $(LDFLAGS) /OUT:$@ $**
+
+tests\error.exe: tests\watchdog\error.obj
+	link /nologo $(LDFLAGS) /OUT:$@ $**
+
+tests\nonrecoverable.exe: tests\watchdog\nonrecoverable.obj
 	link /nologo $(LDFLAGS) /OUT:$@ $**
 
 check: $(PROJECT)-test.exe
@@ -53,5 +62,5 @@ dev:
 	nmake all DEV=1
 
 clean:
-	del $(PROJECT).exe $(PROJECT)-test.exe src\main.obj tests\tests.obj
+	del $(PROJECT).exe $(PROJECT)-test.exe src\main.obj tests\tests.obj tests\error.exe tests\nonrecoverable.exe tests\infloop.exe
 	cmd /V:ON /C "set P=$(OBJ) & del !P:/=\!"

@@ -32,9 +32,8 @@ DWORD os_start_service(const char* program, const char** args, size_t args_sz)
         // create a Job Object that terminates all children when parent dies
         g_job = CreateJobObject(NULL, NULL);
         if (!g_job) {
-            THROW("CreateJobObject failed : % lu", GetLastError());
-        }
-        else {
+            ERR("CreateJobObject failed : % lu", GetLastError());
+        } else {
             JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = { 0 };
             jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
             SetInformationJobObject(g_job, JobObjectExtendedLimitInformation, &jeli, sizeof(jeli));
@@ -68,12 +67,14 @@ DWORD os_start_service(const char* program, const char** args, size_t args_sz)
         &pi
     );
 
-    if (!ok)
-        THROW("CreateProcess failed: %lu\n", GetLastError());
+    if (!ok) {
+        ERR("CreateProcess failed: %lu\n", GetLastError());
+	return -1;
+    }
 
     if (g_job) {
         if (!AssignProcessToJobObject(g_job, pi.hProcess)) {
-            fprintf(stderr, "AssignProcessToJobObject failed: %lu\n", GetLastError());
+            ERR("AssignProcessToJobObject failed: %lu", GetLastError());
         }
     }
 
