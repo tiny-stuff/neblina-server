@@ -1,6 +1,7 @@
 #include "os/os.h"
 
 #include <signal.h>
+#include <stdio.h>
 #include <string.h>
 
 static HANDLE g_job = NULL;   // Global job handle to tie children to parent
@@ -40,8 +41,14 @@ DWORD os_start_service(const char* program, const char** args, size_t args_sz)
         }
     }
 
+    char cprogram[1024];
+    snprintf(cprogram, sizeof cprogram, "%s.exe", program);
+    for (char* c = cprogram; *c; ++c)
+        if (*c == '/')
+	    *c = '\\';
+
     char cmd_line[1024] = {0}; char* s = cmd_line;
-    s = strcat(s, program);
+    s = strcat(s, cprogram);
     s = strcat(s, " ");
     for (size_t i = 0; i < args_sz; ++i) {
         s = strcat(s, args[i]);
@@ -55,7 +62,7 @@ DWORD os_start_service(const char* program, const char** args, size_t args_sz)
     si.cb = sizeof(si);
 
     BOOL ok = CreateProcessA(
-        program,             // application
+        cprogram,            // application
         cmd_line,            // command line
         NULL,                // proc security
         NULL,                // thread security

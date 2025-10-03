@@ -44,7 +44,7 @@ $(PROJECT).exe: src\main.obj $(OBJ)
 	link /nologo $(LDFLAGS) /OUT:$@ $**
 
 $(PROJECT)-test.exe: tests\tests.obj $(OBJ) tests\error.exe tests\nonrecoverable.exe tests\infloop.exe
-	link /nologo $(LDFLAGS) /OUT:$@ $**
+	link /nologo $(LDFLAGS) /OUT:$@ tests\tests.obj $(OBJ) 
 
 tests\infloop.exe: tests\watchdog\infloop.obj
 	link /nologo $(LDFLAGS) /OUT:$@ $**
