@@ -1,7 +1,6 @@
 #include "watchdog.h"
 
 #include <time.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
 #include "util/logs.h"
@@ -20,17 +19,17 @@ static size_t programs_sz;
 static Task*         tasks = NULL;
 static size_t        n_tasks = 0;
 
-#define MAX_ATTEMPS          10
+#define MAX_ATTEMPTS         10
 #define SEC_TO_RESET_ATTEMPS 10
 #define MS_BETWEEN_RETRIES   100
 
 static void start_task_if_stopped(Task* task)
 {
-    if (task->pid == -1) {
-        if (task->recent_attempts == MAX_ATTEMPS) {
+    if (task->pid == PID_NOT_RUNNING) {
+        if (task->recent_attempts == MAX_ATTEMPTS) {
             LOG("Giving up on service '%s'", programs[task->program_idx].name);
             ++task->recent_attempts;
-        } else if (task->recent_attempts < MAX_ATTEMPS) {
+        } else if (task->recent_attempts < MAX_ATTEMPTS) {
             LOG("Starting service '%s' with (attempt %d)", programs[task->program_idx].name, task->recent_attempts);
             task->pid = os_start_service(programs[task->program_idx].program, programs[task->program_idx].args, programs[task->program_idx].args_sz);
             if (task->pid == 0) {
@@ -46,13 +45,13 @@ static void start_task_if_stopped(Task* task)
 
 static void mark_task_as_terminated_if_dead(Task *task)
 {
-    int status;
+    int status = 0;
     if (!os_process_still_running(task->pid, &status)) {
         LOG("Sevice process '%s' has died with status %d%s", programs[task->program_idx].name, status,
             status == NON_RECOVERABLE_ERROR ? " (non-recoverable)" : "");
         task->pid = PID_NOT_RUNNING;
         if (status == NON_RECOVERABLE_ERROR)
-            task->recent_attempts = 10;
+            task->recent_attempts = MAX_ATTEMPTS;
     }
 }
 
@@ -64,8 +63,9 @@ void watchdog_init(WatchdogProgram const* programs_, size_t programs_sz_)
     tasks = calloc(programs_sz, sizeof(Task));
 
     // create list of services
+    n_tasks = programs_sz;
     for (size_t i = 0; i < programs_sz; ++i) {
-        tasks[n_tasks++] = (Task) {
+        tasks[i] = (Task) {
             .program_idx = i,
             .pid = PID_NOT_RUNNING,
             .recent_attempts = 0,
@@ -87,7 +87,7 @@ void watchdog_step()
     // reset recent attempts
     time_t now; time(&now);
     for (size_t i = 0; i < n_tasks; ++i)
-        if (tasks[i].recent_attempts >= MAX_ATTEMPS && difftime(now, tasks[i].last_attempt) > SEC_TO_RESET_ATTEMPS)
+        if (tasks[i].recent_attempts >= MAX_ATTEMPTS && difftime(now, tasks[i].last_attempt) > SEC_TO_RESET_ATTEMPS)
             tasks[i].recent_attempts = 0;
 
     os_sleep_ms(MS_BETWEEN_RETRIES);
@@ -106,10 +106,10 @@ WatchdogProgramState watchdog_program_state(size_t idx)
     WatchdogProgramState state;
     state.attempts = tasks[idx].recent_attempts;
     state.pid = tasks[idx].pid;
-    if (state.pid == PID_NOT_RUNNING)
-        state.status = WPS_STOPPED;
-    else if (tasks[idx].recent_attempts >= MAX_ATTEMPS)
+    if (tasks[idx].recent_attempts >= MAX_ATTEMPTS)
         state.status = WPS_GAVE_UP;
+    else if (state.pid == PID_NOT_RUNNING)
+        state.status = WPS_STOPPED;
     else
         state.status = WPS_RUNNING;
     return state;
