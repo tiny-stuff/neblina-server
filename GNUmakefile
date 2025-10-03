@@ -40,7 +40,7 @@ endif
 # flags
 #
 
-INCLUDES=-I. -Isrc
+INCLUDES=-I. -Isrc -Isrc/contrib
 
 CFLAGS=-std=c17 -D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200112L -D_DEFAULT_SOURCE -MMD $(INCLUDES)
 

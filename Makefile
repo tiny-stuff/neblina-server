@@ -19,7 +19,7 @@ OBJ = $(OBJ:.o=.obj)
 
 WARNINGS=/W4 /WX /w14445 /w14640 /w14242 /w14263 /w14265
 
-INCLUDES = /I. /Isrc
+INCLUDES = /I. /Isrc /Isrc\contrib
 CFLAGS = /std:c17 /DSTDC_WANT_LIB_EXT2__=1 /nologo /MD /D_CRT_SECURE_NO_WARNINGS $(INCLUDES)
 
 !IFDEF DEV

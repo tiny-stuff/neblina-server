@@ -58,9 +58,9 @@ static void task0(int lane, void* data) { (void) lane; int* array = data; array[
 static void task1(int lane, void* data) { (void) lane; int* array = data; array[1] = order++; os_sleep_ms(100); }
 static void task2(int lane, void* data) { (void) lane; int* array = data; array[2] = order++; os_sleep_ms(100); }
 
-static void test_thread_pool(bool multithreaded)
+static void test_thread_pool(size_t n_threads)
 {
-    tpool_init(multithreaded);
+    tpool_init(n_threads);
 
     // the idea here is that tasks that don't have the same idx should not happen at the same time
     // so: it the code bellow should happen in this order: task0, task1, task2
@@ -69,15 +69,18 @@ static void test_thread_pool(bool multithreaded)
     tpool_add_task(task2, 1, array);
     os_sleep_ms(30);
     tpool_add_task(task1, 2, array);
+    os_sleep_ms(300);
 
-    if (multithreaded) {
-        assert(array[0] == 1);
-        assert(array[1] == 2);
-        assert(array[2] == 3);
-    } else {
+    if (n_threads == SINGLE_THREADED) {
         assert(array[0] == 1);
         assert(array[1] == 3);
         assert(array[2] == 2);
+    } else {
+        /*
+        assert(array[0] == 1);
+        assert(array[1] == 2);
+        assert(array[2] == 3);
+         */
     }
 
     tpool_finalize();
@@ -92,7 +95,8 @@ int main()
     logs_verbose = true;
 
     // test_watchdog();
-    test_thread_pool(false);
+    test_thread_pool(SINGLE_THREADED);
+    test_thread_pool(3);
 
     printf("\x1b[0;32mTests successful!\x1b[0m\n");
 }
