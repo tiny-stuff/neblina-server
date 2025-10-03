@@ -11,9 +11,9 @@ void tpool_finalize()
 {
 }
 
-void tpool_add_task(TPoolTask task, int idx, void* data)
+void tpool_add_task(TPoolTask task, int lane, void* data)
 {
     if (!multithreaded) {
-        task(idx, data);
+        task(lane, data);
     }
 }

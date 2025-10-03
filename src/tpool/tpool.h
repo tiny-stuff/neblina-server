@@ -11,6 +11,6 @@ typedef void(*TPoolTask)(int idx, void* data);
 void tpool_init(bool multithreaded);
 void tpool_finalize();
 
-void tpool_add_task(TPoolTask task, int idx, void* data);
+void tpool_add_task(TPoolTask task, int lane, void* data);
 
 #endif //NEBLINA_SERVER_TPOOL_H

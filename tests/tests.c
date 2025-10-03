@@ -54,9 +54,9 @@ static void test_watchdog()
 
 volatile int order = 1;
 
-static void task0(int idx, void* data) { (void) idx; int* array = data; array[0] = order++; os_sleep_ms(100); }
-static void task1(int idx, void* data) { (void) idx; int* array = data; array[1] = order++; os_sleep_ms(100); }
-static void task2(int idx, void* data) { (void) idx; int* array = data; array[2] = order++; os_sleep_ms(100); }
+static void task0(int lane, void* data) { (void) lane; int* array = data; array[0] = order++; os_sleep_ms(100); }
+static void task1(int lane, void* data) { (void) lane; int* array = data; array[1] = order++; os_sleep_ms(100); }
+static void task2(int lane, void* data) { (void) lane; int* array = data; array[2] = order++; os_sleep_ms(100); }
 
 static void test_thread_pool(bool multithreaded)
 {
