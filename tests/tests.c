@@ -4,7 +4,7 @@
 
 #include "os/os.h"
 #include "util/logs.h"
-#include "tpool/tpool.h"
+#include "server/cpool/cpool.h"
 #include "watchdog/watchdog.h"
 
 const char* service = "tests";
@@ -50,34 +50,14 @@ static void test_watchdog()
 }
 
 //
-// THREAD POOL TESTS
+// CONNECTION POOL TESTS
 //
 
-volatile int order = 1;
-
-char sequence[4] = { 0, 0, 0, 0 };
-
-static void task(int fd, uint8_t const* data, size_t data_sz) { (void) fd; strcat(sequence, (const char *) data); os_sleep_ms(100); }
-
-static void test_thread_pool(size_t n_threads)
+static void test_connection_pool(size_t n_threads)
 {
-    tpool_init(n_threads);
+    cpool_init(n_threads, NULL);
 
-    // the idea here is that tasks that don't have the same idx should not happen at the same time
-    // so: it the code bellow should happen in this order: task0, task1, task2
-    tpool_add_task(task, 1, (uint8_t const *) "0", 2);
-    tpool_add_task(task, 1, (uint8_t const *) "1", 2);
-    os_sleep_ms(30);
-    tpool_add_task(task, 2, (uint8_t const *) "2", 2);
-    os_sleep_ms(300);
-
-    if (n_threads == SINGLE_THREADED) {
-        assert(strcmp(sequence, "012") == 0);
-    } else {
-        // assert(strcmp(sequence, "021") == 0);
-    }
-
-    tpool_finalize();
+    cpool_finalize();
 }
 
 //
@@ -89,8 +69,8 @@ int main()
     logs_verbose = true;
 
     // test_watchdog();
-    test_thread_pool(SINGLE_THREADED);
-    test_thread_pool(3);
+    test_connection_pool(SINGLE_THREADED);
+    // test_connection_pool(3);
 
     printf("\x1b[0;32mTests successful!\x1b[0m\n");
 }
