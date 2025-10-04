@@ -86,6 +86,6 @@ void cpool_flush_connection(Connection* connection)
         // TODO - wake up thread
         FATAL_NON_RECOVERABLE("Not implemented yet");
     } else {
-        // server_flush_connection(server, connection);
+        server_flush_connection(server, connection);
     }
 }

@@ -45,10 +45,14 @@ void connection_add_to_send_buffer(Connection* c, uint8_t const* data, size_t da
     c->send_buf_sz += data_sz;
 }
 
-void connection_clear_buffers(Connection* c)
+void connection_clear_send_buffer(Connection* c)
+{
+    c->send_buf_sz = 0;
+}
+
+void connection_clear_recv_buffer(Connection* c)
 {
     c->recv_buf_sz = 0;
-    c->send_buf_sz = 0;
 }
 
 SOCKET connection_socket_fd(Connection const* c)
@@ -66,4 +70,16 @@ uint8_t const* connection_send_buffer(Connection const* c, size_t* data_sz)
 {
     *data_sz = c->send_buf_sz;
     return c->send_buf;
+}
+
+size_t connection_extract_from_recv_buffer(Connection* c, uint8_t** data)
+{
+    // TODO
+    return 0;
+}
+
+size_t connection_extract_line_from_recv_buffer(Connection* c, uint8_t** data)
+{
+    // TODO
+    return 0;
 }

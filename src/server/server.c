@@ -30,6 +30,7 @@ int server_flush_connection(Server* server, Connection* connection)
     int r = server->send(connection_socket_fd(connection), data_to_send, sz);
     if (r < 0)
         return r;
+    connection_clear_send_buffer(connection);
 
     // receive data
     uint8_t* recv_buf;
@@ -38,12 +39,10 @@ int server_flush_connection(Server* server, Connection* connection)
         return r;
     if (r > 0) {
         connection_add_to_recv_buffer(connection, recv_buf, r);
-        // TODO - call session
+        // TODO - call session (session need to clear recv buffer)
+        // session_on_recv(connection_session(connection), connection);
         free(recv_buf);
     }
-
-    // done - clear buffers
-    connection_clear_buffers(connection);
 
     return 0;
 }

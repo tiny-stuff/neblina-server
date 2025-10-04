@@ -16,6 +16,6 @@ typedef int(*ServerSendF)(SOCKET fd, uint8_t const* data, size_t data_sz);
 Server* server_create(ServerRecvF recv, ServerSendF send);
 void    server_destroy(Server* server);
 
-int server_flush_connection(Server* server, Connection* connection);
+int     server_flush_connection(Server* server, Connection* connection);
 
 #endif //NEBLINA_SERVER_SERVER_H

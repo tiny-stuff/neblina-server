@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "os/os.h"
 #include "util/logs.h"
@@ -57,26 +58,49 @@ static void test_connection()
 {
     Connection* conn = connection_create(8);
 
-    connection_add_to_recv_buffer(conn, (uint8_t const*) "Hello", 5);
-    connection_add_to_recv_buffer(conn, (uint8_t const*) "World", 5);
-    connection_add_to_send_buffer(conn, (uint8_t const*) "send", 4);
+    // send buffer
+
+    connection_add_to_send_buffer(conn, (uint8_t const*) "Hello", 5);
+    connection_add_to_send_buffer(conn, (uint8_t const*) "World", 5);
 
     assert(connection_socket_fd(conn) == 8);
 
     size_t sz;
-    uint8_t const* data = connection_recv_buffer(conn, &sz);
+    uint8_t const* data = connection_send_buffer(conn, &sz);
     assert(sz == 10);
     assert(memcmp(data, "HelloWorld", sz) == 0);
 
-    data = connection_send_buffer(conn, &sz);
-    assert(sz == 4);
-    assert(memcmp(data, "send", sz) == 0);
+    connection_clear_send_buffer(conn);
 
-    connection_clear_buffers(conn);
-
-    connection_recv_buffer(conn, &sz);
-    assert(sz == 0);
     connection_send_buffer(conn, &sz);
+    assert(sz == 0);
+
+    connection_add_to_send_buffer(conn, (uint8_t const*) "Hello", 5);
+    data = connection_send_buffer(conn, &sz);
+    assert(sz == 5);
+    assert(memcmp(data, "Hello", sz) == 0);
+
+    // recv buffer
+
+    connection_add_to_recv_buffer(conn, (uint8_t const*) "Hello", 5);
+    uint8_t* data2;
+    sz = connection_extract_from_recv_buffer(conn, &data2);
+    assert(sz == 5);
+    assert(memcmp(data2, (uint8_t const*) "Hello", sz) == 0);
+    free(data2);
+
+    connection_add_to_recv_buffer(conn, (uint8_t const*) "Hello\nWorld\ntest", 16);
+    sz = connection_extract_line_from_recv_buffer(conn, &data2);
+    assert(sz == 6);
+    assert(memcmp(data2, (uint8_t const*) "Hello\n", sz) == 0);
+    free(data2);
+
+    sz = connection_extract_line_from_recv_buffer(conn, &data2);
+    assert(sz == 6);
+    assert(memcmp(data2, (uint8_t const*) "World\n", sz) == 0);
+    free(data2);
+
+    sz = connection_extract_line_from_recv_buffer(conn, &data2);
     assert(sz == 0);
 
     connection_destroy(conn);
