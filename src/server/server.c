@@ -7,6 +7,8 @@
 #include "service/session.h"
 #include "cpool/cpool.h"
 
+extern bool termination_requested;
+
 Server* server_init(CreateSessionF create_session, size_t n_threads)
 {
     Server* server = calloc(1, sizeof(Server));
@@ -16,8 +18,9 @@ Server* server_init(CreateSessionF create_session, size_t n_threads)
     return server;
 }
 
-void server_finalize(Server* server)
+void server_destroy(Server* server)
 {
+    cpool_destroy(server->cpool);
     server->vt->free(server);
 }
 
@@ -53,7 +56,6 @@ int server_iterate(Server* server, size_t timeout_ms)
 
 void server_run(Server* server)
 {
-    extern bool termination_requested;
     while (!termination_requested)
         server_iterate(server, 50);
 }

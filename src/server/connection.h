@@ -3,10 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-
-#ifndef _WIN32
-typedef int SOCKET;
-#endif
+#include "socket.h"
 
 typedef struct Connection Connection;
 typedef struct Session Session;

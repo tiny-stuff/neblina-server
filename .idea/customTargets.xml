@@ -6,6 +6,9 @@
         <build type="MAKE">
           <make targetName="tests/parrot-test" />
         </build>
+        <clean type="MAKE">
+          <make targetName="clean" />
+        </clean>
       </configuration>
     </target>
   </component>
