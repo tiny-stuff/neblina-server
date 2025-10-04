@@ -57,3 +57,10 @@ int server_iterate(Server* server, size_t timeout_ms)
     // TODO - ???
     return 0;
 }
+
+void server_run(Server* server)
+{
+    extern bool termination_requested;
+    while (!termination_requested)
+        server_iterate(server, 50);
+}

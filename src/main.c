@@ -1,9 +1,11 @@
 #include <stdio.h>
 
-#include <stdbool.h>
+#include <string.h>
 
-const char service[24];
+char service[24];
 
 int main()
 {
+
+
 }

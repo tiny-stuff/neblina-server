@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="220f32f5-3f9b-42d6-abb4-dab4fda599cf" name="parrot-test" defaultType="MAKE">
+      <configuration id="67a1ad88-a018-4a43-853a-f4f90fd377ba" name="parrot-test">
+        <build type="MAKE">
+          <make targetName="tests/parrot-test" />
+        </build>
+      </configuration>
+    </target>
+  </component>
+</project>

@@ -24,6 +24,6 @@ Session*       connection_session(Connection* c);
 uint8_t const* connection_send_buffer(Connection const* c, size_t* data_sz);
 
 size_t         connection_extract_from_recv_buffer(Connection* c, uint8_t** data);
-size_t         connection_extract_line_from_recv_buffer(Connection* c, uint8_t** data, const char* separator);
+size_t         connection_extract_line_from_recv_buffer(Connection* c, char** data, const char* separator);
 
 #endif //NEBLINA_SERVER_CONNECTION_H

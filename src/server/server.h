@@ -21,4 +21,6 @@ void    server_destroy(Server* server);
 int     server_iterate(Server* server, size_t timeout_ms);
 int     server_flush_connection(Server* server, Connection* connection);
 
+void    server_run(Server* server);
+
 #endif //NEBLINA_SERVER_SERVER_H

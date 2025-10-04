@@ -90,7 +90,7 @@ size_t connection_extract_from_recv_buffer(Connection* c, uint8_t** data)
     return sz;
 }
 
-size_t connection_extract_line_from_recv_buffer(Connection* c, uint8_t** data, const char* separator)
+size_t connection_extract_line_from_recv_buffer(Connection* c, char** data, const char* separator)
 {
     size_t sep_len = strlen(separator);
     int len_to_return = -1;
