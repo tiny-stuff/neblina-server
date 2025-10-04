@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char service[] = "parrot";
+const char* service = "parrot";
 
 typedef struct ParrotSession {
-    Session     session;
+    Session session;
 } ParrotSession;
 
 static int parrot_on_recv(Session* session, Connection* c)
@@ -32,8 +32,13 @@ static Session* parrot_session_create(void* data)
 {
     (void) data;
 
+    static const SessionVTable vt = {
+        .on_recv = parrot_on_recv,
+        .session_free = parrot_free,
+    };
+
     ParrotSession* psession = calloc(1, sizeof(ParrotSession));
-    session_init(&psession->session, parrot_on_recv, parrot_free);
+    session_init(&psession->session, &vt);
     return (Session *) psession;
 }
 

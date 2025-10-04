@@ -7,7 +7,6 @@ typedef struct TCPServer {
     Server server;
     int    port;
     bool   open_to_world;
-    SOCKET fd;
 } TCPServer;
 
 #endif //NEBLINA_SERVER_TCP_SERVER_PRIV_H

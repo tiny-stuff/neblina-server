@@ -7,20 +7,18 @@
 #include "service/session.h"
 #include "cpool/cpool.h"
 
-Server* server_create(ServerRecvF recv, ServerSendF send, ServerFreeF free_, CreateSessionF create_session, size_t n_threads)
+Server* server_init(CreateSessionF create_session, size_t n_threads)
 {
     Server* server = calloc(1, sizeof(Server));
-    server->recv = recv;
-    server->send = send;
-    server->free = free_;
     server->create_session = create_session;
     server->cpool = cpool_create(n_threads, server);
+    server->fd = -1;
     return server;
 }
 
-void server_destroy(Server* server)
+void server_finalize(Server* server)
 {
-    server->free(server);
+    server->vt->free(server);
 }
 
 int server_flush_connection(Server* server, Connection* connection)
@@ -28,14 +26,14 @@ int server_flush_connection(Server* server, Connection* connection)
     // send pending data
     size_t sz;
     uint8_t const* data_to_send = connection_send_buffer(connection, &sz);
-    int r = server->send(connection_socket_fd(connection), data_to_send, sz);
+    int r = server->vt->send(connection_socket_fd(connection), data_to_send, sz);
     if (r < 0)
         return r;
     connection_clear_send_buffer(connection);
 
     // receive data
     uint8_t* recv_buf;
-    r = server->recv(connection_socket_fd(connection), &recv_buf);
+    r = server->vt->recv(connection_socket_fd(connection), &recv_buf);
     if (r < 0)
         return r;
     if (r > 0) {

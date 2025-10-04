@@ -16,11 +16,12 @@ typedef struct Session Session;
 typedef int(*ServerRecvF)(SOCKET fd, uint8_t** data);
 typedef int(*ServerSendF)(SOCKET fd, uint8_t const* data, size_t data_sz);
 typedef void(*ServerFreeF)(Server* server);
+typedef void(*ServerIterateF)(Server* server);
 
 typedef Session*(*CreateSessionF)(void* data);
 
-Server* server_create(ServerRecvF recv, ServerSendF send, ServerFreeF free_, CreateSessionF create_session, size_t n_threads);
-void    server_destroy(Server* server);
+Server* server_init(CreateSessionF create_session, size_t n_threads);
+void    server_finalize(Server* server);
 
 int     server_iterate(Server* server, size_t timeout_ms);
 int     server_flush_connection(Server* server, Connection* connection);

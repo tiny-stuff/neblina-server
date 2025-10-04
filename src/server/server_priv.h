@@ -5,12 +5,19 @@
 
 typedef struct CPool CPool;
 
-typedef struct Server {
+typedef struct ServerVTable {
     ServerRecvF    recv;
     ServerSendF    send;
+    ServerIterateF iterate;
     ServerFreeF    free;
-    CreateSessionF create_session;
-    CPool*         cpool;
+} ServerVTable;
+
+
+typedef struct Server {
+    ServerVTable const* vt;
+    CreateSessionF      create_session;
+    CPool*              cpool;
+    SOCKET              fd;
 } Server;
 
 #endif //NEBLINA_SERVER_SERVER_PRIV_H
