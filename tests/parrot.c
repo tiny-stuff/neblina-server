@@ -7,26 +7,35 @@
 
 const char service[] = "parrot";
 
-/*
-    size_t sz;
+typedef struct ParrotSession {
+    Session     session;
+} ParrotSession;
+
+static int parrot_on_recv(Session* session, Connection* c)
+{
+    (void) session;
+
     char* line;
-    while ((sz = connection_extract_line_from_recv_buffer(c, &line, "\r\n"))) {
+    while ((connection_extract_line_from_recv_buffer(c, &line, "\r\n"))) {
         connection_add_to_send_buffer(c, (uint8_t *) line, strlen(line));
         free(line);
     }
-    */
 
-typedef struct ParrotSession {
-    Session*    session;
-    Connection* connection;
-} ParrotSession;
+    return 0;
+}
 
-static Session* parrot_session_create(Connection* c, void* data)
+static void parrot_free(Session* session)
 {
-    ParrotSession* session = calloc(1, sizeof(ParrotSession));
-    session->session = session_create(parrot_on_recv, free);
-    session->connection = c;
-    return (Session *) session;
+    free(session);
+}
+
+static Session* parrot_session_create(void* data)
+{
+    (void) data;
+
+    ParrotSession* psession = calloc(1, sizeof(ParrotSession));
+    session_init(&psession->session, parrot_on_recv, parrot_free);
+    return (Session *) psession;
 }
 
 int main()
