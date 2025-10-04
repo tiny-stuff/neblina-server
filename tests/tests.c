@@ -90,17 +90,17 @@ static void test_connection()
     free(data2);
 
     connection_add_to_recv_buffer(conn, (uint8_t const*) "Hello\nWorld\ntest", 16);
-    sz = connection_extract_line_from_recv_buffer(conn, &data2);
+    sz = connection_extract_line_from_recv_buffer(conn, &data2, "\n");
     assert(sz == 6);
     assert(memcmp(data2, (uint8_t const*) "Hello\n", sz) == 0);
     free(data2);
 
-    sz = connection_extract_line_from_recv_buffer(conn, &data2);
+    sz = connection_extract_line_from_recv_buffer(conn, &data2, "\n");
     assert(sz == 6);
     assert(memcmp(data2, (uint8_t const*) "World\n", sz) == 0);
     free(data2);
 
-    sz = connection_extract_line_from_recv_buffer(conn, &data2);
+    sz = connection_extract_line_from_recv_buffer(conn, &data2, "\n");
     assert(sz == 0);
 
     connection_destroy(conn);

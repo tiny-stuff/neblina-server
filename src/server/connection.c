@@ -74,12 +74,37 @@ uint8_t const* connection_send_buffer(Connection const* c, size_t* data_sz)
 
 size_t connection_extract_from_recv_buffer(Connection* c, uint8_t** data)
 {
-    // TODO
-    return 0;
+    size_t sz = c->recv_buf_sz;
+    if (c->recv_buf_sz > 0) {
+        *data = malloc(c->recv_buf_sz);
+        memcpy(*data, c->recv_buf, c->recv_buf_sz);
+        c->recv_buf_sz = 0;
+    }
+    return sz;
 }
 
-size_t connection_extract_line_from_recv_buffer(Connection* c, uint8_t** data)
+size_t connection_extract_line_from_recv_buffer(Connection* c, uint8_t** data, const char* separator)
 {
-    // TODO
-    return 0;
+    size_t sep_len = strlen(separator);
+    int len_to_return = -1;
+
+    // look for enter
+    for (size_t i = 0; i < (c->recv_buf_sz - sep_len + 1); ++i) {
+        if (memcmp(&c->recv_buf[i], separator, sep_len) == 0) {
+            len_to_return = (int) i;
+            break;
+        }
+    }
+
+    if (len_to_return == -1)  // enter not found
+        return 0;
+
+    // copy string and return
+    len_to_return += (int) sep_len;  // include separator
+    *data = malloc(len_to_return);
+    memcpy(*data, c->recv_buf, len_to_return);
+    memmove(c->recv_buf, &c->recv_buf[len_to_return], c->recv_buf_sz - len_to_return);
+    c->recv_buf_sz -= len_to_return;
+
+    return len_to_return;
 }
