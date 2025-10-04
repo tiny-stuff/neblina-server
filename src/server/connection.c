@@ -1,0 +1,69 @@
+#include "connection.h"
+
+#include <stdlib.h>
+#include <string.h>
+
+#include "util/error.h"
+
+typedef struct Connection {
+    int      fd;
+    uint8_t* recv_buf;
+    size_t   recv_buf_sz;
+    uint8_t* send_buf;
+    size_t   send_buf_sz;
+} Connection;
+
+Connection* connection_create(int fd)
+{
+    Connection* c = calloc(1, sizeof(Connection));
+    c->fd = fd;
+    return c;
+}
+
+void connection_destroy(Connection* c)
+{
+    free(c->recv_buf);
+    free(c->send_buf);
+    free(c);
+}
+
+void connection_add_to_recv_buffer(Connection* c, uint8_t const* data, size_t data_sz)
+{
+    c->recv_buf = realloc(c->recv_buf, c->recv_buf_sz + data_sz);
+    if (!c->recv_buf)
+        FATAL_NON_RECOVERABLE("Allocation error");
+    memcpy(&c->recv_buf[c->recv_buf_sz], data, data_sz);
+    c->recv_buf_sz += data_sz;
+}
+
+void connection_add_to_send_buffer(Connection* c, uint8_t const* data, size_t data_sz)
+{
+    c->send_buf = realloc(c->send_buf, c->send_buf_sz + data_sz);
+    if (!c->send_buf)
+    FATAL_NON_RECOVERABLE("Allocation error");
+    memcpy(&c->send_buf[c->send_buf_sz], data, data_sz);
+    c->send_buf_sz += data_sz;
+}
+
+void connection_clear_buffers(Connection* c)
+{
+    c->recv_buf_sz = 0;
+    c->send_buf_sz = 0;
+}
+
+int connection_fd(Connection const* c)
+{
+    return c->fd;
+}
+
+uint8_t const* connection_recv_buffer(Connection const* c, size_t* data_sz)
+{
+    *data_sz = c->recv_buf_sz;
+    return c->recv_buf;
+}
+
+uint8_t const* connection_send_buffer(Connection const* c, size_t* data_sz)
+{
+    *data_sz = c->send_buf_sz;
+    return c->send_buf;
+}
