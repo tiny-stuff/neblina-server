@@ -61,7 +61,7 @@ static void test_connection()
     connection_add_to_recv_buffer(conn, (uint8_t const*) "World", 5);
     connection_add_to_send_buffer(conn, (uint8_t const*) "send", 4);
 
-    assert(connection_fd(conn) == 8);
+    assert(connection_socket_fd(conn) == 8);
 
     size_t sz;
     uint8_t const* data = connection_recv_buffer(conn, &sz);

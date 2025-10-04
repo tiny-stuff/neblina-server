@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifndef _WIN32
+typedef int SOCKET;
+#endif
+
 typedef struct Connection Connection;
 
 Connection*    connection_create(int fd);
@@ -14,7 +18,7 @@ void           connection_add_to_send_buffer(Connection* c, uint8_t const* data,
 
 void           connection_clear_buffers(Connection* c);
 
-int            connection_fd(Connection const* c);
+SOCKET         connection_socket_fd(Connection const* c);
 uint8_t const* connection_recv_buffer(Connection const* c, size_t* data_sz);
 uint8_t const* connection_send_buffer(Connection const* c, size_t* data_sz);
 

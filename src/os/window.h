@@ -3,6 +3,12 @@
 
 #include <stdarg.h>
 
+#ifndef _MSC_VER
+#  define ATTR_PRINTF(a, b) __attribute__ ((format (printf, a, b)))
+#else
+#  define ATTR_PRINTF(a, b)
+#endif
+
 void vnprintf(const char *restrict fmt, va_list ap);
 void vnprintf_error(const char *restrict fmt, va_list ap);
 

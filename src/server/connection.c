@@ -6,7 +6,7 @@
 #include "util/error.h"
 
 typedef struct Connection {
-    int      fd;
+    SOCKET   fd;
     uint8_t* recv_buf;
     size_t   recv_buf_sz;
     uint8_t* send_buf;
@@ -51,7 +51,7 @@ void connection_clear_buffers(Connection* c)
     c->send_buf_sz = 0;
 }
 
-int connection_fd(Connection const* c)
+SOCKET connection_socket_fd(Connection const* c)
 {
     return c->fd;
 }
