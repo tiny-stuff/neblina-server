@@ -11,81 +11,94 @@
 #include "../server.h"
 #include "../connection.h"
 
-static Server* server;
+typedef struct ThreadArgs {
+    struct CPool* cpool;
+    size_t        thread_n;
+} ThreadArgs;
 
-// thread management
-static size_t  n_threads = 0;
-static thrd_t* threads = NULL;
-static bool*   thread_running = NULL;
+typedef struct CPool {
+    Server*     server;
+    size_t      n_threads;
+    thrd_t*     threads;
+    bool*       thread_running;
+    ThreadArgs* args;
+} CPool;
 
 static int thread_function(void* arg)
 {
-    intptr_t n = (intptr_t) arg;
+    ThreadArgs* args = arg;
 
-    DBG("Creating thread %zi", n);
+    DBG("Creating thread %zu", args->thread_n);
 
-    while (thread_running[n])
+    while (args->cpool->thread_running[args->thread_n])
         thrd_sleep(&(struct timespec){ .tv_nsec = 1 * 1000 * 1000 }, NULL);
 
     return 0;
 }
 
-void cpool_init(size_t n_threads_, Server* server_)
+CPool* cpool_create(size_t n_threads, Server* server)
 {
-    server = server_;
+    CPool* cpool = calloc(1, sizeof(CPool));
+    cpool->server = server;
 
     // create threads
-    n_threads = n_threads_;
+    cpool->n_threads = n_threads;
     if (n_threads != SINGLE_THREADED) {
 
-        thread_running = calloc(n_threads, sizeof thread_running[0]);
-        threads = calloc(n_threads, sizeof threads[0]);
+        cpool->thread_running = calloc(n_threads, sizeof cpool->thread_running[0]);
+        cpool->threads = calloc(n_threads, sizeof cpool->threads[0]);
+        cpool->args = calloc(n_threads, sizeof cpool->args[0]);
+
         for (size_t i = 0; i < n_threads; ++i) {
-            thread_running[i] = true;
-            if (thrd_create(&threads[i], thread_function, (void *) i) != thrd_success)
+            cpool->thread_running[i] = true;
+            cpool->args[i] = (ThreadArgs) { .cpool = cpool, .thread_n = i };
+            if (thrd_create(&cpool->threads[i], thread_function, &cpool->args[i]) != thrd_success)
                 FATAL_NON_RECOVERABLE("Unable to create thread.");
         }
     }
+
+    return cpool;
 }
 
-void cpool_finalize()
+void cpool_destroy(CPool* cpool)
 {
     // end threads
-    for (size_t i = 0; i < n_threads; ++i)
-        thread_running[i] = false;
-    for (size_t i = 0; i < n_threads; ++i) {
-        thrd_join(threads[i], NULL);
+    for (size_t i = 0; i < cpool->n_threads; ++i)
+        cpool->thread_running[i] = false;
+    for (size_t i = 0; i < cpool->n_threads; ++i) {
+        thrd_join(cpool->threads[i], NULL);
         DBG("Thread %zu finalized", i);
     }
 
     // cleanup
-    free(threads);
-    free(thread_running);
+    free(cpool->threads);
+    free(cpool->thread_running);
+    free(cpool->args);
 }
 
-void cpool_add_connection(Connection* connection)
+void cpool_add_connection(CPool* cpool, Connection* connection)
 {
-    if (n_threads != SINGLE_THREADED) {
+    if (cpool->n_threads != SINGLE_THREADED) {
         // TODO - add connection to the least populated thread
         FATAL_NON_RECOVERABLE("Not implemented yet");
     }
 }
 
-void cpool_remove_connection(Connection* connection)
+void cpool_remove_connection(CPool* cpool, Connection* connection)
 {
-    if (n_threads != SINGLE_THREADED) {
+    if (cpool->n_threads != SINGLE_THREADED) {
         // TODO - remove connection from the thread
         FATAL_NON_RECOVERABLE("Not implemented yet");
     }
 }
 
-void cpool_flush_connection(Connection* connection)
+void cpool_flush_connection(CPool* cpool, Connection* connection)
 {
-    if (n_threads != SINGLE_THREADED) {
+    if (cpool->n_threads != SINGLE_THREADED) {
         // TODO - mark connection as available for flushing
         // TODO - wake up thread
         FATAL_NON_RECOVERABLE("Not implemented yet");
     } else {
-        server_flush_connection(server, connection);
+        server_flush_connection(cpool->server, connection);
     }
 }

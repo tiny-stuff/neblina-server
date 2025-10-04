@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+typedef struct CPool CPool;
 typedef struct Server Server;
 typedef struct Connection Connection;
 
@@ -13,12 +14,12 @@ typedef struct Connection Connection;
 
 #define SINGLE_THREADED 0
 
-void cpool_init(size_t n_threads, Server* server);
-void cpool_finalize();
+CPool* cpool_create(size_t n_threads, Server* server);
+void cpool_destroy(CPool* cpool);
 
-void cpool_add_connection(Connection* connection);
-void cpool_remove_connection(Connection* connection);
+void cpool_add_connection(CPool* cpool, Connection* connection);
+void cpool_remove_connection(CPool* cpool, Connection* connection);
 
-void cpool_flush_connection(Connection* connection);
+void cpool_flush_connection(CPool* cpool, Connection* connection);
 
 #endif //NEBLINA_SERVER_CPOOL_H
