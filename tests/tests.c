@@ -56,7 +56,7 @@ static void test_watchdog()
 
 static void test_connection()
 {
-    Connection* conn = connection_create(8);
+    Connection* conn = connection_create(8, NULL);
 
     // send buffer
 
@@ -89,18 +89,19 @@ static void test_connection()
     assert(memcmp(data2, (uint8_t const*) "Hello", sz) == 0);
     free(data2);
 
+    char* data3;
     connection_add_to_recv_buffer(conn, (uint8_t const*) "Hello\nWorld\ntest", 16);
-    sz = connection_extract_line_from_recv_buffer(conn, &data2, "\n");
+    sz = connection_extract_line_from_recv_buffer(conn, &data3, "\n");
     assert(sz == 6);
     assert(memcmp(data2, (uint8_t const*) "Hello\n", sz) == 0);
     free(data2);
 
-    sz = connection_extract_line_from_recv_buffer(conn, &data2, "\n");
+    sz = connection_extract_line_from_recv_buffer(conn, &data3, "\n");
     assert(sz == 6);
     assert(memcmp(data2, (uint8_t const*) "World\n", sz) == 0);
     free(data2);
 
-    sz = connection_extract_line_from_recv_buffer(conn, &data2, "\n");
+    sz = connection_extract_line_from_recv_buffer(conn, &data3, "\n");
     assert(sz == 0);
 
     connection_destroy(conn);

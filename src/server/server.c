@@ -1,4 +1,5 @@
 #include "server.h"
+#include "server_priv.h"
 
 #include <stdlib.h>
 
@@ -6,18 +7,12 @@
 #include "service/session.h"
 #include "cpool/cpool.h"
 
-typedef struct Server {
-    ServerRecvF    recv;
-    ServerSendF    send;
-    CreateSessionF create_session;
-    CPool*         cpool;
-} Server;
-
-Server* server_create(ServerRecvF recv, ServerSendF send, CreateSessionF create_session, size_t n_threads)
+Server* server_create(ServerRecvF recv, ServerSendF send, ServerFreeF free_, CreateSessionF create_session, size_t n_threads)
 {
     Server* server = calloc(1, sizeof(Server));
     server->recv = recv;
     server->send = send;
+    server->free = free_;
     server->create_session = create_session;
     server->cpool = cpool_create(n_threads, server);
     return server;
@@ -25,7 +20,7 @@ Server* server_create(ServerRecvF recv, ServerSendF send, CreateSessionF create_
 
 void server_destroy(Server* server)
 {
-    free(server);
+    server->free(server);
 }
 
 int server_flush_connection(Server* server, Connection* connection)

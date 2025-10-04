@@ -12,8 +12,6 @@ typedef struct Connection Connection;
 // This is a thread pool that receives tasks, put the tasks in a queue, and then process them.
 // There's a lock number which prevents two tasks with the same lock number to be executed at the same time.
 
-#define SINGLE_THREADED 0
-
 CPool* cpool_create(size_t n_threads, Server* server);
 void cpool_destroy(CPool* cpool);
 

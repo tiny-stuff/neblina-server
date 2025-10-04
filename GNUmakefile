@@ -89,7 +89,7 @@ bear:
 
 clean:
 	find . -type f -name '*.[od]' -exec rm {} +
-	rm -f $(PROJECT) $(PROJECT)-test
+	rm -f $(PROJECT) $(PROJECT)-test tests/error tests/nonrecoverable tests/infloop tests/parrot-test
 
 install: $(PROJECT)
 	install $(PROJECT) /usr/local/bin/$(PROJECT)
