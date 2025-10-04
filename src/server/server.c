@@ -3,17 +3,20 @@
 #include <stdlib.h>
 
 #include "connection.h"
+#include "service/session.h"
 
 typedef struct Server {
-    ServerRecvF recv;
-    ServerSendF send;
+    ServerRecvF    recv;
+    ServerSendF    send;
+    CreateSessionF create_session;
 } Server;
 
-Server* server_create(ServerRecvF recv, ServerSendF send)
+Server* server_create(ServerRecvF recv, ServerSendF send, CreateSessionF create_session)
 {
     Server* server = calloc(1, sizeof(Server));
     server->recv = recv;
     server->send = send;
+    server->create_session = create_session;
     return server;
 }
 
@@ -39,8 +42,7 @@ int server_flush_connection(Server* server, Connection* connection)
         return r;
     if (r > 0) {
         connection_add_to_recv_buffer(connection, recv_buf, r);
-        // TODO - call session (session need to clear recv buffer)
-        // session_on_recv(connection_session(connection), connection);
+        session_on_recv(connection_session(connection), connection);  // TODO - check for errors
         free(recv_buf);
     }
 

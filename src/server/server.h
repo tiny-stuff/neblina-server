@@ -9,11 +9,13 @@
 #define RECV_BUF_SZ (16 * 1024)
 
 typedef struct Server Server;
+typedef struct Session Session;
 
 typedef int(*ServerRecvF)(SOCKET fd, uint8_t** data);
 typedef int(*ServerSendF)(SOCKET fd, uint8_t const* data, size_t data_sz);
+typedef Session*(*CreateSessionF)(Connection* connection, void* data);
 
-Server* server_create(ServerRecvF recv, ServerSendF send);
+Server* server_create(ServerRecvF recv, ServerSendF send, CreateSessionF create_session);
 void    server_destroy(Server* server);
 
 int     server_flush_connection(Server* server, Connection* connection);
