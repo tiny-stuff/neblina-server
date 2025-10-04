@@ -5,8 +5,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "../server.h"
-#include "../connection.h"
+typedef struct Server Server;
+typedef struct Connection Connection;
 
 // This is a thread pool that receives tasks, put the tasks in a queue, and then process them.
 // There's a lock number which prevents two tasks with the same lock number to be executed at the same time.

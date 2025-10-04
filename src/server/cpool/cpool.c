@@ -8,6 +8,9 @@
 #include "uthash/uthash.h"
 #include "uthash/utlist.h"
 
+#include "../server.h"
+#include "../connection.h"
+
 static Server* server;
 
 // thread management
@@ -62,12 +65,27 @@ void cpool_finalize()
 
 void cpool_add_connection(Connection* connection)
 {
+    if (n_threads != SINGLE_THREADED) {
+        // TODO - add connection to the least populated thread
+        FATAL_NON_RECOVERABLE("Not implemented yet");
+    }
 }
 
 void cpool_remove_connection(Connection* connection)
 {
+    if (n_threads != SINGLE_THREADED) {
+        // TODO - remove connection from the thread
+        FATAL_NON_RECOVERABLE("Not implemented yet");
+    }
 }
 
 void cpool_flush_connection(Connection* connection)
 {
+    if (n_threads != SINGLE_THREADED) {
+        // TODO - mark connection as available for flushing
+        // TODO - wake up thread
+        FATAL_NON_RECOVERABLE("Not implemented yet");
+    } else {
+        server_flush_connection(server, connection);
+    }
 }

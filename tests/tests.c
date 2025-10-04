@@ -4,7 +4,7 @@
 
 #include "os/os.h"
 #include "util/logs.h"
-#include "server/cpool/cpool.h"
+#include "server/connection.h"
 #include "watchdog/watchdog.h"
 
 const char* service = "tests";
@@ -50,14 +50,36 @@ static void test_watchdog()
 }
 
 //
-// CONNECTION POOL TESTS
+// CONNECTION TESTS
 //
 
-static void test_connection_pool(size_t n_threads)
+static void test_connection()
 {
-    cpool_init(n_threads, NULL);
+    Connection* conn = connection_create(8);
 
-    cpool_finalize();
+    connection_add_to_recv_buffer(conn, (uint8_t const*) "Hello", 5);
+    connection_add_to_recv_buffer(conn, (uint8_t const*) "World", 5);
+    connection_add_to_send_buffer(conn, (uint8_t const*) "send", 4);
+
+    assert(connection_fd(conn) == 8);
+
+    size_t sz;
+    uint8_t const* data = connection_recv_buffer(conn, &sz);
+    assert(sz == 10);
+    assert(memcmp(data, "HelloWorld", sz) == 0);
+
+    data = connection_send_buffer(conn, &sz);
+    assert(sz == 4);
+    assert(memcmp(data, "send", sz) == 0);
+
+    connection_clear_buffers(conn);
+
+    connection_recv_buffer(conn, &sz);
+    assert(sz == 0);
+    connection_send_buffer(conn, &sz);
+    assert(sz == 0);
+
+    connection_destroy(conn);
 }
 
 //
@@ -69,7 +91,8 @@ int main()
     logs_verbose = true;
 
     // test_watchdog();
-    test_connection_pool(SINGLE_THREADED);
+    test_connection();
+    // test_connection_pool(SINGLE_THREADED);
     // test_connection_pool(3);
 
     printf("\x1b[0;32mTests successful!\x1b[0m\n");
