@@ -15,9 +15,10 @@ typedef int(*ServerRecvF)(SOCKET fd, uint8_t** data);
 typedef int(*ServerSendF)(SOCKET fd, uint8_t const* data, size_t data_sz);
 typedef Session*(*CreateSessionF)(Connection* connection, void* data);
 
-Server* server_create(ServerRecvF recv, ServerSendF send, CreateSessionF create_session);
+Server* server_create(ServerRecvF recv, ServerSendF send, CreateSessionF create_session, size_t n_threads);
 void    server_destroy(Server* server);
 
+int     server_iterate(Server* server, size_t timeout_ms);
 int     server_flush_connection(Server* server, Connection* connection);
 
 #endif //NEBLINA_SERVER_SERVER_H

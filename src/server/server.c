@@ -4,19 +4,22 @@
 
 #include "connection.h"
 #include "service/session.h"
+#include "cpool/cpool.h"
 
 typedef struct Server {
     ServerRecvF    recv;
     ServerSendF    send;
     CreateSessionF create_session;
+    CPool*         cpool;
 } Server;
 
-Server* server_create(ServerRecvF recv, ServerSendF send, CreateSessionF create_session)
+Server* server_create(ServerRecvF recv, ServerSendF send, CreateSessionF create_session, size_t n_threads)
 {
     Server* server = calloc(1, sizeof(Server));
     server->recv = recv;
     server->send = send;
     server->create_session = create_session;
+    server->cpool = cpool_create(n_threads, server);
     return server;
 }
 
@@ -46,5 +49,11 @@ int server_flush_connection(Server* server, Connection* connection)
         free(recv_buf);
     }
 
+    return 0;
+}
+
+int server_iterate(Server* server, size_t timeout_ms)
+{
+    // TODO - ???
     return 0;
 }
