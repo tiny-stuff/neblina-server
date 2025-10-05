@@ -12,12 +12,19 @@ static const char* ERR_PRX = "TCP server error:";
 
 static int tcp_server_recv(SOCKET fd, uint8_t** data)
 {
-    return 0;
+    *data = malloc(RECV_BUF_SZ);
+    ssize_t r = recv(fd, *data, RECV_BUF_SZ, 0);
+    if (r < 0)
+        ERR("%s recv error: %s", ERR_PRX, strerror(errno));
+    return (int) r;
 }
 
 static int tcp_server_send(SOCKET fd, uint8_t const* data, size_t data_sz)
 {
-    return 0;
+    ssize_t r = send(fd, data, data_sz, 0);
+    if (r < 0)
+        ERR("%s send error: %s", ERR_PRX, strerror(errno));
+    return (int) r;
 }
 
 static void tcp_server_free(Server* server)

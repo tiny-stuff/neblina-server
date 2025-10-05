@@ -108,7 +108,12 @@ static void handle_disconnect(Server* server, SOCKET client_fd)
 
 static void handle_new_data(Server* server, SOCKET client_fd)
 {
-    DBG("New data");
+    ConnectionHash* conn_hash;
+    HASH_FIND_INT(server->connection_hash, &client_fd, conn_hash);
+    if (!conn_hash)
+        return;
+
+    cpool_flush_connection(server->cpool, conn_hash->connection);
 }
 
 int server_iterate(Server* server, size_t timeout_ms)
