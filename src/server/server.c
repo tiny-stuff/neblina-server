@@ -77,22 +77,38 @@ static void handle_new_connection(Server* server)
     cpool_add_connection(server->cpool, conn_hash->connection);
 }
 
-static void handle_new_data(Server* server, SOCKET client_fd)
-{
-    DBG("New data");
-}
-
 static void handle_disconnect(Server* server, SOCKET client_fd)
 {
     DBG("Client disconnected from socket %d", client_fd);
 
-    // TODO - remove connection + session + cpool
+    // find connection in list
+    ConnectionHash* conn_hash;
+    HASH_FIND_INT(server->connection_hash, &client_fd, conn_hash);
+    if (!conn_hash)
+        return;
+    Session* session = connection_session(conn_hash->connection);
 
-    // remove from poller
+    // remove connection from connection pool
+    cpool_remove_connection(server->cpool, conn_hash->connection);
+
+    // remove connection from hash, and destroy it
+    connection_destroy(conn_hash->connection);
+    HASH_DEL(server->connection_hash, conn_hash);
+    free(conn_hash);
+
+    // destroy session
+    session_free(session);
+
+    // remove socket from poller
     poller_remove_connection(server->poller, client_fd);
 
     // close socket
     server_close_socket(client_fd);
+}
+
+static void handle_new_data(Server* server, SOCKET client_fd)
+{
+    DBG("New data");
 }
 
 int server_iterate(Server* server, size_t timeout_ms)
