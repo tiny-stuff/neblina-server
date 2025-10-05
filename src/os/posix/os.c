@@ -15,6 +15,7 @@ bool termination_requested = false;
 void handle_sigint(int signum)
 {
     (void) signum;
+    DBG("Termination requested");
     termination_requested = true;
 }
 

@@ -27,6 +27,7 @@ void server_destroy(Server* server)
     poller_destroy(server->poller);
     cpool_destroy(server->cpool);
     server->vt->free(server);
+    DBG("Server destroyed");
 }
 
 int server_flush_connection(Server* server, Connection* connection)

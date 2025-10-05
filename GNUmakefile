@@ -65,24 +65,19 @@ $(PROJECT): src/main.o $(OBJ)
 ifndef DEV
 	strip ./$@
 endif
+ifeq ($(UNAME_S),Linux)
+	sudo setcap cap_net_bind_service=ep ./$@
+endif
 
 #
 # development targets
 #
 
 leaks: dev
-ifeq ($(UNAME_S),Linux)
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --suppressions=valgrind.supp ./$(PROJECT)
-else
-	$(error Checking for leaks only supported on Linux.)
-endif
 
 thread: dev
-ifeq ($(UNAME_S),Linux)
 	valgrind --tool=drd ./$(PROJECT)
-else
-	$(error Checking for threads only supported on Linux.)
-endif
 
 dev:
 	$(MAKE) all DEV=1
@@ -109,6 +104,9 @@ tests/parrot-test: CFLAGS=-D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200112L -D_DEFAU
 tests/parrot-test: tests/parrot.o $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
+parrot-test-leaks: tests/parrot-test
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --suppressions=valgrind.supp ./tests/parrot-test
+
 $(PROJECT)-test: CFLAGS=-D_XOPEN_SOURCE=700 -D_POSIX_C_SOURCE=200112L -D_DEFAULT_SOURCE $(INCLUDES) -I../src -O0 -ggdb -fno-inline-functions -fstack-protector-strong -fno-common $(WARNINGS)
 $(PROJECT)-test: tests/tests.o $(OBJ) tests/error tests/nonrecoverable tests/infloop tests/parrot-test
 	$(CC) -o $@ tests/tests.o $(OBJ) $(LDFLAGS)
@@ -126,18 +124,10 @@ check: $(PROJECT)-test
 	./$(PROJECT)-test
 
 leaks-check: $(PROJECT)-test
-ifeq ($(UNAME_S),Linux)
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --suppressions=valgrind.supp ./$(PROJECT)-test
-else
-	$(error Checking for leaks only supported on Linux.)
-endif
 
 thread-check: $(PROJECT)-test
-ifeq ($(UNAME_S),Linux)
 	valgrind --tool=drd ./$(PROJECT)-test
-else
-	$(error Checking for threads only supported on Linux.)
-endif
 
 
 # include dependencies

@@ -74,6 +74,8 @@ void cpool_destroy(CPool* cpool)
     free(cpool->threads);
     free(cpool->thread_running);
     free(cpool->args);
+
+    free(cpool);
 }
 
 void cpool_add_connection(CPool* cpool, Connection* connection)

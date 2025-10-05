@@ -1,0 +1,13 @@
+{
+   Ignore dlopen bug.
+   Memcheck:Leak
+   ...
+   fun:_dl_open
+   ...
+}
+{
+   microjson bug
+   Memcheck:Addr1
+   fun:json_internal_read_object
+   ...
+}

@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "util/logs.h"
+#include "os/os.h"
 
 const char* service = "parrot";
 
@@ -47,6 +48,7 @@ static Session* parrot_session_create(void* data)
 int main()
 {
     logs_verbose = true;
+    os_handle_ctrl_c();
 
     Server* server = tcp_server_create(23456, false, parrot_session_create, SINGLE_THREADED);
     server_run(server);
