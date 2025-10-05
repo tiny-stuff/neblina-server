@@ -34,17 +34,9 @@ void server_destroy(Server* server)
 
 int server_flush_connection(Server* server, Connection* connection)
 {
-    // send pending data
-    size_t sz;
-    uint8_t const* data_to_send = connection_send_buffer(connection, &sz);
-    int r = server->vt->send(connection_socket_fd(connection), data_to_send, sz);
-    if (r < 0)
-        return r;
-    connection_clear_send_buffer(connection);
-
     // receive data
     uint8_t* recv_buf;
-    r = server->vt->recv(connection_socket_fd(connection), &recv_buf);
+    int r = server->vt->recv(connection_socket_fd(connection), &recv_buf);
     if (r < 0)
         return r;
     if (r > 0) {
@@ -52,6 +44,14 @@ int server_flush_connection(Server* server, Connection* connection)
         session_on_recv(connection_session(connection), connection);  // TODO - check for errors
         free(recv_buf);
     }
+
+    // send pending data
+    size_t sz;
+    uint8_t const* data_to_send = connection_send_buffer(connection, &sz);
+    r = server->vt->send(connection_socket_fd(connection), data_to_send, sz);
+    if (r < 0)
+        return r;
+    connection_clear_send_buffer(connection);
 
     return 0;
 }

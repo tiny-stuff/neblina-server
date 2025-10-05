@@ -95,10 +95,10 @@ size_t connection_extract_line_from_recv_buffer(Connection* c, char** data, cons
     size_t sep_len = strlen(separator);
     int len_to_return = -1;
 
-    // look for enter
-    for (size_t i = 0; i < (c->recv_buf_sz - sep_len + 1); ++i) {
+    // look for separator
+    for (int i = 0; i < ((int) c->recv_buf_sz - (int) sep_len + 1); ++i) {
         if (memcmp(&c->recv_buf[i], separator, sep_len) == 0) {
-            len_to_return = (int) i;
+            len_to_return = i;
             break;
         }
     }
@@ -108,9 +108,10 @@ size_t connection_extract_line_from_recv_buffer(Connection* c, char** data, cons
 
     // copy string and return
     len_to_return += (int) sep_len;  // include separator
-    *data = malloc(len_to_return);
+    *data = calloc(1, len_to_return + 1);
     memcpy(*data, c->recv_buf, len_to_return);
-    memmove(c->recv_buf, &c->recv_buf[len_to_return], c->recv_buf_sz - len_to_return);
+    if ((int) c->recv_buf_sz > len_to_return)
+        memmove(c->recv_buf, &c->recv_buf[len_to_return], c->recv_buf_sz - len_to_return);
     c->recv_buf_sz -= len_to_return;
 
     return len_to_return;
