@@ -129,7 +129,7 @@ Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_se
     int fd = tcp_server_get_listener(port, open_to_world);
 
     TCPServer* tcp_server = calloc(1, sizeof(TCPServer));
-    server_init(&tcp_server->server, fd, create_session, n_threads);
+    server_init(&tcp_server->server, fd, create_session, NULL, n_threads);
     tcp_server->server.vt = &vtable;
     tcp_server->port = port;
     tcp_server->open_to_world = open_to_world;

@@ -13,12 +13,14 @@
 
 extern bool termination_requested;
 
-void server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, size_t n_threads)
+void server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, void* session_data, size_t n_threads)
 {
     server->create_session_cb = create_session_cb;
+    server->session_data = session_data;
     server->cpool = cpool_create(n_threads, server);
     server->fd = fd;
     server->poller = poller_create(fd);
+    server->connection_hash = NULL;
 }
 
 void server_destroy(Server* server)
@@ -56,11 +58,23 @@ int server_flush_connection(Server* server, Connection* connection)
 
 static void handle_new_connection(Server* server)
 {
+    // accept new connection
     SOCKET client_fd = server->vt->accept_new_connection(server);
 
+    // add socket to poller (allows polling for new data)
     poller_add_connection(server->poller, client_fd);
 
-    // TODO - create connection + session + cpool
+    // create session from service
+    Session* session = server->create_session_cb(server->session_data);
+
+    // create and add connection to hash
+    ConnectionHash* conn_hash = malloc(sizeof *conn_hash);
+    conn_hash->fd = client_fd;
+    conn_hash->connection = connection_create(client_fd, session);
+    HASH_ADD_INT(server->connection_hash, fd, conn_hash);
+
+    // add connection to connection pool
+    cpool_add_connection(server->cpool, conn_hash->connection);
 }
 
 static void handle_new_data(Server* server, SOCKET client_fd)

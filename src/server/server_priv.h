@@ -3,8 +3,15 @@
 
 #include "server.h"
 #include "server/poller/poller.h"
+#include "uthash/uthash.h"
 
 typedef struct CPool CPool;
+
+typedef struct ConnectionMap {
+    int            fd;
+    Connection*    connection;
+    UT_hash_handle hh;
+} ConnectionHash;
 
 typedef struct ServerVTable {
     void   (*free)(Server* server);
@@ -19,8 +26,10 @@ typedef struct Server {
     ServerVTable const* vt;
     SOCKET              fd;
     CreateSessionF      create_session_cb;
+    void*               session_data;
     CPool*              cpool;
     Poller*             poller;
+    ConnectionHash*     connection_hash;
 } Server;
 
 #endif //NEBLINA_SERVER_SERVER_PRIV_H
