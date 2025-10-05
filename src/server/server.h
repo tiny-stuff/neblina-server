@@ -13,19 +13,15 @@
 typedef struct Server Server;
 typedef struct Session Session;
 
-typedef int(*ServerRecvF)(SOCKET fd, uint8_t** data);
-typedef int(*ServerSendF)(SOCKET fd, uint8_t const* data, size_t data_sz);
-typedef void(*ServerFreeF)(Server* server);
-typedef void(*ServerIterateF)(Server* server);
-
 typedef Session*(*CreateSessionF)(void* data);
 
-Server* server_init(CreateSessionF create_session, size_t n_threads);
+void    server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, size_t n_threads);
 void    server_destroy(Server* server);
 
 int     server_iterate(Server* server, size_t timeout_ms);
 int     server_flush_connection(Server* server, Connection* connection);
 
 void    server_run(Server* server);
+void    server_close_socket(SOCKET fd);
 
 #endif //NEBLINA_SERVER_SERVER_H

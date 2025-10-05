@@ -11,7 +11,7 @@ typedef struct Poller {
     int fs_socket;
 } Poller;
 
-Poller* poller_init(int fd_listener)
+Poller* poller_create(int fd_listener)
 {
     Poller* p = calloc(1, sizeof(Poller));
 
@@ -53,10 +53,10 @@ bool poller_remove_connection(Poller* p, SOCKET fd)
     return true;
 }
 
-size_t poller_wait(Poller* p, PollerEvent* out_evt, size_t evt_sz)
+size_t poller_wait(Poller* p, PollerEvent* out_evt, size_t evt_sz, size_t timeout_ms)
 {
     struct epoll_event events[evt_sz];
-    int n_events = epoll_wait(p->epoll_fd, events, (int) evt_sz, 100);
+    int n_events = epoll_wait(p->epoll_fd, events, (int) evt_sz, (int) timeout_ms);
 
     if (n_events < 0) {
         if (errno == EINTR)

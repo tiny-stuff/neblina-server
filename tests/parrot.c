@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "util/logs.h"
+
 const char* service = "parrot";
 
 typedef struct ParrotSession {
@@ -44,6 +46,8 @@ static Session* parrot_session_create(void* data)
 
 int main()
 {
+    logs_verbose = true;
+
     Server* server = tcp_server_create(23456, false, parrot_session_create, SINGLE_THREADED);
     server_run(server);
     server_destroy(server);

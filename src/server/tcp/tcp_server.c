@@ -7,18 +7,8 @@
 
 #include "tcp_server_priv.h"
 #include "util/logs.h"
-#include "../socket.h"
 
 static const char* ERR_PRX = "TCP server error:";
-
-static void close_socket(SOCKET fd)
-{
-#ifdef _WIN32
-    closesocket(fd);
-#else
-    close(fd);
-#endif
-}
 
 static int tcp_server_recv(SOCKET fd, uint8_t** data)
 {
@@ -32,7 +22,8 @@ static int tcp_server_send(SOCKET fd, uint8_t const* data, size_t data_sz)
 
 static void tcp_server_free(Server* server)
 {
-    free(server);
+    TCPServer* tserver = (TCPServer *) server;
+    free(tserver);
 }
 
 static SOCKET tcp_server_get_listener(int port, bool open_to_world)
@@ -83,7 +74,7 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
 
         // bind to port
         if (bind(listener, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
-            close_socket(listener);
+            server_close_socket(listener);
             continue;  // not possible, try next
         }
 
@@ -104,25 +95,43 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
     return listener;
 }
 
-static void tcp_server_iterate(Server* server)
+static SOCKET tcp_accept_new_connection(Server* server)
 {
-    // TODO
+    // accept connection
+    struct sockaddr_storage remoteaddr; // Client address
+    memset(&remoteaddr, 0, sizeof remoteaddr);
+    socklen_t addrlen = sizeof remoteaddr;
+
+    SOCKET client_fd = accept(server->fd, (struct sockaddr *) &remoteaddr, &addrlen);
+    if (client_fd == -1) {
+        ERR("%s listen error: %s", ERR_PRX, strerror(errno));
+        return INVALID_SOCKET;
+    }
+
+    // find connecter IP/port
+    char hoststr[NI_MAXHOST] = "Unknown";
+    char portstr[NI_MAXSERV] = "0";
+    getnameinfo((struct sockaddr const*)(&remoteaddr), addrlen, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
+    DBG("New connection from %s:%s as fd %d", hoststr, portstr, client_fd);
+
+    return client_fd;
 }
 
 Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_session, size_t n_threads)
 {
     static const ServerVTable vtable = {
+        .free = tcp_server_free,
         .recv = tcp_server_recv,
         .send = tcp_server_send,
-        .free = tcp_server_free,
-        .iterate = tcp_server_iterate,
+        .accept_new_connection = tcp_accept_new_connection,
     };
 
+    int fd = tcp_server_get_listener(port, open_to_world);
+
     TCPServer* tcp_server = calloc(1, sizeof(TCPServer));
-    server_init(create_session, n_threads);
+    server_init(&tcp_server->server, fd, create_session, n_threads);
     tcp_server->server.vt = &vtable;
     tcp_server->port = port;
     tcp_server->open_to_world = open_to_world;
-    tcp_server->server.fd = tcp_server_get_listener(port, open_to_world);
     return (Server *) tcp_server;
 }

@@ -2,24 +2,29 @@
 #include "server_priv.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "connection.h"
 #include "service/session.h"
 #include "cpool/cpool.h"
+#include "util/logs.h"
+
+#define MAX_EVENTS 64
 
 extern bool termination_requested;
 
-Server* server_init(CreateSessionF create_session, size_t n_threads)
+void server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, size_t n_threads)
 {
-    Server* server = calloc(1, sizeof(Server));
-    server->create_session = create_session;
+    server->create_session_cb = create_session_cb;
     server->cpool = cpool_create(n_threads, server);
-    server->fd = -1;
-    return server;
+    server->fd = fd;
+    server->poller = poller_create(fd);
 }
 
 void server_destroy(Server* server)
 {
+    server_close_socket(server->fd);
+    poller_destroy(server->poller);
     cpool_destroy(server->cpool);
     server->vt->free(server);
 }
@@ -48,9 +53,44 @@ int server_flush_connection(Server* server, Connection* connection)
     return 0;
 }
 
+static void handle_new_connection(Server* server)
+{
+    SOCKET client_fd = server->vt->accept_new_connection(server);
+
+    poller_add_connection(server->poller, client_fd);
+
+    // TODO - create connection + session + cpool
+}
+
+static void handle_new_data(Server* server, SOCKET client_fd)
+{
+    DBG("New data");
+}
+
+static void handle_disconnect(Server* server, SOCKET client_fd)
+{
+    DBG("Client disconnected from socket %d", client_fd);
+
+    // TODO - remove connection + session + cpool
+
+    // remove from poller
+    poller_remove_connection(server->poller, client_fd);
+
+    // close socket
+    server_close_socket(client_fd);
+}
+
 int server_iterate(Server* server, size_t timeout_ms)
 {
-    // TODO - ???
+    PollerEvent events[MAX_EVENTS];
+    size_t n_events = poller_wait(server->poller, events, MAX_EVENTS, timeout_ms);   // TODO - check for errors
+    for (size_t i = 0; i < n_events; ++i) {
+        switch (events[i].type) {
+            case PT_NEW_CONNECTION: handle_new_connection(server); break;
+            case PT_NEW_DATA:       handle_new_data(server, events[i].fd); break;
+            case PT_DISCONNECTED:   handle_disconnect(server, events[i].fd); break;
+        }
+    }
     return 0;
 }
 
@@ -58,4 +98,13 @@ void server_run(Server* server)
 {
     while (!termination_requested)
         server_iterate(server, 50);
+}
+
+void server_close_socket(SOCKET fd)
+{
+#ifdef _WIN32
+    closesocket(fd);
+#else
+    close(fd);
+#endif
 }
