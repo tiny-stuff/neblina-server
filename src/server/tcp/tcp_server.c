@@ -124,7 +124,7 @@ static SOCKET tcp_accept_new_connection(Server* server)
     return client_fd;
 }
 
-Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_session, size_t n_threads)
+Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_session_cb, size_t n_threads)
 {
     static const ServerVTable vtable = {
         .free = tcp_server_free,
@@ -136,7 +136,7 @@ Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_se
     int fd = tcp_server_get_listener(port, open_to_world);
 
     TCPServer* tcp_server = calloc(1, sizeof(TCPServer));
-    server_init(&tcp_server->server, fd, create_session, NULL, n_threads);
+    server_init(&tcp_server->server, fd, create_session_cb, NULL, n_threads);
     tcp_server->server.vt = &vtable;
     tcp_server->port = port;
     tcp_server->open_to_world = open_to_world;

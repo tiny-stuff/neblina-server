@@ -13,6 +13,7 @@ void           connection_destroy(Connection* c);
 
 void           connection_add_to_recv_buffer(Connection* c, uint8_t const* data, size_t data_sz);
 void           connection_add_to_send_buffer(Connection* c, uint8_t const* data, size_t data_sz);
+void           connection_add_text_to_send_buffer(Connection* c, const char* text);
 
 void           connection_clear_send_buffer(Connection* c);
 

@@ -23,15 +23,6 @@ void server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, vo
     server->connection_hash = NULL;
 }
 
-void server_destroy(Server* server)
-{
-    server_close_socket(server->fd);
-    poller_destroy(server->poller);
-    cpool_destroy(server->cpool);
-    server->vt->free(server);
-    DBG("Server destroyed");
-}
-
 int server_flush_connection(Server* server, Connection* connection)
 {
     // receive data
@@ -97,7 +88,8 @@ static void handle_disconnect(Server* server, SOCKET client_fd)
     free(conn_hash);
 
     // destroy session
-    session_free(session);
+    session_finalize(session);
+    free(session);
 
     // remove socket from poller
     poller_remove_connection(server->poller, client_fd);
@@ -144,3 +136,19 @@ void server_close_socket(SOCKET fd)
     close(fd);
 #endif
 }
+
+void server_destroy(Server* server)
+{
+    // close all connections
+    ConnectionHash *conn_hash, *tmp;
+    HASH_ITER(hh, server->connection_hash, conn_hash, tmp) {
+        handle_disconnect(server, conn_hash->fd);
+    }
+
+    server_close_socket(server->fd);
+    poller_destroy(server->poller);
+    cpool_destroy(server->cpool);
+    server->vt->free(server);
+    DBG("Server destroyed");
+}
+

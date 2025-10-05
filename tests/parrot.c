@@ -19,29 +19,19 @@ static int parrot_on_recv(Session* session, Connection* c)
 
     char* line;
     while ((connection_extract_line_from_recv_buffer(c, &line, "\r\n"))) {
-        connection_add_to_send_buffer(c, (uint8_t *) line, strlen(line));
+        connection_add_text_to_send_buffer(c, line);
         free(line);
     }
 
     return 0;
 }
 
-static void parrot_free(Session* session)
-{
-    free(session);
-}
-
 static Session* parrot_session_create(void* data)
 {
     (void) data;
 
-    static const SessionVTable vt = {
-        .on_recv = parrot_on_recv,
-        .session_free = parrot_free,
-    };
-
     ParrotSession* psession = calloc(1, sizeof(ParrotSession));
-    session_init(&psession->session, &vt);
+    session_init(&psession->session, parrot_on_recv, NULL);
     return (Session *) psession;
 }
 

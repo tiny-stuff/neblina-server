@@ -2,17 +2,19 @@
 
 #include <stdlib.h>
 
-void session_init(Session* session, SessionVTable const* vt)
+void session_init(Session* session, SessionOnRecv on_recv, SessionFinalize finalize)
 {
-    session->vt = vt;
+    session->vt.on_recv = on_recv;
+    session->vt.finalize = finalize;
 }
 
 int session_on_recv(Session* session, Connection* connection)
 {
-    return session->vt->on_recv(session, connection);
+    return session->vt.on_recv(session, connection);
 }
 
-void session_free(Session* session)
+void session_finalize(Session* session)
 {
-    session->vt->session_free(session);
+    if (session->vt.finalize)
+        session->vt.finalize(session);
 }

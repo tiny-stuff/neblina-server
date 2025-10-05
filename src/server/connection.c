@@ -47,6 +47,11 @@ void connection_add_to_send_buffer(Connection* c, uint8_t const* data, size_t da
     c->send_buf_sz += data_sz;
 }
 
+void connection_add_text_to_send_buffer(Connection* c, const char* text)
+{
+    connection_add_to_send_buffer(c, (uint8_t const *) text, strlen(text));
+}
+
 void connection_clear_send_buffer(Connection* c)
 {
     c->send_buf_sz = 0;
