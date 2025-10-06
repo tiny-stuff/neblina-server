@@ -62,3 +62,5 @@ dkms.conf
 /tests/parrot-test
 *~
 *.swp
+*.vcxproj.user
+.vs/
