@@ -11,7 +11,7 @@
 
 #define MAX_EVENTS 64
 
-extern bool termination_requested;
+extern volatile bool termination_requested;
 
 void server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, void* session_data, size_t n_threads)
 {
@@ -102,7 +102,7 @@ static void handle_new_data(Server* server, SOCKET client_fd)
 {
     ConnectionHash* conn_hash;
     HASH_FIND_INT(server->connection_hash, &client_fd, conn_hash);
-    if (!conn_hash)
+    if (conn_hash == NULL)
         return;
 
     cpool_flush_connection(server->cpool, conn_hash->connection);

@@ -10,13 +10,16 @@
 #include "util/error.h"
 #include "util/logs.h"
 
-bool termination_requested = false;
+volatile bool termination_requested = false;
 
 void handle_sigint(int signum)
 {
     (void) signum;
-    DBG("Termination requested");
     termination_requested = true;
+    DBG("Termination requested");
+#ifdef TARGET_OS_MAC
+    exit(EXIT_SUCCESS);
+#endif
 }
 
 void os_handle_ctrl_c()
