@@ -57,7 +57,7 @@ endif
 CFLAGS_CONTRIB = -I. -O3 -ffast-math -march=native -flto -Wno-switch
 
 #
-# main executable targets
+# main targets
 #
 
 $(PROJECT): src/main.o $(OBJ)
@@ -68,6 +68,16 @@ endif
 ifeq ($(UNAME_S),Linux)
 	sudo setcap cap_net_bind_service=ep ./$@
 endif
+
+clean:
+	find . -type f -name '*.[od]' -exec rm {} +
+	rm -f $(PROJECT) $(PROJECT)-test tests/error tests/nonrecoverable tests/infloop tests/parrot-test
+
+install: $(PROJECT)
+	install $(PROJECT) /usr/local/bin/$(PROJECT)
+
+uninstall:
+	rm /usr/local/bin/$(PROJECT)
 
 #
 # development targets
@@ -85,16 +95,6 @@ dev:
 bear:
 	make clean
 	bear -- make
-
-clean:
-	find . -type f -name '*.[od]' -exec rm {} +
-	rm -f $(PROJECT) $(PROJECT)-test tests/error tests/nonrecoverable tests/infloop tests/parrot-test
-
-install: $(PROJECT)
-	install $(PROJECT) /usr/local/bin/$(PROJECT)
-
-uninstall:
-	rm /usr/local/bin/$(PROJECT)
 
 #
 # test targets
