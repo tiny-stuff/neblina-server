@@ -43,18 +43,34 @@ static void* thread_function(void* arg)
     DBG("Creating thread %zu", ctx->thread_n);
 
     while (ctx->cpool->thread_running[ctx->thread_n]) {
+
+        // wait until work is available
         pthread_mutex_lock(&ctx->mutex);
         while (!ctx->should_wake)
             pthread_cond_wait(&ctx->cond, &ctx->mutex);
         ctx->should_wake = false;
         pthread_mutex_unlock(&ctx->mutex);
 
-        DBG("Work from thread %zu!", ctx->thread_n);  // TODO
-    }
+        // make a list of connections that are ready for work
+        Connection** connections = NULL;
+        size_t connections_sz = 0;
+        pthread_mutex_lock(&ctx->cpool->connection_threads_mutex);
+        for (ConnectionThread* conn_th = ctx->cpool->connection_thread_map; conn_th != NULL; conn_th = conn_th->hh.next) {
+            if (conn_th->ready && conn_th->thread_n == ctx->thread_n) {
+                ++connections_sz;
+                connections = realloc(connections, connections_sz * sizeof(Connection *));
+                connections[connections_sz - 1] = conn_th->connection;
+                conn_th->ready = false;
+            }
+        }
+        pthread_mutex_unlock(&ctx->cpool->connection_threads_mutex);
 
-    pthread_mutex_lock(&ctx->cpool->connection_threads_mutex);
-    // ct->ready = true;
-    pthread_mutex_unlock(&ctx->cpool->connection_threads_mutex);
+        // do the work
+        for (size_t i = 0; i < connections_sz; ++i)
+            server_flush_connection(ctx->cpool->server, connections[i]);
+
+        free(connections);
+    }
 
     return NULL;
 }
