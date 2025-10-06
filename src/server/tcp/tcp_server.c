@@ -116,8 +116,8 @@ static SOCKET tcp_accept_new_connection(Server* server)
     }
 
     // find connecter IP/port
-    char hoststr[NI_MAXHOST] = "Unknown";
-    char portstr[NI_MAXSERV] = "0";
+    char hoststr[1024] = "Unknown";
+    char portstr[24] = "0";
     getnameinfo((struct sockaddr const*)(&remoteaddr), addrlen, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
     DBG("New connection from %s:%s as fd %d", hoststr, portstr, client_fd);
 

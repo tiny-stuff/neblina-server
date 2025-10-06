@@ -6,7 +6,6 @@
 #  include <ws2tcpip.h>
 #  pragma comment(lib, "Ws2_32.lib")
 #else
-#  define _DARWIN_C_SOURCE
 #  include <unistd.h>
 #  include <arpa/inet.h>
 #  include <sys/socket.h>
