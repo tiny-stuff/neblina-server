@@ -8,6 +8,10 @@
 #include "tcp_server_priv.h"
 #include "util/logs.h"
 
+#ifdef _WIN32
+typedef long ssize_t;
+#endif
+
 static const char* ERR_PRX = "TCP server error:";
 
 static int tcp_server_recv(SOCKET fd, uint8_t** data)
@@ -133,7 +137,7 @@ Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_se
         .accept_new_connection = tcp_accept_new_connection,
     };
 
-    int fd = tcp_server_get_listener(port, open_to_world);
+    SOCKET fd = tcp_server_get_listener(port, open_to_world);
 
     TCPServer* tcp_server = calloc(1, sizeof(TCPServer));
     server_init(&tcp_server->server, fd, create_session_cb, NULL, n_threads);

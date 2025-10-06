@@ -6,6 +6,9 @@
 #include <windows.h>
 #include <stdio.h>
 
+#include "util/error.h"
+#include "util/logs.h"
+
 typedef struct Poller {
     SOCKET fs_socket;
     WSAPOLLFD poll_fds[FD_SETSIZE];
@@ -34,7 +37,7 @@ void poller_destroy(Poller* p)
 bool poller_add_connection(Poller* p, SOCKET fd)
 {
     if (p->poll_count >= FD_SETSIZE) {
-        THROW("Too many sockets for WSAPoll()");
+        FATAL_NON_RECOVERABLE("Too many sockets for WSAPoll()");
         return false;
     }
 
@@ -57,8 +60,7 @@ bool poller_remove_connection(Poller* p, SOCKET fd)
             return true;
         }
     }
-    THROW("Socket not found in poll list");
-    return false;
+    FATAL_NON_RECOVERABLE("Socket not found in poll list");
 }
 
 size_t poller_wait(Poller* p, PollerEvent* out_evt, size_t evt_sz, size_t timeout_ms)
