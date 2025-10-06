@@ -160,6 +160,7 @@ void cpool_add_connection(CPool* cpool, Connection* connection)
         ConnectionThread* ct = malloc(sizeof *ct);
         ct->thread_n = thread_n;
         ct->connection = connection;
+        ct->ready = false;
         pthread_mutex_lock(&cpool->connection_threads_mutex);
         HASH_ADD_PTR(cpool->connection_thread_map, connection, ct);
         pthread_mutex_unlock(&cpool->connection_threads_mutex);
