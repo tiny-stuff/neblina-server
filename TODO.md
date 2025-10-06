@@ -3,6 +3,7 @@
 - [x] Rename project
 - [x] Orchestrator
 - [x] TCP server + Line by Line + Parrot
+- [ ] Multithreaded connection pool
 - [ ] SSL server + SParrot
 - [ ] Process config file
 - [ ] Multithreading

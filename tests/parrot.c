@@ -40,7 +40,7 @@ int main()
     logs_verbose = true;
     os_handle_ctrl_c();
 
-    Server* server = tcp_server_create(23456, false, parrot_session_create, SINGLE_THREADED);
+    Server* server = tcp_server_create(23456, false, parrot_session_create, 3);
     server_run(server);
     DBG("end");
     server_destroy(server);
