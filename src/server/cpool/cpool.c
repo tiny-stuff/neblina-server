@@ -38,12 +38,23 @@ typedef struct CPool {
 
 static void* thread_function(void* arg)
 {
-    ThreadContext* args = arg;
+    ThreadContext* ctx = arg;
 
-    DBG("Creating thread %zu", args->thread_n);
+    DBG("Creating thread %zu", ctx->thread_n);
 
-    while (args->cpool->thread_running[args->thread_n])
-        os_sleep_ms(100);
+    while (ctx->cpool->thread_running[ctx->thread_n]) {
+        pthread_mutex_lock(&ctx->mutex);
+        while (!ctx->should_wake)
+            pthread_cond_wait(&ctx->cond, &ctx->mutex);
+        ctx->should_wake = false;
+        pthread_mutex_unlock(&ctx->mutex);
+
+        DBG("Work from thread %zu!", ctx->thread_n);  // TODO
+    }
+
+    pthread_mutex_lock(&ctx->cpool->connection_threads_mutex);
+    // ct->ready = true;
+    pthread_mutex_unlock(&ctx->cpool->connection_threads_mutex);
 
     return NULL;
 }
@@ -133,6 +144,8 @@ void cpool_add_connection(CPool* cpool, Connection* connection)
         pthread_mutex_lock(&cpool->connection_threads_mutex);
         HASH_ADD_PTR(cpool->connection_thread_map, connection, ct);
         pthread_mutex_unlock(&cpool->connection_threads_mutex);
+
+        DBG("New connection added to thread %zu", thread_n);
     }
 }
 
@@ -144,8 +157,11 @@ void cpool_remove_connection(CPool* cpool, Connection* connection)
         pthread_mutex_lock(&cpool->connection_threads_mutex);
         ConnectionThread* ct;
         HASH_FIND_PTR(cpool->connection_thread_map, connection, ct);
-        if (ct)
+        if (ct) {
+            DBG("Connection removed from thread %zu", ct->thread_n);
             HASH_DEL(cpool->connection_thread_map, ct);
+            free(ct);
+        }
         pthread_mutex_unlock(&cpool->connection_threads_mutex);
     }
 }
@@ -153,9 +169,18 @@ void cpool_remove_connection(CPool* cpool, Connection* connection)
 void cpool_flush_connection(CPool* cpool, Connection* connection)
 {
     if (cpool->n_threads != SINGLE_THREADED) {
-        // TODO - mark connection as available for flushing
-        // TODO - wake up thread
-        FATAL_NON_RECOVERABLE("Not implemented yet");
+        ConnectionThread* ct;
+        HASH_FIND_PTR(cpool->connection_thread_map, &connection, ct);
+        if (ct) {
+            pthread_mutex_lock(&cpool->connection_threads_mutex);
+            ct->ready = true;
+            pthread_mutex_unlock(&cpool->connection_threads_mutex);
+
+            pthread_mutex_lock(&cpool->ctx[ct->thread_n].mutex);
+            cpool->ctx[ct->thread_n].should_wake = true;
+            pthread_cond_signal(&cpool->ctx[ct->thread_n].cond);
+            pthread_mutex_unlock(&cpool->ctx[ct->thread_n].mutex);
+        }
     } else {
         server_flush_connection(cpool->server, connection);
     }
