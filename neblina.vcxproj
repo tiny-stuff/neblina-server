@@ -23,6 +23,7 @@
     <ClInclude Include="src\contrib\uthash\utlist.h" />
     <ClInclude Include="src\os\os.h" />
     <ClInclude Include="src\os\pthread.h" />
+    <ClInclude Include="src\os\window.h" />
     <ClInclude Include="src\server\connection.h" />
     <ClInclude Include="src\server\cpool\cpool.h" />
     <ClInclude Include="src\server\poller\poller.h" />
@@ -39,6 +40,7 @@
   <ItemGroup>
     <ClCompile Include="src\os\win32\os.c" />
     <ClCompile Include="src\os\win32\pthread.c" />
+    <ClCompile Include="src\os\win32\window.c" />
     <ClCompile Include="src\server\connection.c" />
     <ClCompile Include="src\server\cpool\cpool.c" />
     <ClCompile Include="src\server\poller\poller_win32.c" />
