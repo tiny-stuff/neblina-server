@@ -115,18 +115,21 @@ void cpool_destroy(CPool* cpool)
 
 size_t cpool_least_populated_thread(CPool* cpool)
 {
-    size_t smallest_thread_n = 0, smallest_sz = SIZE_MAX;
+    size_t count_per_thread[cpool->n_threads];
+    memset(count_per_thread, 0, sizeof(size_t) * cpool->n_threads);
+
+    for (ConnectionThread* conn_th = cpool->connection_thread_map; conn_th != NULL; conn_th = conn_th->hh.next)
+        ++count_per_thread[conn_th->thread_n];
+
+    size_t min_sz = SIZE_MAX, min_thread = 0;
     for (size_t i = 0; i < cpool->n_threads; ++i) {
-        size_t count = 0;
-        for (ConnectionThread* conn_th = cpool->connection_thread_map; conn_th != NULL; conn_th = conn_th->hh.next) {
-            if (conn_th->thread_n == i)
-                ++count;
+        if (count_per_thread[i] < min_sz) {
+            min_thread = i;
+            min_sz = count_per_thread[i];
         }
-        if (count < smallest_sz)
-            smallest_thread_n = i;
     }
 
-    return smallest_thread_n;
+    return min_thread;
 }
 
 void cpool_add_connection(CPool* cpool, Connection* connection)
