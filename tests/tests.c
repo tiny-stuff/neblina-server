@@ -115,7 +115,7 @@ int main()
 {
     logs_verbose = true;
 
-    // test_watchdog();
+    test_watchdog();
     test_connection();
     // test_connection_pool(SINGLE_THREADED);
     // test_connection_pool(3);

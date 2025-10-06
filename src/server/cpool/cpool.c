@@ -2,14 +2,12 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <threads.h>
+#include <pthread.h>
 
 #include "util/error.h"
-#include "uthash/uthash.h"
-#include "uthash/utlist.h"
 
 #include "../server.h"
-#include "../connection.h"
+#include "os/os.h"
 
 typedef struct ThreadArgs {
     struct CPool* cpool;
@@ -19,21 +17,21 @@ typedef struct ThreadArgs {
 typedef struct CPool {
     Server*     server;
     size_t      n_threads;
-    thrd_t*     threads;
+    pthread_t*  threads;
     bool*       thread_running;
     ThreadArgs* args;
 } CPool;
 
-static int thread_function(void* arg)
+static void* thread_function(void* arg)
 {
     ThreadArgs* args = arg;
 
     DBG("Creating thread %zu", args->thread_n);
 
     while (args->cpool->thread_running[args->thread_n])
-        thrd_sleep(&(struct timespec){ .tv_nsec = 1 * 1000 * 1000 }, NULL);
+        os_sleep_ms(100);
 
-    return 0;
+    return NULL;
 }
 
 CPool* cpool_create(size_t n_threads, Server* server)
@@ -52,7 +50,7 @@ CPool* cpool_create(size_t n_threads, Server* server)
         for (size_t i = 0; i < n_threads; ++i) {
             cpool->thread_running[i] = true;
             cpool->args[i] = (ThreadArgs) { .cpool = cpool, .thread_n = i };
-            if (thrd_create(&cpool->threads[i], thread_function, &cpool->args[i]) != thrd_success)
+            if (pthread_create(&cpool->threads[i], NULL, thread_function, &cpool->args[i]))
                 FATAL_NON_RECOVERABLE("Unable to create thread.");
         }
     }
@@ -66,7 +64,7 @@ void cpool_destroy(CPool* cpool)
     for (size_t i = 0; i < cpool->n_threads; ++i)
         cpool->thread_running[i] = false;
     for (size_t i = 0; i < cpool->n_threads; ++i) {
-        thrd_join(cpool->threads[i], NULL);
+        pthread_join(cpool->threads[i], NULL);
         DBG("Thread %zu finalized", i);
     }
 
@@ -80,6 +78,8 @@ void cpool_destroy(CPool* cpool)
 
 void cpool_add_connection(CPool* cpool, Connection* connection)
 {
+    (void) connection;
+
     if (cpool->n_threads != SINGLE_THREADED) {
         // TODO - add connection to the least populated thread
         FATAL_NON_RECOVERABLE("Not implemented yet");
@@ -88,6 +88,8 @@ void cpool_add_connection(CPool* cpool, Connection* connection)
 
 void cpool_remove_connection(CPool* cpool, Connection* connection)
 {
+    (void) connection;
+
     if (cpool->n_threads != SINGLE_THREADED) {
         // TODO - remove connection from the thread
         FATAL_NON_RECOVERABLE("Not implemented yet");
