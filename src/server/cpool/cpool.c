@@ -139,8 +139,7 @@ void cpool_destroy(CPool* cpool)
 
 size_t cpool_least_populated_thread(CPool* cpool)
 {
-    size_t count_per_thread[cpool->n_threads];
-    memset(count_per_thread, 0, sizeof(size_t) * cpool->n_threads);
+    size_t* count_per_thread = calloc(cpool->n_threads, sizeof(size_t));
 
     for (ConnectionThread* conn_th = cpool->connection_thread_map; conn_th != NULL; conn_th = conn_th->hh.next)
         ++count_per_thread[conn_th->thread_n];
@@ -152,6 +151,8 @@ size_t cpool_least_populated_thread(CPool* cpool)
             min_sz = count_per_thread[i];
         }
     }
+
+    free(count_per_thread);
 
     return min_thread;
 }
