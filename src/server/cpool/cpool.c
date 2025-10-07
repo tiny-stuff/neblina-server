@@ -106,19 +106,21 @@ CPool* cpool_create(size_t n_threads, Server* server)
 void cpool_destroy(CPool* cpool)
 {
     if (cpool->n_threads != SINGLE_THREADED) {
-        pthread_mutex_destroy(&cpool->connection_threads_mutex);
 
         // end threads
         for (size_t i = 0; i < cpool->n_threads; ++i) {
-            pthread_cond_signal(&cpool->ctx[i].cond);
             cpool->thread_running[i] = false;
         }
         for (size_t i = 0; i < cpool->n_threads; ++i) {
+            cpool->ctx[i].should_wake = true;
+            pthread_cond_signal(&cpool->ctx[i].cond);
             pthread_join(cpool->threads[i], NULL);
             pthread_mutex_destroy(&cpool->ctx[i].mutex);
             pthread_cond_destroy(&cpool->ctx[i].cond);
             DBG("Thread %zu finalized", i);
         }
+
+        pthread_mutex_destroy(&cpool->connection_threads_mutex);
 
         // cleanup
         free(cpool->threads);

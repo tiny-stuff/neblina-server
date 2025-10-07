@@ -42,6 +42,5 @@ int main()
 
     Server* server = tcp_server_create(23456, false, parrot_session_create, 3);
     server_run(server);
-    DBG("end");
     server_destroy(server);
 }
