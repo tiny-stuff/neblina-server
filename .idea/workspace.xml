@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakePresetLoader"><![CDATA[{
+  "useNewFormat": true
+}]]></component>
+  <component name="CMakeReloadState">
+    <option name="reloaded" value="true" />
+  </component>
+  <component name="CMakeRunConfigurationManager">
+    <generated>
+      <config projectName="neblina" targetName="neblina" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="27e5460b-a703-409e-bbeb-46f55d9d23aa" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/neblina-server.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/customTargets.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/makefile.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/fs.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/os.h" beforeDir="false" afterPath="$PROJECT_DIR$/os/os.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/posix/fs.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/posix/os.c" beforeDir="false" afterPath="$PROJECT_DIR$/os/posix/os.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/posix/window.c" beforeDir="false" afterPath="$PROJECT_DIR$/os/posix/window.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/pthread.h" beforeDir="false" afterPath="$PROJECT_DIR$/os/win32/pthread.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/win32/fs.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/win32/os.c" beforeDir="false" afterPath="$PROJECT_DIR$/os/win32/os.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/win32/pthread.c" beforeDir="false" afterPath="$PROJECT_DIR$/os/win32/pthread.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/win32/window.c" beforeDir="false" afterPath="$PROJECT_DIR$/os/win32/window.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/os/window.h" beforeDir="false" afterPath="$PROJECT_DIR$/os/window.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/cpool/cpool.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/cpool/cpool.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/poller/poller.h" beforeDir="false" afterPath="$PROJECT_DIR$/os/poller.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/poller/poller_apple.c" beforeDir="false" afterPath="$PROJECT_DIR$/os/apple/poller.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/poller/poller_unix.c" beforeDir="false" afterPath="$PROJECT_DIR$/os/unix/poller.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/poller/poller_win32.c" beforeDir="false" afterPath="$PROJECT_DIR$/os/win32/poller.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/server_priv.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/server_priv.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/server/tcp/tcp_server_priv.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/server/tcp/tcp_server_priv.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/logs.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/logs.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/watchdog/watchdog.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/watchdog/watchdog.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/watchdog/watchdog.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/watchdog/watchdog.h" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.west.config.association.type.startup.service": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "os__independent"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/os/win32" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/os/win32" />
+      <recent name="$PROJECT_DIR$/src/os/unix" />
+      <recent name="$PROJECT_DIR$/src/os" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="neblina" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="neblina" TARGET_NAME="neblina" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="neblina" RUN_TARGET_NAME="neblina">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="27e5460b-a703-409e-bbeb-46f55d9d23aa" name="Changes" comment="" />
+      <created>1759865170004</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759865170004</updated>
+      <workItem from="1759865172706" duration="1636000" />
+    </task>
+    <servers />
+  </component>
+  <component name="VCPKGProject">
+    <isAutomaticCheckingOnLaunch value="false" />
+    <isAutomaticFoundErrors value="true" />
+    <isAutomaticReloadCMake value="true" />
+  </component>
+</project>
