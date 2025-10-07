@@ -1,4 +1,4 @@
-#include "os/os.h"
+#include "os.h"
 
 #include <stdbool.h>
 #include <signal.h>

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "util/logs.h"
-#include "os/os.h"
+#include "os.h"
 #include "util/error.h"
 
 typedef struct {

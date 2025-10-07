@@ -64,3 +64,4 @@ dkms.conf
 *.swp
 *.vcxproj.user
 .vs/
+/cmake-build-*

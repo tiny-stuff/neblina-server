@@ -4,7 +4,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "../socket.h"
+#ifndef _WIN32
+typedef int SOCKET;
+#endif
 
 typedef struct Poller Poller;
 

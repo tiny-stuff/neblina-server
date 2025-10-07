@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#include "os/os.h"
+#include "os.h"
 
 #define PID_NOT_RUNNING ((pid_t) -1)
 

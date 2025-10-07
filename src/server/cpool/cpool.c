@@ -7,7 +7,7 @@
 #include "util/error.h"
 
 #include "../server.h"
-#include "os/os.h"
+#include "os.h"
 #include "uthash/uthash.h"
 
 typedef struct ThreadContext {

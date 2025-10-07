@@ -2,7 +2,6 @@
 #define NEBLINA_SERVER_TCP_SERVER_PRIV_H
 
 #include "../server_priv.h"
-#include "server/poller/poller.h"
 
 typedef struct TCPServer {
     Server  server;
