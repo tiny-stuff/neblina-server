@@ -40,8 +40,6 @@ static void* thread_function(void* arg)
 {
     ThreadContext* ctx = arg;
 
-    DBG("Creating thread %zu", ctx->thread_n);
-
     while (ctx->cpool->thread_running[ctx->thread_n]) {
 
         // wait until work is available
@@ -95,6 +93,7 @@ CPool* cpool_create(size_t n_threads, Server* server)
             cpool->ctx[i] = (ThreadContext) { .cpool = cpool, .thread_n = i, .should_wake = false };
             pthread_mutex_init(&cpool->ctx[i].mutex, NULL);
             pthread_cond_init(&cpool->ctx[i].cond, NULL);
+            DBG("Creating thread %zu", i);
             if (pthread_create(&cpool->threads[i], NULL, thread_function, &cpool->ctx[i]))
                 FATAL_NON_RECOVERABLE("Unable to create thread.");
         }
@@ -108,12 +107,19 @@ void cpool_destroy(CPool* cpool)
     if (cpool->n_threads != SINGLE_THREADED) {
 
         // end threads
+        pthread_mutex_lock(&cpool->connection_threads_mutex);
         for (size_t i = 0; i < cpool->n_threads; ++i) {
+            pthread_mutex_lock(&cpool->ctx[i].mutex);
             cpool->thread_running[i] = false;
-        }
-        for (size_t i = 0; i < cpool->n_threads; ++i) {
             cpool->ctx[i].should_wake = true;
+            pthread_mutex_unlock(&cpool->ctx[i].mutex);
+        }
+        pthread_mutex_unlock(&cpool->connection_threads_mutex);
+
+        for (size_t i = 0; i < cpool->n_threads; ++i) {
+            pthread_mutex_lock(&cpool->ctx[i].mutex);
             pthread_cond_signal(&cpool->ctx[i].cond);
+            pthread_mutex_unlock(&cpool->ctx[i].mutex);
             pthread_join(cpool->threads[i], NULL);
             pthread_mutex_destroy(&cpool->ctx[i].mutex);
             pthread_cond_destroy(&cpool->ctx[i].cond);
@@ -178,11 +184,14 @@ void cpool_remove_connection(CPool* cpool, Connection* connection)
     if (cpool->n_threads != SINGLE_THREADED) {
         pthread_mutex_lock(&cpool->connection_threads_mutex);
         ConnectionThread* ct;
-        HASH_FIND_PTR(cpool->connection_thread_map, connection, ct);
+        HASH_FIND_PTR(cpool->connection_thread_map, &connection, ct);
         if (ct) {
+            size_t thread_n = ct->thread_n;
+            pthread_mutex_lock(&cpool->ctx[thread_n].mutex);
             DBG("Connection removed from thread %zu", ct->thread_n);
             HASH_DEL(cpool->connection_thread_map, ct);
             free(ct);
+            pthread_mutex_unlock(&cpool->ctx[thread_n].mutex);
         }
         pthread_mutex_unlock(&cpool->connection_threads_mutex);
     }
