@@ -11,23 +11,24 @@ project(neblina
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-include_directories("src", "src/contrib", "os")
+include_directories(src src/contrib os)
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
 
 #-------------------------
 # Compiler specific code
 #------------------------
 
 if(MSVC)
-    message("MSVC compiler detected")
     include(cmake/msvc.cmake)
-elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    message("Clang compiler detected")
-    include(cmake/common.cmake)
+elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
     include(cmake/clang.cmake)
-elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    message("gcc compiler detected")
     include(cmake/common.cmake)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     include(cmake/gcc.cmake)
+    include(cmake/common.cmake)
 endif()
 
 #-------------------------
@@ -39,20 +40,16 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
         src/*.[ch])
 
 if(WIN32)
-    message("Windows OS detected")
     file(GLOB_RECURSE ADDITIONAL_FILES CONFIGURE_DEPENDS os/win32/*.c)
 elseif(APPLE)
-    message("Apple OS detected")
     file(GLOB_RECURSE ADDITIONAL_FILES CONFIGURE_DEPENDS os/posix/*.c os/apple/*.c)
 elseif(UNIX)
-    message("Unix OS detected")
     file(GLOB_RECURSE ADDITIONAL_FILES CONFIGURE_DEPENDS os/posix/*.c os/unix/*.c)
 else()
     message(FATAL_ERROR "Unsupported platform")
 endif()
 
 set(SRC_FILES "${SRC_FILES};${ADDITIONAL_FILES}")
-message("Source files: ${SRC_FILES}")
 
 #-------------------------
 # Main build
