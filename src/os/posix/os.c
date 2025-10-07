@@ -17,7 +17,7 @@ void handle_sigint(int signum)
     (void) signum;
     termination_requested = true;
     DBG("Termination requested");
-#ifdef TARGET_OS_MAC
+#ifdef __APPLE__
     exit(EXIT_SUCCESS);
 #endif
 }
