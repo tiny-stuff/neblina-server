@@ -7,10 +7,7 @@
 
 #include "tcp_server_priv.h"
 #include "util/logs.h"
-
-#ifdef _WIN32
-typedef long ssize_t;
-#endif
+#include "socket.h"
 
 static const char* ERR_PRX = "TCP server error:";
 
@@ -33,6 +30,8 @@ static int tcp_server_send(SOCKET fd, uint8_t const* data, size_t data_sz)
 
 static void tcp_server_free(Server* server)
 {
+    socket_finalize();
+
     TCPServer* tserver = (TCPServer *) server;
     free(tserver);
 }
@@ -42,13 +41,6 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
 #define FATAL(...) { ERR(__VA_ARGS__); return -1; }
 
     SOCKET listener = -1;
-
-#ifdef _WIN32
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-        FATAL("WSAStartup() error!");
-    DBG("WSAStartup() succeeded");
-#endif
 
     // find internet address to bind
     struct addrinfo hints;
@@ -75,11 +67,7 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
             FATAL("%s socket error: %s", ERR_PRX, strerror(errno));
 
         // set socket as reusable
-#ifdef _WIN32
-        char yes = '1';
-#else
-        int yes = 1;
-#endif
+        SOCKETOPT_YES
         if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == SOCKET_ERROR)
             FATAL("%s setsocket error: %s", ERR_PRX, strerror(errno));
 
@@ -136,6 +124,8 @@ Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_se
         .send = tcp_server_send,
         .accept_new_connection = tcp_accept_new_connection,
     };
+
+    socket_init();
 
     SOCKET fd = tcp_server_get_listener(port, open_to_world);
 
