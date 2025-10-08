@@ -65,3 +65,4 @@ dkms.conf
 *.vcxproj.user
 .vs/
 /cmake-build-*
+/.idea/workspace.xml
