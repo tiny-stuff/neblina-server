@@ -1,4 +1,4 @@
-#include "os/os.h"
+#include "os.h"
 
 #include <signal.h>
 #include <stdio.h>
