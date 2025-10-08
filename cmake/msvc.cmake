@@ -1,6 +1,8 @@
 set(WARNINGS "/W4 /WX /w14445 /w14640 /w14242 /w14263 /w14265")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNINGS} /Ios\\win32 /nologo /MD")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNINGS} /nologo /MD")
+
+set(INCLUDES "${INCLUDES} os\\win32")
 
 add_definitions("/D_CRT_SECURE_NO_WARNINGS /DSTDC_WANT_LIB_EXT2__=1")
 
