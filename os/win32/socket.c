@@ -1,16 +1,18 @@
 #include "socket.h"
 
-void init_socket()
+#include "util/error.h"
+
+void socket_init()
 {
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-        FATAL("WSAStartup() error!");
+        FATAL_NON_RECOVERABLE("WSAStartup() error!");
     DBG("WSAStartup() succeeded");
 }
 
-void finalize_socket()
+void socket_finalize()
 {
-    WSACleanup()
+    WSACleanup();
 }
 
 void close(SOCKET fd)
