@@ -17,9 +17,9 @@ const char* service = "tests";
 static void test_watchdog()
 {
     WatchdogProgram programs[] = {
-            { "error",   "tests/error",          NULL, 0 },
-            { "infloop", "tests/infloop",        NULL, 0 },
-            { "nonrec",  "tests/nonrecoverable", NULL, 0 },
+            { "error",   "./tests-error",          NULL, 0 },
+            { "infloop", "./tests-infloop",        NULL, 0 },
+            { "nonrec",  "./tests-nonrecoverable", NULL, 0 },
     };
     watchdog_init(programs, sizeof programs / sizeof programs[0]);
 

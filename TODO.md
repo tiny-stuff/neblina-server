@@ -6,6 +6,7 @@
 - [ ] Improve OS independence
   - [x] Migrate to CMake
   - [x] Improve OS separation of concerns (posix by default)
+  - [ ] Tests
 - [ ] Code review
   - [ ] Create class creator
     - [ ] Adjust classes
@@ -16,6 +17,7 @@
   - [ ] init/create pattern
   - [ ] Proper error handling
   - [ ] Fix all warnings
+  - [ ] Github actions to build/test in all envs
 - [ ] Multithreaded connection pool
 - [ ] SSL server + SParrot
 - [ ] Process config file
