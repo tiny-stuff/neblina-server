@@ -1,4 +1,4 @@
-foreach (TARGET ${SPECIAL_TARGETS})
+foreach (TARGET ${FINAL_TARGETS})
 
     add_custom_target(
             ${TARGET}-leaks

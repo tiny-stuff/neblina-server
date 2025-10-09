@@ -72,5 +72,14 @@ add_executable(${PROJECT_NAME}-tests EXCLUDE_FROM_ALL tests/tests.c ${SRC_FILES}
 add_dependencies(${PROJECT_NAME}-tests tests-infloop tests-error tests-nonrecoverable)
 
 # add special targets
-set(SPECIAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests parrot-test)
+set(FINAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests parrot-test)
 include(cmake/special-targets.cmake)
+
+# strip executables
+foreach (TARGET ${FINAL_TARGETS})
+    if (NOT MSVC)
+        add_custom_command(TARGET ${TARGET} POST_BUILD
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${TARGET}>
+        )
+    endif ()
+endforeach ()
