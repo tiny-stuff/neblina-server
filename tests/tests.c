@@ -91,13 +91,13 @@ static void test_connection()
     commbuf_add_to_recv_buffer(conn, (uint8_t const*) "Hello\nWorld\ntest", 16);
     sz = commbuf_extract_line_from_recv_buffer(conn, &data3, "\n");
     assert(sz == 6);
-    assert(memcmp(data2, (uint8_t const*) "Hello\n", sz) == 0);
-    free(data2);
+    assert(memcmp(data3, (uint8_t const*) "Hello\n", sz) == 0);
+    free(data3);
 
     sz = commbuf_extract_line_from_recv_buffer(conn, &data3, "\n");
     assert(sz == 6);
-    assert(memcmp(data2, (uint8_t const*) "World\n", sz) == 0);
-    free(data2);
+    assert(memcmp(data3, (uint8_t const*) "World\n", sz) == 0);
+    free(data3);
 
     sz = commbuf_extract_line_from_recv_buffer(conn, &data3, "\n");
     assert(sz == 0);
