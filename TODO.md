@@ -3,6 +3,7 @@
 - [x] Rename project
 - [x] Orchestrator
 - [x] TCP server + Line by Line + Parrot
+- [x] Multithreaded connection pool
 - [x] Improve OS independence
   - [x] Migrate to CMake
   - [x] Improve OS separation of concerns (posix by default)
@@ -10,11 +11,11 @@
 - [ ] Code review
   - [x] Fix all warnings
   - [x] Move CommunicationBuffer inside Session (as ConnectionBuffer)
+  - [x] Document stuff
   - [ ] Create class creator
   - [ ] Proper error handling
   - [ ] Additional tests (for parrot)
   - [ ] Github actions to build/test in all envs
-- [ ] Multithreaded connection pool
 - [ ] SSL server + SParrot
 - [ ] Process config file
 - [ ] Multithreading
