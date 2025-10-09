@@ -1,4 +1,4 @@
-set(WARNINGS "-Wall -Wextra -Wpedantic -Wbad-function-cast \ -Wcast-align -Wcast-qual \
+set(WARNINGS "-Wno-unknown-warning -Wall -Wextra -Wpedantic -Wbad-function-cast -Wcast-align -Wcast-qual \
     -Wconversion -Wfloat-equal -Wnull-dereference -Wshadow -Wstack-protector -Wswitch-enum \
     -Wundef -Wno-vla -Wno-sign-conversion -Wmissing-field-initializers ${SPECIFIC_WARNINGS}")
 
