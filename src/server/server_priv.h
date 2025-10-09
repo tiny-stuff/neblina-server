@@ -1,9 +1,10 @@
 #ifndef NEBLINA_SERVER_SERVER_PRIV_H
 #define NEBLINA_SERVER_SERVER_PRIV_H
 
+#include <uthash/uthash.h>
+
 #include "server.h"
 #include "poller.h"
-#include "uthash/uthash.h"
 
 typedef struct CPool CPool;
 

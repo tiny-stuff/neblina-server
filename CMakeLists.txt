@@ -11,7 +11,7 @@ project(neblina
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(INCLUDES src src/contrib os)
+set(INCLUDES src os)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -40,7 +40,7 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     include(cmake/common.cmake)
 endif()
 
-include_directories(${INCLUDES})
+include_directories(${INCLUDES} SYSTEM src/contrib)
 
 #-------------------------
 # Determine compilation files

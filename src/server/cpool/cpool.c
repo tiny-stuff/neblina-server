@@ -3,12 +3,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <uthash/uthash.h>
 
 #include "util/error.h"
 
 #include "../server.h"
 #include "os.h"
-#include "uthash/uthash.h"
 #include "util/alloc.h"
 
 typedef struct ThreadContext {
