@@ -4,11 +4,14 @@
 - [x] Orchestrator
 - [x] TCP server + Line by Line + Parrot
 - [ ] Improve OS independence
-  - [ ] Migrate to CMake
-  - [ ] Improve OS separation of concerns (posix by default)
+  - [x] Migrate to CMake
+  - [x] Improve OS separation of concerns (posix by default)
 - [ ] Code review
+  - [ ] Create class creator
+    - [ ] Adjust classes
   - [ ] Additional tests (for parrot)
   - [ ] Better isolation of subsystems?
+    - [ ] Move Connection inside Session (as ConnectionBuffer)
   - [ ] Reorganize header files
   - [ ] init/create pattern
   - [ ] Proper error handling
