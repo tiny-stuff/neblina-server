@@ -19,6 +19,14 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 #-------------------------
+# Libraries
+#------------------------
+
+if(NOT WIN32)
+    find_package(Threads REQUIRED)
+endif ()
+
+#-------------------------
 # Compiler specific code
 #------------------------
 
@@ -75,9 +83,13 @@ add_dependencies(${PROJECT_NAME}-tests tests-infloop tests-error tests-nonrecove
 set(FINAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests parrot-test)
 include(cmake/special-targets.cmake)
 
-# strip executables
+# add common things to all final targets
 foreach (TARGET ${FINAL_TARGETS})
     if (NOT MSVC)
+        # add POSIX libraries
+        target_link_libraries(${TARGET} PRIVATE Threads::Threads)
+
+        # strip executable
         add_custom_command(TARGET ${TARGET} POST_BUILD
                 COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${TARGET}>
         )
