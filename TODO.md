@@ -8,7 +8,7 @@
   - [x] Improve OS separation of concerns (posix by default)
   - [x] Tests
 - [ ] Code review
-  - [ ] Fix all warnings
+  - [x] Fix all warnings
   - [ ] Create class creator
     - [ ] Adjust classes
   - [ ] Additional tests (for parrot)
