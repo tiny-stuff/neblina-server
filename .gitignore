@@ -66,3 +66,4 @@ dkms.conf
 .vs/
 /cmake-build-*
 /.idea/workspace.xml
+/build
