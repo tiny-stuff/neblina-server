@@ -17,7 +17,7 @@ void handle_sigint(int signum)
     (void) signum;
     termination_requested = true;
     DBG("Termination requested");
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
     exit(EXIT_SUCCESS);
 #endif
 }
