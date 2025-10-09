@@ -1,0 +1,12 @@
+name: FreeBSD (with Clang)
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build & Test
+        uses: vmactions/freebsd-vm@v1
+        run: mkdir build && cd build && cmake .. && make neblina && make neblina-tests && ./neblina-tests
