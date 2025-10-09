@@ -97,6 +97,9 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
 
 static SOCKET tcp_accept_new_connection(Server* server)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wanalyzer-fd-leak"
+
     // accept connection
     struct sockaddr_storage remoteaddr; // Client address
     memset(&remoteaddr, 0, sizeof remoteaddr);
@@ -115,6 +118,8 @@ static SOCKET tcp_accept_new_connection(Server* server)
         DBG("New connection from %s:%s as fd %d", hoststr, portstr, client_fd);
 
     return client_fd;
+
+#pragma GCC diagnostic pop
 }
 
 Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_session_cb, size_t n_threads)

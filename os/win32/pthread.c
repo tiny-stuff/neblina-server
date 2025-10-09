@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include "util/alloc.h"
+
 typedef HANDLE pthread_t;
 typedef CRITICAL_SECTION pthread_mutex_t;
 typedef CONDITION_VARIABLE pthread_cond_t;
@@ -28,7 +30,7 @@ int pthread_create(pthread_t* thread, const void* attr,
 {
     (void)attr;
 
-    struct thread_start* t = malloc(sizeof(*t));
+    struct thread_start* t = MALLOC(sizeof(*t));
     if (!t)
         return ENOMEM;
 

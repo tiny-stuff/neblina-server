@@ -9,6 +9,7 @@
 
 #include "util/error.h"
 #include "util/logs.h"
+#include "util/alloc.h"
 
 volatile bool termination_requested = false;
 
@@ -46,7 +47,7 @@ pid_t os_start_service(const char* program, const char** args, size_t args_sz)
         DBG("Command line: %s %s", program, cmd_line);
     }
 
-    char** pargs = calloc(args_sz + 2, sizeof (char *));
+    char** pargs = CALLOC(args_sz + 2, sizeof (char *));
     pargs[0] = (char *) (uintptr_t) program;
     for (size_t i = 0; i < args_sz; ++i)
         pargs[i + 1] = (char *) (uintptr_t) args[i];

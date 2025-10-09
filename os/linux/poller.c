@@ -57,10 +57,11 @@ bool poller_remove_connection(Poller* p, SOCKET fd)
 
 size_t poller_wait(Poller* p, PollerEvent* out_evt, size_t evt_sz, size_t timeout_ms)
 {
-    struct epoll_event events[evt_sz];
+    struct epoll_event* events = CALLOC(evt_sz, sizeof(struct epoll_event));
     int n_events = epoll_wait(p->epoll_fd, events, (int) evt_sz, (int) timeout_ms);
 
     if (n_events < 0) {
+        free(events);
         if (errno == EINTR)
             return 0;
         else
@@ -78,6 +79,8 @@ size_t poller_wait(Poller* p, PollerEvent* out_evt, size_t evt_sz, size_t timeou
             }
         }
     }
+
+    free(events);
 
     return n_events;
 }

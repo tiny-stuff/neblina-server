@@ -9,8 +9,11 @@
 #  define ATTR_PRINTF(a, b)
 #endif
 
-void vnprintf(const char *restrict fmt, va_list ap);
-void vnprintf_error(const char *restrict fmt, va_list ap);
+void vnprintf(const char *restrict fmt, va_list ap) ATTR_PRINTF(1, 0);
+void vnprintf_error(const char *restrict fmt, va_list ap) ATTR_PRINTF(1, 0);
+
+static inline void nprintf(const char *restrict fmt, ...) ATTR_PRINTF(1, 2);
+static inline void nprintf_error(const char *restrict fmt, ...) ATTR_PRINTF(1, 2);
 
 static inline void nprintf(const char *restrict fmt, ...) {
     va_list ap;
