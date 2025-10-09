@@ -1,4 +1,4 @@
-name: C/C++ Build
+name: Linux (with GCC)
 
 on: push
 
@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/mattkretz/cplusplus-ci/gcc15
+      image: ghcr.io/mattkretz/cplusplus-ci/gcc16
 
     steps:
       - uses: actions/checkout@v4
