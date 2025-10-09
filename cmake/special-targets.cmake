@@ -2,7 +2,7 @@ foreach (TARGET ${FINAL_TARGETS})
 
     add_custom_target(
             ${TARGET}-leaks
-            COMMAND valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --suppressions=${CMAKE_SOURCE_DIR}/valgrind.supp ./${TARGET}
+            COMMAND valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes --suppressions=${CMAKE_SOURCE_DIR}/valgrind.supp ./${TARGET}
             DEPENDS ${TARGET}
             COMMENT Checking leaks on ${TARGET}...
             VERBATIM
