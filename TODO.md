@@ -3,11 +3,12 @@
 - [x] Rename project
 - [x] Orchestrator
 - [x] TCP server + Line by Line + Parrot
-- [ ] Improve OS independence
+- [x] Improve OS independence
   - [x] Migrate to CMake
   - [x] Improve OS separation of concerns (posix by default)
-  - [ ] Tests
+  - [x] Tests
 - [ ] Code review
+  - [ ] Fix all warnings
   - [ ] Create class creator
     - [ ] Adjust classes
   - [ ] Additional tests (for parrot)
@@ -16,7 +17,6 @@
   - [ ] Reorganize header files
   - [ ] init/create pattern
   - [ ] Proper error handling
-  - [ ] Fix all warnings
   - [ ] Github actions to build/test in all envs
 - [ ] Multithreaded connection pool
 - [ ] SSL server + SParrot
