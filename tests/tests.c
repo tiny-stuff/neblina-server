@@ -56,55 +56,53 @@ static void test_watchdog()
 
 static void test_connection()
 {
-    CommunicationBuffer* conn = connection_create(8, NULL);
+    CommunicationBuffer* conn = commbuf_create();
 
     // send buffer
 
-    connection_add_to_send_buffer(conn, (uint8_t const*) "Hello", 5);
-    connection_add_to_send_buffer(conn, (uint8_t const*) "World", 5);
-
-    assert(connection_socket_fd(conn) == 8);
+    commbuf_add_to_send_buffer(conn, (uint8_t const*) "Hello", 5);
+    commbuf_add_to_send_buffer(conn, (uint8_t const*) "World", 5);
 
     size_t sz;
-    uint8_t const* data = connection_send_buffer(conn, &sz);
+    uint8_t const* data = commbuf_send_buffer(conn, &sz);
     assert(sz == 10);
     assert(memcmp(data, "HelloWorld", sz) == 0);
 
-    connection_clear_send_buffer(conn);
+    commbuf_clear_send_buffer(conn);
 
-    connection_send_buffer(conn, &sz);
+    commbuf_send_buffer(conn, &sz);
     assert(sz == 0);
 
-    connection_add_to_send_buffer(conn, (uint8_t const*) "Hello", 5);
-    data = connection_send_buffer(conn, &sz);
+    commbuf_add_to_send_buffer(conn, (uint8_t const*) "Hello", 5);
+    data = commbuf_send_buffer(conn, &sz);
     assert(sz == 5);
     assert(memcmp(data, "Hello", sz) == 0);
 
     // recv buffer
 
-    connection_add_to_recv_buffer(conn, (uint8_t const*) "Hello", 5);
+    commbuf_add_to_recv_buffer(conn, (uint8_t const*) "Hello", 5);
     uint8_t* data2;
-    sz = connection_extract_from_recv_buffer(conn, &data2);
+    sz = commbuf_extract_from_recv_buffer(conn, &data2);
     assert(sz == 5);
     assert(memcmp(data2, (uint8_t const*) "Hello", sz) == 0);
     free(data2);
 
     char* data3;
-    connection_add_to_recv_buffer(conn, (uint8_t const*) "Hello\nWorld\ntest", 16);
-    sz = connection_extract_line_from_recv_buffer(conn, &data3, "\n");
+    commbuf_add_to_recv_buffer(conn, (uint8_t const*) "Hello\nWorld\ntest", 16);
+    sz = commbuf_extract_line_from_recv_buffer(conn, &data3, "\n");
     assert(sz == 6);
     assert(memcmp(data2, (uint8_t const*) "Hello\n", sz) == 0);
     free(data2);
 
-    sz = connection_extract_line_from_recv_buffer(conn, &data3, "\n");
+    sz = commbuf_extract_line_from_recv_buffer(conn, &data3, "\n");
     assert(sz == 6);
     assert(memcmp(data2, (uint8_t const*) "World\n", sz) == 0);
     free(data2);
 
-    sz = connection_extract_line_from_recv_buffer(conn, &data3, "\n");
+    sz = commbuf_extract_line_from_recv_buffer(conn, &data3, "\n");
     assert(sz == 0);
 
-    connection_destroy(conn);
+    commbuf_destroy(conn);
 }
 
 //
@@ -117,8 +115,8 @@ int main()
 
     test_watchdog();
     test_connection();
-    // test_connection_pool(SINGLE_THREADED);
-    // test_connection_pool(3);
+    // test_commbuf_pool(SINGLE_THREADED);
+    // test_commbuf_pool(3);
 
     printf("\x1b[0;32mTests successful!\x1b[0m\n");
 }
