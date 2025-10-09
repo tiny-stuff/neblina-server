@@ -86,7 +86,7 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
     if (p == NULL)
         FATAL("%s failed to bind: %s", ERR_PRX, strerror(errno));
 
-    if (listen(listener, 10) == SOCKET_ERROR)
+    if (listen(listener, SOMAXCONN) == SOCKET_ERROR)
         FATAL("%s listen error: %s", ERR_PRX, strerror(errno));
 
     LOG("listening in port %d", port);

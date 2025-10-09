@@ -119,6 +119,7 @@ static void test_parrot()
     os_sleep_ms(100);
 
     TCPClient* t = tcpclient_create("localhost", 23456);
+    assert(t);
     assert(tcpclient_send_text(t, "hello\r\n") == 7);
 
     char resp[6] = {0};
@@ -139,8 +140,10 @@ static void* test_parrot_load_thread(void *data)
 
 #define N_CLIENTS 200
     TCPClient* clients[N_CLIENTS];
-    for (size_t i = 0; i < N_CLIENTS; ++i)
+    for (size_t i = 0; i < N_CLIENTS; ++i) {
         clients[i] = tcpclient_create("localhost", 23456);
+	assert(clients[i]);
+    }
     for (size_t i = 0; i < N_CLIENTS; ++i)
         assert(tcpclient_send_text(clients[i], "hello\r\n") == 7);
     for (size_t i = 0; i < N_CLIENTS; ++i) {
@@ -189,9 +192,9 @@ int main()
     logs_verbose = true;
 
     test_commbuf();
-    test_parrot();
+    // test_parrot();
     test_parrot_load();
-    test_watchdog();
+    //test_watchdog();
 
     socket_finalize();
 

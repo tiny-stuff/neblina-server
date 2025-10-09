@@ -58,6 +58,7 @@ static SOCKET open_connection_(const char* host, int port)
         DBG("client: attempting connection to %s:%s", address, sport);
 
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+	    ERR("connect() to %s:%s failed: %s", address, sport, strerror(errno));
             close(sockfd);
             continue;
         }
