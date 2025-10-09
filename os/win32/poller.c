@@ -8,6 +8,7 @@
 
 #include "util/error.h"
 #include "util/logs.h"
+#include "util/alloc.h"
 
 typedef struct Poller {
     SOCKET fs_socket;
@@ -18,7 +19,7 @@ typedef struct Poller {
 
 Poller* poller_create(SOCKET fd_listener)
 {
-	Poller* p = (Poller*)malloc(sizeof(Poller));
+	Poller* p = (Poller*)MALLOC(sizeof(Poller));
     p->fs_socket = fd_listener;
 
     p->poll_count = 0;
@@ -31,6 +32,7 @@ Poller* poller_create(SOCKET fd_listener)
 
 void poller_destroy(Poller* p)
 {
+    closesocket(p->fs_socket);
     free(p);
 }
 

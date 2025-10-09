@@ -5,6 +5,7 @@
 #include <sys/epoll.h>
 
 #include "util/error.h"
+#include "util/alloc.h"
 
 typedef struct Poller {
     int epoll_fd;
@@ -13,7 +14,7 @@ typedef struct Poller {
 
 Poller* poller_create(int fd_listener)
 {
-    Poller* p = calloc(1, sizeof(Poller));
+    Poller* p = CALLOC(1, sizeof(Poller));
 
     p->epoll_fd = epoll_create1(0); // 0 for default flags
     if (p->epoll_fd < -1)
@@ -32,6 +33,7 @@ Poller* poller_create(int fd_listener)
 
 void poller_destroy(Poller* p)
 {
+    close(p->epoll_fd);
     free(p);
 }
 

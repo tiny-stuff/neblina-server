@@ -8,6 +8,7 @@
 
 #include "util/logs.h"
 #include "util/error.h"
+#include "util/alloc.h"
 
 typedef struct Poller {
     int kqueue_fd;
@@ -16,7 +17,7 @@ typedef struct Poller {
 
 Poller* poller_create(SOCKET fd_listener)
 {
-    Poller* p = calloc(1, sizeof(Poller));
+    Poller* p = CALLOC(1, sizeof(Poller));
 
     p->kqueue_fd = kqueue();
     if (p->kqueue_fd < -1)
@@ -34,6 +35,7 @@ Poller* poller_create(SOCKET fd_listener)
 
 void poller_destroy(Poller* p)
 {
+    close(p->kqueue_fd);
     free(p);
 }
 
