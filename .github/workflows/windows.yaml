@@ -12,4 +12,4 @@ jobs:
         with:
           arch: x64
       - name: Run
-        run: build.bat
+        run: dir
