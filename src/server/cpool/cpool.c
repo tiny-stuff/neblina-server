@@ -12,29 +12,29 @@
 #include "util/alloc.h"
 
 typedef struct ThreadContext {
-    struct CPool*   cpool;
+    struct SPool*   cpool;
     size_t          thread_n;
     pthread_mutex_t mutex;
     pthread_cond_t  cond;
     bool            should_wake;
 } ThreadContext;
 
-typedef struct ConnectionThread {
-    Connection*    connection;
+typedef struct SessionThread {
+    Session*       session;
     size_t         thread_n;
     bool           ready;
     UT_hash_handle hh;
-} ConnectionThread;
+} SessionThread;
 
-typedef struct CPool {
+typedef struct SPool {
     Server*           server;
     size_t            n_threads;
     pthread_t*        threads;
     bool*             thread_running;
     ThreadContext*    ctx;
-    ConnectionThread* connection_thread_map;
-    pthread_mutex_t   connection_threads_mutex;
-} CPool;
+    SessionThread*    session_thread_map;
+    pthread_mutex_t   session_threads_mutex;
+} SPool;
 
 
 static void* thread_function(void* arg)
@@ -50,33 +50,33 @@ static void* thread_function(void* arg)
         ctx->should_wake = false;
         pthread_mutex_unlock(&ctx->mutex);
 
-        // make a list of connections that are ready for work
-        Connection** connections = NULL;
-        size_t connections_sz = 0;
-        pthread_mutex_lock(&ctx->cpool->connection_threads_mutex);
-        for (ConnectionThread* conn_th = ctx->cpool->connection_thread_map; conn_th != NULL; conn_th = conn_th->hh.next) {
-            if (conn_th->ready && conn_th->thread_n == ctx->thread_n) {
-                ++connections_sz;
-                connections = REALLOC(connections, connections_sz * sizeof(Connection *));
-                connections[connections_sz - 1] = conn_th->connection;
-                conn_th->ready = false;
+        // make a list of sessions that are ready for work
+        Session** sessions = NULL;
+        size_t sessions_sz = 0;
+        pthread_mutex_lock(&ctx->cpool->session_threads_mutex);
+        for (SessionThread* session_th = ctx->cpool->session_thread_map; session_th != NULL; session_th = session_th->hh.next) {
+            if (session_th->ready && session_th->thread_n == ctx->thread_n) {
+                ++sessions_sz;
+                sessions = REALLOC(sessions, sessions_sz * sizeof(Session *));
+                sessions[sessions_sz - 1] = session_th->session;
+                session_th->ready = false;
             }
         }
-        pthread_mutex_unlock(&ctx->cpool->connection_threads_mutex);
+        pthread_mutex_unlock(&ctx->cpool->session_threads_mutex);
 
         // do the work
-        for (size_t i = 0; i < connections_sz; ++i)
-            server_flush_connection(ctx->cpool->server, connections[i]);
+        for (size_t i = 0; i < sessions_sz; ++i)
+            server_process_session(ctx->cpool->server, sessions[i]);
 
-        free(connections);
+        free(sessions);
     }
 
     return NULL;
 }
 
-CPool* cpool_create(size_t n_threads, Server* server)
+SPool* spool_create(size_t n_threads, Server* server)
 {
-    CPool* cpool = CALLOC(1, sizeof(CPool));
+    SPool* cpool = CALLOC(1, sizeof(SPool));
     cpool->server = server;
 
     // create threads
@@ -86,8 +86,8 @@ CPool* cpool_create(size_t n_threads, Server* server)
         cpool->thread_running = CALLOC(n_threads, sizeof cpool->thread_running[0]);
         cpool->threads = CALLOC(n_threads, sizeof cpool->threads[0]);
         cpool->ctx = CALLOC(n_threads, sizeof cpool->ctx[0]);
-        cpool->connection_thread_map = NULL;
-        pthread_mutex_init(&cpool->connection_threads_mutex, NULL);
+        cpool->session_thread_map = NULL;
+        pthread_mutex_init(&cpool->session_threads_mutex, NULL);
 
         for (size_t i = 0; i < n_threads; ++i) {
             cpool->thread_running[i] = true;
@@ -103,19 +103,19 @@ CPool* cpool_create(size_t n_threads, Server* server)
     return cpool;
 }
 
-void cpool_destroy(CPool* cpool)
+void spool_destroy(SPool* cpool)
 {
     if (cpool->n_threads != SINGLE_THREADED) {
 
         // end threads
-        pthread_mutex_lock(&cpool->connection_threads_mutex);
+        pthread_mutex_lock(&cpool->session_threads_mutex);
         for (size_t i = 0; i < cpool->n_threads; ++i) {
             pthread_mutex_lock(&cpool->ctx[i].mutex);
             cpool->thread_running[i] = false;
             cpool->ctx[i].should_wake = true;
             pthread_mutex_unlock(&cpool->ctx[i].mutex);
         }
-        pthread_mutex_unlock(&cpool->connection_threads_mutex);
+        pthread_mutex_unlock(&cpool->session_threads_mutex);
 
         for (size_t i = 0; i < cpool->n_threads; ++i) {
             pthread_mutex_lock(&cpool->ctx[i].mutex);
@@ -127,7 +127,7 @@ void cpool_destroy(CPool* cpool)
             DBG("Thread %zu finalized", i);
         }
 
-        pthread_mutex_destroy(&cpool->connection_threads_mutex);
+        pthread_mutex_destroy(&cpool->session_threads_mutex);
 
         // cleanup
         free(cpool->threads);
@@ -138,11 +138,11 @@ void cpool_destroy(CPool* cpool)
     free(cpool);
 }
 
-size_t cpool_least_populated_thread(CPool* cpool)
+size_t cpool_least_populated_thread(SPool* cpool)
 {
     size_t* count_per_thread = CALLOC(cpool->n_threads, sizeof(size_t));
 
-    for (ConnectionThread* conn_th = cpool->connection_thread_map; conn_th != NULL; conn_th = conn_th->hh.next)
+    for (SessionThread* conn_th = cpool->session_thread_map; conn_th != NULL; conn_th = conn_th->hh.next)
         ++count_per_thread[conn_th->thread_n];
 
     size_t min_sz = SIZE_MAX, min_thread = 0;
@@ -158,56 +158,52 @@ size_t cpool_least_populated_thread(CPool* cpool)
     return min_thread;
 }
 
-void cpool_add_connection(CPool* cpool, Connection* connection)
+void spool_add_session(SPool* cpool, Session* session)
 {
-    (void) connection;
-
     if (cpool->n_threads != SINGLE_THREADED) {
         // find least populated thread
         size_t thread_n = cpool_least_populated_thread(cpool);
 
-        // add connection to thread
-        ConnectionThread* ct = MALLOC(sizeof *ct);
+        // add session to thread
+        SessionThread* ct = MALLOC(sizeof *ct);
         ct->thread_n = thread_n;
-        ct->connection = connection;
+        ct->session = session;
         ct->ready = false;
-        pthread_mutex_lock(&cpool->connection_threads_mutex);
-        HASH_ADD_PTR(cpool->connection_thread_map, connection, ct);
-        pthread_mutex_unlock(&cpool->connection_threads_mutex);
+        pthread_mutex_lock(&cpool->session_threads_mutex);
+        HASH_ADD_PTR(cpool->session_thread_map, session, ct);
+        pthread_mutex_unlock(&cpool->session_threads_mutex);
 
-        DBG("New connection added to thread %zu", thread_n);
+        DBG("New session added to thread %zu", thread_n);
     }
 }
 
-void cpool_remove_connection(CPool* cpool, Connection* connection)
+void spool_remove_session(SPool* cpool, Session* session)
 {
-    (void) connection;
-
     if (cpool->n_threads != SINGLE_THREADED) {
-        pthread_mutex_lock(&cpool->connection_threads_mutex);
-        ConnectionThread* ct;
-        HASH_FIND_PTR(cpool->connection_thread_map, &connection, ct);
-        if (ct) {
-            size_t thread_n = ct->thread_n;
+        pthread_mutex_lock(&cpool->session_threads_mutex);
+        SessionThread* st;
+        HASH_FIND_PTR(cpool->session_thread_map, &session, st);
+        if (st) {
+            size_t thread_n = st->thread_n;
             pthread_mutex_lock(&cpool->ctx[thread_n].mutex);
-            DBG("Connection removed from thread %zu", ct->thread_n);
-            HASH_DEL(cpool->connection_thread_map, ct);
-            free(ct);
+            DBG("Session removed from thread %zu", st->thread_n);
+            HASH_DEL(cpool->session_thread_map, st);
+            free(st);
             pthread_mutex_unlock(&cpool->ctx[thread_n].mutex);
         }
-        pthread_mutex_unlock(&cpool->connection_threads_mutex);
+        pthread_mutex_unlock(&cpool->session_threads_mutex);
     }
 }
 
-void cpool_flush_connection(CPool* cpool, Connection* connection)
+void spool_flush_session(SPool* cpool, Session* session)
 {
     if (cpool->n_threads != SINGLE_THREADED) {
-        ConnectionThread* ct;
-        HASH_FIND_PTR(cpool->connection_thread_map, &connection, ct);
+        SessionThread* ct;
+        HASH_FIND_PTR(cpool->session_thread_map, &session, ct);
         if (ct) {
-            pthread_mutex_lock(&cpool->connection_threads_mutex);
+            pthread_mutex_lock(&cpool->session_threads_mutex);
             ct->ready = true;
-            pthread_mutex_unlock(&cpool->connection_threads_mutex);
+            pthread_mutex_unlock(&cpool->session_threads_mutex);
 
             pthread_mutex_lock(&cpool->ctx[ct->thread_n].mutex);
             cpool->ctx[ct->thread_n].should_wake = true;
@@ -215,6 +211,6 @@ void cpool_flush_connection(CPool* cpool, Connection* connection)
             pthread_mutex_unlock(&cpool->ctx[ct->thread_n].mutex);
         }
     } else {
-        server_flush_connection(cpool->server, connection);
+        server_process_session(cpool->server, session);
     }
 }

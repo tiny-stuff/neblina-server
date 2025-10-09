@@ -6,11 +6,11 @@
 #include "server.h"
 #include "poller.h"
 
-typedef struct CPool CPool;
+typedef struct SPool SPool;
 
 typedef struct ConnectionMap {
     SOCKET         fd;
-    Connection*    connection;
+    Session*       session;
     UT_hash_handle hh;
 } ConnectionHash;
 
@@ -28,7 +28,7 @@ typedef struct Server {
     SOCKET              fd;
     CreateSessionF      create_session_cb;
     void*               session_data;
-    CPool*              cpool;
+    SPool*              cpool;
     Poller*             poller;
     ConnectionHash*     connection_hash;
 } Server;

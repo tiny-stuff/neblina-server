@@ -26,12 +26,12 @@ static int parrot_on_recv(Session* session, Connection* c)
     return 0;
 }
 
-static Session* parrot_session_create(void* data)
+static Session* parrot_session_create(SOCKET fd, void* data)
 {
     (void) data;
 
     ParrotSession* psession = calloc(1, sizeof(ParrotSession));
-    session_init(&psession->session, parrot_on_recv, NULL);
+    session_init(&psession->session, fd, parrot_on_recv, NULL);
     return (Session *) psession;
 }
 

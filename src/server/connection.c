@@ -8,18 +8,16 @@
 
 typedef struct Connection {
     SOCKET   fd;
-    Session* session;
     uint8_t* recv_buf;
     size_t   recv_buf_sz;
     uint8_t* send_buf;
     size_t   send_buf_sz;
 } Connection;
 
-Connection* connection_create(SOCKET fd, Session* session)
+Connection* connection_create(SOCKET fd)
 {
     Connection* c = CALLOC(1, sizeof(Connection));
     c->fd = fd;
-    c->session = session;
     return c;
 }
 
@@ -66,11 +64,6 @@ void connection_clear_recv_buffer(Connection* c)
 SOCKET connection_socket_fd(Connection const* c)
 {
     return c->fd;
-}
-
-Session* connection_session(Connection* c)
-{
-    return c->session;
 }
 
 uint8_t const* connection_recv_buffer(Connection const* c, size_t* data_sz)

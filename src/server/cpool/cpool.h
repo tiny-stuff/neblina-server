@@ -5,19 +5,19 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef struct CPool CPool;
+typedef struct SPool SPool;
 typedef struct Server Server;
-typedef struct Connection Connection;
+typedef struct Session Session;
 
 // This is a thread pool that receives tasks, put the tasks in a queue, and then process them.
 // There's a lock number which prevents two tasks with the same lock number to be executed at the same time.
 
-CPool* cpool_create(size_t n_threads, Server* server);
-void cpool_destroy(CPool* cpool);
+SPool* spool_create(size_t n_threads, Server* server);
+void spool_destroy(SPool* cpool);
 
-void cpool_add_connection(CPool* cpool, Connection* connection);
-void cpool_remove_connection(CPool* cpool, Connection* connection);
+void spool_add_session(SPool* cpool, Session* session);
+void spool_remove_session(SPool* cpool, Session* session);
 
-void cpool_flush_connection(CPool* cpool, Connection* connection);
+void spool_flush_session(SPool* cpool, Session* session);
 
 #endif //NEBLINA_SERVER_CPOOL_H
