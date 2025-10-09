@@ -9,14 +9,10 @@
   - [x] Tests
 - [ ] Code review
   - [x] Fix all warnings
+  - [ ] Move Connection inside Session (as ConnectionBuffer)
   - [ ] Create class creator
-    - [ ] Adjust classes
-  - [ ] Additional tests (for parrot)
-  - [ ] Better isolation of subsystems?
-    - [ ] Move Connection inside Session (as ConnectionBuffer)
-  - [ ] Reorganize header files
-  - [ ] init/create pattern
   - [ ] Proper error handling
+  - [ ] Additional tests (for parrot)
   - [ ] Github actions to build/test in all envs
 - [ ] Multithreaded connection pool
 - [ ] SSL server + SParrot
