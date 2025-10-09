@@ -13,10 +13,10 @@
   - [x] Move CommunicationBuffer inside Session (as ConnectionBuffer)
   - [x] Document stuff
   - [x] Proper error handling
-  - [ ] Additional tests (for parrot)
-    - [ ] Create TCPClient (?)
   - [ ] Github actions to build/test in all envs
   - [ ] Create class creator
+  - [ ] Additional tests (for parrot)
+    - [ ] Create TCPClient (?)
 - [ ] SSL server + SParrot
 - [ ] Process config file
 - [ ] Multithreading

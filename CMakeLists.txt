@@ -92,8 +92,10 @@ foreach (TARGET ${FINAL_TARGETS})
         target_link_libraries(${TARGET} PRIVATE Threads::Threads)
 
         # strip executable
-        add_custom_command(TARGET ${TARGET} POST_BUILD
-                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${TARGET}>
-        )
+        if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+            add_custom_command(TARGET ${TARGET} POST_BUILD
+                    COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${TARGET}>
+            )
+        endif ()
     endif ()
 endforeach ()
