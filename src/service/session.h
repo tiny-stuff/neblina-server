@@ -4,9 +4,9 @@
 #include "socket.h"
 
 typedef struct Session Session;
-typedef struct Connection Connection;
+typedef struct CommunicationBuffer CommunicationBuffer;
 
-typedef int(*SessionOnRecv)(Session* session, Connection* connection);
+typedef int(*SessionOnRecv)(Session* session, CommunicationBuffer* connection);
 typedef void(*SessionFinalize)(Session* session);
 
 typedef struct SessionVTable {
@@ -16,7 +16,8 @@ typedef struct SessionVTable {
 
 typedef struct Session {
     SessionVTable vt;
-    Connection*   connection;
+    SOCKET        fd;
+    CommunicationBuffer*   connection;
 } Session;
 
 void session_init(Session* session, SOCKET fd, SessionOnRecv on_recv, SessionFinalize finalize);

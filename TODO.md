@@ -9,7 +9,7 @@
   - [x] Tests
 - [ ] Code review
   - [x] Fix all warnings
-  - [ ] Move Connection inside Session (as ConnectionBuffer)
+  - [x] Move CommunicationBuffer inside Session (as ConnectionBuffer)
   - [ ] Create class creator
   - [ ] Proper error handling
   - [ ] Additional tests (for parrot)
@@ -63,7 +63,7 @@
 
 - [ ] Require Host request (otherwise 400)
 - [ ] Automatic error according to request type
-- [ ] Persistent connections (check Connection header)
+- [ ] Persistent connections (check CommunicationBuffer header)
 - [ ] Transfer encoding: gzip, deflate
 - [ ] Redirects
 - [ ] Conditional requests: If-None-Match, ETag

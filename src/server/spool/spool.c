@@ -1,4 +1,4 @@
-#include "cpool.h"
+#include "spool.h"
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -12,7 +12,7 @@
 #include "util/alloc.h"
 
 typedef struct ThreadContext {
-    struct SPool*   cpool;
+    struct SessionPool*   cpool;
     size_t          thread_n;
     pthread_mutex_t mutex;
     pthread_cond_t  cond;
@@ -26,7 +26,7 @@ typedef struct SessionThread {
     UT_hash_handle hh;
 } SessionThread;
 
-typedef struct SPool {
+typedef struct SessionPool {
     Server*           server;
     size_t            n_threads;
     pthread_t*        threads;
@@ -34,7 +34,7 @@ typedef struct SPool {
     ThreadContext*    ctx;
     SessionThread*    session_thread_map;
     pthread_mutex_t   session_threads_mutex;
-} SPool;
+} SessionPool;
 
 
 static void* thread_function(void* arg)
@@ -74,9 +74,9 @@ static void* thread_function(void* arg)
     return NULL;
 }
 
-SPool* spool_create(size_t n_threads, Server* server)
+SessionPool* spool_create(size_t n_threads, Server* server)
 {
-    SPool* cpool = CALLOC(1, sizeof(SPool));
+    SessionPool* cpool = CALLOC(1, sizeof(SessionPool));
     cpool->server = server;
 
     // create threads
@@ -103,7 +103,7 @@ SPool* spool_create(size_t n_threads, Server* server)
     return cpool;
 }
 
-void spool_destroy(SPool* cpool)
+void spool_destroy(SessionPool* cpool)
 {
     if (cpool->n_threads != SINGLE_THREADED) {
 
@@ -138,7 +138,7 @@ void spool_destroy(SPool* cpool)
     free(cpool);
 }
 
-size_t cpool_least_populated_thread(SPool* cpool)
+size_t cpool_least_populated_thread(SessionPool* cpool)
 {
     size_t* count_per_thread = CALLOC(cpool->n_threads, sizeof(size_t));
 
@@ -158,7 +158,7 @@ size_t cpool_least_populated_thread(SPool* cpool)
     return min_thread;
 }
 
-void spool_add_session(SPool* cpool, Session* session)
+void spool_add_session(SessionPool* cpool, Session* session)
 {
     if (cpool->n_threads != SINGLE_THREADED) {
         // find least populated thread
@@ -177,7 +177,7 @@ void spool_add_session(SPool* cpool, Session* session)
     }
 }
 
-void spool_remove_session(SPool* cpool, Session* session)
+void spool_remove_session(SessionPool* cpool, Session* session)
 {
     if (cpool->n_threads != SINGLE_THREADED) {
         pthread_mutex_lock(&cpool->session_threads_mutex);
@@ -195,7 +195,7 @@ void spool_remove_session(SPool* cpool, Session* session)
     }
 }
 
-void spool_flush_session(SPool* cpool, Session* session)
+void spool_flush_session(SessionPool* cpool, Session* session)
 {
     if (cpool->n_threads != SINGLE_THREADED) {
         SessionThread* ct;

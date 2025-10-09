@@ -6,13 +6,13 @@
 #include "server.h"
 #include "poller.h"
 
-typedef struct SPool SPool;
+typedef struct SessionPool SessionPool;
 
-typedef struct ConnectionMap {
+typedef struct SessionHash {
     SOCKET         fd;
     Session*       session;
     UT_hash_handle hh;
-} ConnectionHash;
+} SessionHash;
 
 typedef struct ServerVTable {
     void   (*free)(Server* server);
@@ -28,9 +28,9 @@ typedef struct Server {
     SOCKET              fd;
     CreateSessionF      create_session_cb;
     void*               session_data;
-    SPool*              cpool;
+    SessionPool*        spool;
     Poller*             poller;
-    ConnectionHash*     connection_hash;
+    SessionHash*        session_hash;
 } Server;
 
 #endif //NEBLINA_SERVER_SERVER_PRIV_H

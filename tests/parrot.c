@@ -13,13 +13,13 @@ typedef struct ParrotSession {
     Session session;
 } ParrotSession;
 
-static int parrot_on_recv(Session* session, Connection* c)
+static int parrot_on_recv(Session* session, CommunicationBuffer* c)
 {
     (void) session;
 
     char* line;
-    while ((connection_extract_line_from_recv_buffer(c, &line, "\r\n"))) {
-        connection_add_text_to_send_buffer(c, line);
+    while ((commbuf_extract_line_from_recv_buffer(c, &line, "\r\n"))) {
+        commbuf_add_text_to_send_buffer(c, line);
         free(line);
     }
 

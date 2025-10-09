@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "connection.h"
+#include "commbuf.h"
 
 #define RECV_BUF_SZ (16 * 1024)
 

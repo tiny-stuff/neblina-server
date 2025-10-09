@@ -2,13 +2,14 @@
 
 #include <stdlib.h>
 
-#include "../server/connection.h"
+#include "../server/commbuf.h"
 
 void session_init(Session* session, SOCKET fd, SessionOnRecv on_recv, SessionFinalize finalize)
 {
-    session->connection = connection_create(fd);
     session->vt.on_recv = on_recv;
     session->vt.finalize = finalize;
+    session->connection = commbuf_create();
+    session->fd = fd;
 }
 
 int session_on_recv(Session* session)
@@ -18,7 +19,7 @@ int session_on_recv(Session* session)
 
 void session_finalize(Session* session)
 {
-    connection_destroy(session->connection);
+    commbuf_destroy(session->connection);
     if (session->vt.finalize)
         session->vt.finalize(session);
 }

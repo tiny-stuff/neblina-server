@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "connection.h"
+#include "commbuf.h"
 #include "service/session.h"
-#include "cpool/cpool.h"
+#include "spool/spool.h"
 #include "util/logs.h"
 #include "util/alloc.h"
 
@@ -18,32 +18,32 @@ void server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, vo
 {
     server->create_session_cb = create_session_cb;
     server->session_data = session_data;
-    server->cpool = spool_create(n_threads, server);
+    server->spool = spool_create(n_threads, server);
     server->fd = fd;
     server->poller = poller_create(fd);
-    server->connection_hash = NULL;
+    server->session_hash = NULL;
 }
 
 int server_process_session(Server* server, Session* session)
 {
     // receive data
     uint8_t* recv_buf;
-    int r = server->vt->recv(connection_socket_fd(session->connection), &recv_buf);
+    int r = server->vt->recv(session->fd, &recv_buf);
     if (r < 0)
         return r;
     if (r > 0) {
-        connection_add_to_recv_buffer(session->connection, recv_buf, r);
+        commbuf_add_to_recv_buffer(session->connection, recv_buf, r);
         session_on_recv(session);  // TODO - check for errors
         free(recv_buf);
     }
 
     // send pending data
     size_t sz;
-    uint8_t const* data_to_send = connection_send_buffer(session->connection, &sz);
-    r = server->vt->send(connection_socket_fd(session->connection), data_to_send, sz);
+    uint8_t const* data_to_send = commbuf_send_buffer(session->connection, &sz);
+    r = server->vt->send(session->fd, data_to_send, sz);
     if (r < 0)
         return r;
-    connection_clear_send_buffer(session->connection);
+    commbuf_clear_send_buffer(session->connection);
 
     return 0;
 }
@@ -57,13 +57,13 @@ static void handle_new_connection(Server* server)
     poller_add_connection(server->poller, client_fd);
 
     // create and add session to hash
-    ConnectionHash* conn_hash = MALLOC(sizeof *conn_hash);
+    SessionHash* conn_hash = MALLOC(sizeof *conn_hash);
     conn_hash->fd = client_fd;
     conn_hash->session = server->create_session_cb(client_fd, server->session_data);
-    HASH_ADD_INT(server->connection_hash, fd, conn_hash);
+    HASH_ADD_INT(server->session_hash, fd, conn_hash);
 
     // add connection to connection pool
-    spool_add_session(server->cpool, conn_hash->session);
+    spool_add_session(server->spool, conn_hash->session);
 }
 
 static void handle_disconnect(Server* server, SOCKET client_fd)
@@ -71,20 +71,20 @@ static void handle_disconnect(Server* server, SOCKET client_fd)
     DBG("Client disconnected from socket %d", client_fd);
 
     // find connection in list
-    ConnectionHash* conn_hash;
-    HASH_FIND_INT(server->connection_hash, &client_fd, conn_hash);
+    SessionHash* conn_hash;
+    HASH_FIND_INT(server->session_hash, &client_fd, conn_hash);
     if (!conn_hash)
         return;
 
     // remove connection from connection pool
-    spool_remove_session(server->cpool, conn_hash->session);
+    spool_remove_session(server->spool, conn_hash->session);
 
     // destroy session
     session_finalize(conn_hash->session);
     free(conn_hash->session);
 
     // remove session from hash, and destroy it
-    HASH_DEL(server->connection_hash, conn_hash);
+    HASH_DEL(server->session_hash, conn_hash);
     free(conn_hash);
 
     // remove socket from poller
@@ -96,12 +96,12 @@ static void handle_disconnect(Server* server, SOCKET client_fd)
 
 static void handle_new_data(Server* server, SOCKET client_fd)
 {
-    ConnectionHash* conn_hash;
-    HASH_FIND_INT(server->connection_hash, &client_fd, conn_hash);
+    SessionHash* conn_hash;
+    HASH_FIND_INT(server->session_hash, &client_fd, conn_hash);
     if (conn_hash == NULL)
         return;
 
-    spool_flush_session(server->cpool, conn_hash->session);
+    spool_flush_session(server->spool, conn_hash->session);
 }
 
 int server_iterate(Server* server, size_t timeout_ms)
@@ -136,14 +136,14 @@ void server_close_socket(SOCKET fd)
 void server_destroy(Server* server)
 {
     // close all connections
-    ConnectionHash *conn_hash, *tmp;
-    HASH_ITER(hh, server->connection_hash, conn_hash, tmp) {
+    SessionHash *conn_hash, *tmp;
+    HASH_ITER(hh, server->session_hash, conn_hash, tmp) {
         handle_disconnect(server, conn_hash->fd);
     }
 
     server_close_socket(server->fd);
     poller_destroy(server->poller);
-    spool_destroy(server->cpool);
+    spool_destroy(server->spool);
     server->vt->free(server);
     DBG("Server destroyed");
 }

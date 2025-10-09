@@ -5,7 +5,7 @@
 
 #include "os/os.h"
 #include "util/logs.h"
-#include "server/connection.h"
+#include "server/commbuf.h"
 #include "watchdog/watchdog.h"
 
 const char* service = "tests";
@@ -56,7 +56,7 @@ static void test_watchdog()
 
 static void test_connection()
 {
-    Connection* conn = connection_create(8, NULL);
+    CommunicationBuffer* conn = connection_create(8, NULL);
 
     // send buffer
 
