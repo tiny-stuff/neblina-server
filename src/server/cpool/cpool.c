@@ -9,6 +9,7 @@
 #include "../server.h"
 #include "os.h"
 #include "uthash/uthash.h"
+#include "util/alloc.h"
 
 typedef struct ThreadContext {
     struct CPool*   cpool;
@@ -56,7 +57,7 @@ static void* thread_function(void* arg)
         for (ConnectionThread* conn_th = ctx->cpool->connection_thread_map; conn_th != NULL; conn_th = conn_th->hh.next) {
             if (conn_th->ready && conn_th->thread_n == ctx->thread_n) {
                 ++connections_sz;
-                connections = realloc(connections, connections_sz * sizeof(Connection *));
+                connections = REALLOC(connections, connections_sz * sizeof(Connection *));
                 connections[connections_sz - 1] = conn_th->connection;
                 conn_th->ready = false;
             }
@@ -75,16 +76,16 @@ static void* thread_function(void* arg)
 
 CPool* cpool_create(size_t n_threads, Server* server)
 {
-    CPool* cpool = calloc(1, sizeof(CPool));
+    CPool* cpool = CALLOC(1, sizeof(CPool));
     cpool->server = server;
 
     // create threads
     cpool->n_threads = n_threads;
     if (n_threads != SINGLE_THREADED) {
 
-        cpool->thread_running = calloc(n_threads, sizeof cpool->thread_running[0]);
-        cpool->threads = calloc(n_threads, sizeof cpool->threads[0]);
-        cpool->ctx = calloc(n_threads, sizeof cpool->ctx[0]);
+        cpool->thread_running = CALLOC(n_threads, sizeof cpool->thread_running[0]);
+        cpool->threads = CALLOC(n_threads, sizeof cpool->threads[0]);
+        cpool->ctx = CALLOC(n_threads, sizeof cpool->ctx[0]);
         cpool->connection_thread_map = NULL;
         pthread_mutex_init(&cpool->connection_threads_mutex, NULL);
 
@@ -139,7 +140,7 @@ void cpool_destroy(CPool* cpool)
 
 size_t cpool_least_populated_thread(CPool* cpool)
 {
-    size_t* count_per_thread = calloc(cpool->n_threads, sizeof(size_t));
+    size_t* count_per_thread = CALLOC(cpool->n_threads, sizeof(size_t));
 
     for (ConnectionThread* conn_th = cpool->connection_thread_map; conn_th != NULL; conn_th = conn_th->hh.next)
         ++count_per_thread[conn_th->thread_n];
@@ -166,7 +167,7 @@ void cpool_add_connection(CPool* cpool, Connection* connection)
         size_t thread_n = cpool_least_populated_thread(cpool);
 
         // add connection to thread
-        ConnectionThread* ct = malloc(sizeof *ct);
+        ConnectionThread* ct = MALLOC(sizeof *ct);
         ct->thread_n = thread_n;
         ct->connection = connection;
         ct->ready = false;

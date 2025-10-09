@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "util/error.h"
+#include "util/alloc.h"
 
 typedef struct Connection {
     SOCKET   fd;
@@ -16,7 +17,7 @@ typedef struct Connection {
 
 Connection* connection_create(int fd, Session* session)
 {
-    Connection* c = calloc(1, sizeof(Connection));
+    Connection* c = CALLOC(1, sizeof(Connection));
     c->fd = fd;
     c->session = session;
     return c;
@@ -31,7 +32,7 @@ void connection_destroy(Connection* c)
 
 void connection_add_to_recv_buffer(Connection* c, uint8_t const* data, size_t data_sz)
 {
-    c->recv_buf = realloc(c->recv_buf, c->recv_buf_sz + data_sz);
+    c->recv_buf = REALLOC(c->recv_buf, c->recv_buf_sz + data_sz);
     if (!c->recv_buf)
         FATAL_NON_RECOVERABLE("Allocation error");
     memcpy(&c->recv_buf[c->recv_buf_sz], data, data_sz);
@@ -40,7 +41,7 @@ void connection_add_to_recv_buffer(Connection* c, uint8_t const* data, size_t da
 
 void connection_add_to_send_buffer(Connection* c, uint8_t const* data, size_t data_sz)
 {
-    c->send_buf = realloc(c->send_buf, c->send_buf_sz + data_sz);
+    c->send_buf = REALLOC(c->send_buf, c->send_buf_sz + data_sz);
     if (!c->send_buf)
     FATAL_NON_RECOVERABLE("Allocation error");
     memcpy(&c->send_buf[c->send_buf_sz], data, data_sz);
@@ -88,7 +89,7 @@ size_t connection_extract_from_recv_buffer(Connection* c, uint8_t** data)
 {
     size_t sz = c->recv_buf_sz;
     if (c->recv_buf_sz > 0) {
-        *data = malloc(c->recv_buf_sz);
+        *data = MALLOC(c->recv_buf_sz);
         memcpy(*data, c->recv_buf, c->recv_buf_sz);
         c->recv_buf_sz = 0;
     }
@@ -113,7 +114,7 @@ size_t connection_extract_line_from_recv_buffer(Connection* c, char** data, cons
 
     // copy string and return
     len_to_return += (int) sep_len;  // include separator
-    *data = calloc(1, len_to_return + 1);
+    *data = CALLOC(1, len_to_return + 1);
     memcpy(*data, c->recv_buf, len_to_return);
     if ((int) c->recv_buf_sz > len_to_return)
         memmove(c->recv_buf, &c->recv_buf[len_to_return], c->recv_buf_sz - len_to_return);

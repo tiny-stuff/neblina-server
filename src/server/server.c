@@ -8,6 +8,7 @@
 #include "service/session.h"
 #include "cpool/cpool.h"
 #include "util/logs.h"
+#include "util/alloc.h"
 
 #define MAX_EVENTS 64
 
@@ -59,7 +60,7 @@ static void handle_new_connection(Server* server)
     Session* session = server->create_session_cb(server->session_data);
 
     // create and add connection to hash
-    ConnectionHash* conn_hash = malloc(sizeof *conn_hash);
+    ConnectionHash* conn_hash = MALLOC(sizeof *conn_hash);
     conn_hash->fd = client_fd;
     conn_hash->connection = connection_create(client_fd, session);
     HASH_ADD_INT(server->connection_hash, fd, conn_hash);

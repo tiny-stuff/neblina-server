@@ -8,12 +8,13 @@
 #include "tcp_server_priv.h"
 #include "util/logs.h"
 #include "socket.h"
+#include "util/alloc.h"
 
 static const char* ERR_PRX = "TCP server error:";
 
 static int tcp_server_recv(SOCKET fd, uint8_t** data)
 {
-    *data = malloc(RECV_BUF_SZ);
+    *data = MALLOC(RECV_BUF_SZ);
     ssize_t r = recv(fd, *data, RECV_BUF_SZ, 0);
     if (r < 0)
         ERR("%s recv error: %s", ERR_PRX, strerror(errno));
@@ -38,7 +39,7 @@ static void tcp_server_free(Server* server)
 
 static SOCKET tcp_server_get_listener(int port, bool open_to_world)
 {
-#define FATAL(...) { ERR(__VA_ARGS__); return -1; }
+#define FATAL(...) { ERR(__VA_ARGS__); if (listener != -1) close(listener); return -1; }
 
     SOCKET listener = -1;
 
@@ -129,7 +130,7 @@ Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_se
 
     SOCKET fd = tcp_server_get_listener(port, open_to_world);
 
-    TCPServer* tcp_server = calloc(1, sizeof(TCPServer));
+    TCPServer* tcp_server = CALLOC(1, sizeof(TCPServer));
     server_init(&tcp_server->server, fd, create_session_cb, NULL, n_threads);
     tcp_server->server.vt = &vtable;
     tcp_server->port = port;
