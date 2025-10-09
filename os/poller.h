@@ -20,7 +20,7 @@ Poller* poller_create(SOCKET fd_listener);
 void    poller_destroy(Poller* p);
 
 size_t  poller_wait(Poller* p, PollerEvent* out_evt, size_t evt_sz, size_t timeout_ms);
-bool    poller_add_connection(Poller* p, SOCKET fd);
-bool    poller_remove_connection(Poller* p, SOCKET fd);
+void    poller_add_connection(Poller* p, SOCKET fd);
+void    poller_remove_connection(Poller* p, SOCKET fd);
 
 #endif //NEBLINA_POLLER_H

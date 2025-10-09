@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include "commbuf.h"
 #include "service/session.h"
@@ -29,29 +30,41 @@ int server_process_session(Server* server, Session* session)
     // receive data
     uint8_t* recv_buf;
     int r = server->vt->recv(session->fd, &recv_buf);
-    if (r < 0)
+    if (r < 0) {
+        ERR("Error receiving data from socket %d: %s", session->fd, strerror(errno));
         return r;
+    }
     if (r > 0) {
         commbuf_add_to_recv_buffer(session->connection, recv_buf, r);
-        session_on_recv(session);  // TODO - check for errors
+        int rr = session_on_recv(session);
         free(recv_buf);
+        if (rr < 0) {
+            ERR("Error on session connected to socket %d: %s (possible description)", session->fd, strerror(errno));
+            close(session->fd);
+        }
     }
 
     // send pending data
     size_t sz;
     uint8_t const* data_to_send = commbuf_send_buffer(session->connection, &sz);
     r = server->vt->send(session->fd, data_to_send, sz);
-    if (r < 0)
+    if (r < 0) {
+        ERR("Error sending data to socket %d: %s", session->fd, strerror(errno));
         return r;
+    }
     commbuf_clear_send_buffer(session->connection);
 
     return 0;
 }
 
-static void handle_new_connection(Server* server)
+static int handle_new_connection(Server* server)
 {
     // accept new connection
     SOCKET client_fd = server->vt->accept_new_connection(server);
+    if (client_fd == INVALID_SOCKET) {
+        ERR("error accepting a new connection: %s", strerror(errno));
+        return -1;
+    }
 
     // add socket to poller (allows polling for new data)
     poller_add_connection(server->poller, client_fd);
@@ -64,6 +77,8 @@ static void handle_new_connection(Server* server)
 
     // add connection to connection pool
     spool_add_session(server->spool, conn_hash->session);
+
+    return 0;
 }
 
 static void handle_disconnect(Server* server, SOCKET client_fd)
@@ -110,9 +125,15 @@ int server_iterate(Server* server, size_t timeout_ms)
     size_t n_events = poller_wait(server->poller, events, MAX_EVENTS, timeout_ms);   // TODO - check for errors
     for (size_t i = 0; i < n_events; ++i) {
         switch (events[i].type) {
-            case PT_NEW_CONNECTION: handle_new_connection(server); break;
-            case PT_NEW_DATA:       handle_new_data(server, events[i].fd); break;
-            case PT_DISCONNECTED:   handle_disconnect(server, events[i].fd); break;
+            case PT_NEW_CONNECTION:
+                handle_new_connection(server);
+                break;
+            case PT_NEW_DATA:
+                handle_new_data(server, events[i].fd);
+                break;
+            case PT_DISCONNECTED:
+                handle_disconnect(server, events[i].fd);
+                break;
         }
     }
     return 0;

@@ -134,6 +134,8 @@ Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_se
     socket_init();
 
     SOCKET fd = tcp_server_get_listener(port, open_to_world);
+    if (fd == INVALID_SOCKET)
+        return NULL;
 
     TCPServer* tcp_server = CALLOC(1, sizeof(TCPServer));
     server_init(&tcp_server->server, fd, create_session_cb, NULL, n_threads);

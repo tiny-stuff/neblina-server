@@ -39,23 +39,20 @@ void poller_destroy(Poller* p)
     free(p);
 }
 
-bool poller_add_connection(Poller* p, int fd)
+void poller_add_connection(Poller* p, int fd)
 {
     struct kevent event;
     EV_SET(&event, fd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
     if (kevent(p->kqueue_fd, &event, 1, NULL, 0, NULL) < 0)
         FATAL_NON_RECOVERABLE("Could not add socket fd to kqueue: %s", strerror(errno));
-
-    return true;
 }
 
-bool poller_remove_connection(Poller* p, SOCKET fd)
+void poller_remove_connection(Poller* p, SOCKET fd)
 {
     struct kevent del_event;
     EV_SET(&del_event, fd, EVFILT_READ, EV_DELETE, 0, 0, NULL);
     if (kevent(p->kqueue_fd, &del_event, 1, NULL, 0, NULL))
         FATAL_NON_RECOVERABLE("Could not add socket fd to kqueue: %s", strerror(errno));
-    return true;
 }
 
 

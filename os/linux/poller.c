@@ -37,22 +37,19 @@ void poller_destroy(Poller* p)
     free(p);
 }
 
-bool poller_add_connection(Poller* p, int fd)
+void poller_add_connection(Poller* p, int fd)
 {
     struct epoll_event event;
     event.events = EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP | EPOLLERR;
     event.data.fd = fd;
     if (epoll_ctl(p->epoll_fd, EPOLL_CTL_ADD, fd, &event) < 0)
         FATAL_NON_RECOVERABLE("Could not initialize socket fd in epoll: %s", strerror(errno));
-
-    return true;
 }
 
-bool poller_remove_connection(Poller* p, SOCKET fd)
+void poller_remove_connection(Poller* p, SOCKET fd)
 {
     if (epoll_ctl(p->epoll_fd, EPOLL_CTL_DEL, fd, NULL) < 0)
         FATAL_NON_RECOVERABLE("Error deleting socket fd in epoll: %s", strerror(errno));
-    return true;
 }
 
 size_t poller_wait(Poller* p, PollerEvent* out_evt, size_t evt_sz, size_t timeout_ms)

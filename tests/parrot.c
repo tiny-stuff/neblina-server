@@ -1,8 +1,10 @@
 #include "server/tcp/tcp_server.h"
 #include "service/session.h"
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "util/logs.h"
 #include "os/os.h"
@@ -41,6 +43,11 @@ int main()
     os_handle_ctrl_c();
 
     Server* server = tcp_server_create(23456, false, parrot_session_create, 3);
+    if (!server) {
+        perror("tcp_create_socket");
+        return EXIT_FAILURE;
+    }
+
     server_run(server);
     server_destroy(server);
 }
