@@ -15,7 +15,7 @@ static const char* ERR_PRX = "TCP server error:";
 static int tcp_server_recv(SOCKET fd, uint8_t** data)
 {
     *data = MALLOC(RECV_BUF_SZ);
-    ssize_t r = recv(fd, *data, RECV_BUF_SZ, 0);
+    ssize_t r = recv(fd, (char *) *data, RECV_BUF_SZ, 0);
     if (r < 0)
         ERR("%s recv error: %s", ERR_PRX, strerror(errno));
     return (int) r;
@@ -23,7 +23,7 @@ static int tcp_server_recv(SOCKET fd, uint8_t** data)
 
 static int tcp_server_send(SOCKET fd, uint8_t const* data, size_t data_sz)
 {
-    ssize_t r = send(fd, data, data_sz, 0);
+    ssize_t r = send(fd, (const char *) data, (int) data_sz, 0);
     if (r < 0)
         ERR("%s send error: %s", ERR_PRX, strerror(errno));
     return (int) r;
@@ -39,9 +39,9 @@ static void tcp_server_free(Server* server)
 
 static SOCKET tcp_server_get_listener(int port, bool open_to_world)
 {
-#define FATAL(...) { ERR(__VA_ARGS__); if (listener != -1) close(listener); return -1; }
+#define FATAL(...) { ERR(__VA_ARGS__); if (listener != INVALID_SOCKET) close(listener); return INVALID_SOCKET; }
 
-    SOCKET listener = -1;
+    SOCKET listener = INVALID_SOCKET;
 
     // find internet address to bind
     struct addrinfo hints;
@@ -73,7 +73,7 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
             FATAL("%s setsocket error: %s", ERR_PRX, strerror(errno));
 
         // bind to port
-        if (bind(listener, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
+        if (bind(listener, p->ai_addr, (int) p->ai_addrlen) == SOCKET_ERROR) {
             server_close_socket(listener);
             continue;  // not possible, try next
         }

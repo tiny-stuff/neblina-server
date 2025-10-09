@@ -9,7 +9,7 @@
 typedef struct CPool CPool;
 
 typedef struct ConnectionMap {
-    int            fd;
+    SOCKET         fd;
     Connection*    connection;
     UT_hash_handle hh;
 } ConnectionHash;

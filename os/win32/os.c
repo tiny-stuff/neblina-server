@@ -78,7 +78,7 @@ DWORD os_start_service(const char* program, const char** args, size_t args_sz)
 
     if (!ok) {
         ERR("CreateProcess failed: %lu\n", GetLastError());
-	return -1;
+	    return (DWORD) -1;
     }
 
     if (g_job) {

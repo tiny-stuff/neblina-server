@@ -15,7 +15,7 @@ typedef struct Connection {
     size_t   send_buf_sz;
 } Connection;
 
-Connection* connection_create(int fd, Session* session)
+Connection* connection_create(SOCKET fd, Session* session)
 {
     Connection* c = CALLOC(1, sizeof(Connection));
     c->fd = fd;

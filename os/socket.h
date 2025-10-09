@@ -6,7 +6,7 @@
 #  include <winsock2.h>
 #  include <ws2tcpip.h>
 #  pragma comment(lib, "Ws2_32.lib")
-#  define SOCKETOPT_YES char yes = "1";
+#  define SOCKETOPT_YES char yes = '1';
 
 typedef long ssize_t;
 

@@ -38,10 +38,8 @@ void poller_destroy(Poller* p)
 
 bool poller_add_connection(Poller* p, SOCKET fd)
 {
-    if (p->poll_count >= FD_SETSIZE) {
+    if (p->poll_count >= FD_SETSIZE)
         FATAL_NON_RECOVERABLE("Too many sockets for WSAPoll()");
-        return false;
-    }
 
     p->poll_fds[p->poll_count].fd = fd;
     p->poll_fds[p->poll_count].events = POLLIN;
@@ -67,7 +65,7 @@ bool poller_remove_connection(Poller* p, SOCKET fd)
 
 size_t poller_wait(Poller* p, PollerEvent* out_evt, size_t evt_sz, size_t timeout_ms)
 {
-    int n_ready = WSAPoll(p->poll_fds, p->poll_count, 100);  // timeout 100 ms
+    int n_ready = WSAPoll(p->poll_fds, p->poll_count, (INT) timeout_ms);
     if (n_ready < 0) {
     	ERR("WSAPoll() error: %d", WSAGetLastError());
         return 0;

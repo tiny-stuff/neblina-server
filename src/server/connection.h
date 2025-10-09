@@ -8,7 +8,7 @@
 typedef struct Connection Connection;
 typedef struct Session Session;
 
-Connection*    connection_create(int fd, Session* session);
+Connection*    connection_create(SOCKET fd, Session* session);
 void           connection_destroy(Connection* c);
 
 void           connection_add_to_recv_buffer(Connection* c, uint8_t const* data, size_t data_sz);
