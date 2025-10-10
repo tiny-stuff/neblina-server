@@ -14,4 +14,4 @@ jobs:
         with:
           arch: x64
       - name: Run tests
-        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina;neblina-tests && cd Debug && dir && .\neblina-tests.exe && cd ..
+        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina,neblina-tests && cd Debug && dir && .\neblina-tests.exe && cd ..
