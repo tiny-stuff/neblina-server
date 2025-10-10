@@ -7,6 +7,7 @@
 #include "util/logs.h"
 #include "server/commbuf.h"
 #include "watchdog/watchdog.h"
+#include "client/tcpclient.h"
 
 const char* service = "tests";
 
@@ -54,7 +55,7 @@ static void test_watchdog()
 // CONNECTION TESTS
 //
 
-static void test_connection()
+static void test_commbuf()
 {
     CommunicationBuffer* conn = commbuf_create();
 
@@ -106,6 +107,26 @@ static void test_connection()
 }
 
 //
+// PARROT (test TCP server and service)
+//
+
+static void test_parrot()
+{
+    pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
+    os_sleep_ms(100);
+
+    TCPClient* t = tcpclient_create("localhost", 23456);
+    tcpclient_send_text(t, "hello");
+
+    char resp[6] = {0};
+    tcpclient_recv_block(t, (uint8_t *) resp, 5);
+    assert(strcmp(resp, "hello") == 0);
+
+    tcpclient_destroy(t);
+    os_kill(parrot_pid);
+}
+
+//
 // MAIN
 //
 
@@ -113,10 +134,9 @@ int main()
 {
     logs_verbose = true;
 
-    test_connection();
-    test_watchdog();
-    // test_commbuf_pool(SINGLE_THREADED);
-    // test_commbuf_pool(3);
+    test_commbuf();
+    // test_watchdog();
+    test_parrot();
 
     printf("\x1b[0;32mTests successful!\x1b[0m\n");
 }

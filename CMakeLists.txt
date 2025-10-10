@@ -79,7 +79,7 @@ add_executable(tests-infloop EXCLUDE_FROM_ALL tests/watchdog/infloop.c)
 add_executable(tests-error EXCLUDE_FROM_ALL tests/watchdog/error.c)
 add_executable(tests-nonrecoverable EXCLUDE_FROM_ALL tests/watchdog/nonrecoverable.c)
 add_executable(${PROJECT_NAME}-tests EXCLUDE_FROM_ALL tests/tests.c ${SRC_FILES})
-add_dependencies(${PROJECT_NAME}-tests tests-infloop tests-error tests-nonrecoverable)
+add_dependencies(${PROJECT_NAME}-tests tests-infloop tests-error tests-nonrecoverable parrot-test)
 
 # add special targets
 set(FINAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests parrot-test)
