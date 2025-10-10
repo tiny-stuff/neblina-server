@@ -35,4 +35,6 @@ typedef struct sockaddr SOCKADDR;
 
 #endif
 
+#include <fcntl.h>
+
 #endif

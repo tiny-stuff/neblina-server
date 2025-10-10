@@ -90,13 +90,14 @@ extensible_priv_header=$(cat <<EOF
 #ifndef ${UCLASS}_PRIV_H_
 #define ${UCLASS}_PRIV_H_
 
-typedef struct ${classname} {
-    // TODO: add fields here
-} ${classname};
-
 typedef struct ${classname}VTable {
     // TODO: add methods here
 } ${classname}VTable;
+
+typedef struct ${classname} {
+    ${classname}VTable vt;
+    // TODO: add fields here
+} ${classname};
 
 void ${lclass}_initialize(${classname}* ${lclass});
 void ${lclass}_finalize(${classname}* ${lclass});

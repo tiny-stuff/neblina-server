@@ -13,6 +13,6 @@ int        tcpclient_send(TCPClient* t, uint8_t* data, size_t sz);
 int        tcpclient_send_text(TCPClient* t, const char* data);
 
 int        tcpclient_recv(TCPClient* t, uint8_t** data);
-int        tcpclient_recv_block(TCPClient* t, uint8_t* data, size_t sz);
+int        tcpclient_recv_spinlock(TCPClient* t, uint8_t* data, size_t sz);
 
 #endif

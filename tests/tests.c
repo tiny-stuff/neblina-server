@@ -112,18 +112,18 @@ static void test_commbuf()
 
 static void test_parrot()
 {
-    pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
-    os_sleep_ms(100);
+    // pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
+    // os_sleep_ms(100);
 
     TCPClient* t = tcpclient_create("localhost", 23456);
-    tcpclient_send_text(t, "hello");
+    assert(tcpclient_send_text(t, "hello") == 5);
 
     char resp[6] = {0};
-    tcpclient_recv_block(t, (uint8_t *) resp, 5);
+    tcpclient_recv_spinlock(t, (uint8_t *) resp, 5);
     assert(strcmp(resp, "hello") == 0);
 
     tcpclient_destroy(t);
-    os_kill(parrot_pid);
+    // os_kill(parrot_pid);
 }
 
 //
@@ -132,11 +132,15 @@ static void test_parrot()
 
 int main()
 {
+    socket_init();
+
     logs_verbose = true;
 
     test_commbuf();
     // test_watchdog();
     test_parrot();
+
+    socket_finalize();
 
     printf("\x1b[0;32mTests successful!\x1b[0m\n");
 }
