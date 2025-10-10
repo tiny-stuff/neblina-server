@@ -31,7 +31,7 @@ lclass=$(echo $classname | tr 'A-Z' 'a-z')
 # templates
 #
 
-define final_header <<EOF
+final_header=$(cat <<EOF
 #ifndef ${UCLASS}_H_
 #define ${UCLASS}_H_
 
@@ -42,8 +42,9 @@ void ${lclass}_destroy(${classname}* ${lclass});
 
 #endif
 EOF
+)
 
-define final_source <<EOF
+final_source=$(cat <<EOF
 #include "${lclass}.h"
 
 #include <string.h>
@@ -79,7 +80,8 @@ void ${lclass}_destroy(${classname}* ${lclass})
 
 #endif
 EOF
+)
 
-echo $final_header
+echo "$final_header"
 echo
-ehco $final_source
+echo "$final_source"
