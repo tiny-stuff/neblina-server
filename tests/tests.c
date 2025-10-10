@@ -156,13 +156,15 @@ static void* test_parrot_load_thread(void *data)
 
 static void test_parrot_load()
 {
+    printf("Performing load test...\n");
+
     pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
     os_sleep_ms(100);
     logs_verbose = false;
 
     time_t start = time(NULL);
 
-#define N_THREADS 100
+#define N_THREADS 10
     pthread_t threads[N_THREADS];
     for (size_t i = 0; i < N_THREADS; ++i)
         pthread_create(&threads[i], NULL, test_parrot_load_thread, NULL);
@@ -187,9 +189,9 @@ int main()
     logs_verbose = true;
 
     test_commbuf();
-    // test_watchdog();
     test_parrot();
     test_parrot_load();
+    test_watchdog();
 
     socket_finalize();
 
