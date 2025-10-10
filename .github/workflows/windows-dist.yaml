@@ -24,4 +24,6 @@ jobs:
         if: github.ref_type == 'tag'
         with:
           name: Windows executable
+          draft: false
+          make_latest: true
           files: build/Release/neblina-win64.zip
