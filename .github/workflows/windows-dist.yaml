@@ -23,4 +23,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: Release\neblina-win64.zip
+          files: build\Release\neblina-win64.zip
