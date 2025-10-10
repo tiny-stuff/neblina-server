@@ -13,10 +13,16 @@ jobs:
           arch: x64
       - name: Run tests
         run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina-tests && cd Debug && dir && .\neblina-tests.exe && cd ..
+      - name: Extract version from CMakeLists.txt
+        id: version
+        shell: bash
+        run: |
+          version=$(grep -Po '(?<=project\(.*VERSION )([0-9]+\.[0-9]+\.[0-9]+)' CMakeLists.txt)
+          echo "version=$version" >> $GITHUB_OUTPUT
       - name: Create executable
-        run: cd build && msbuild neblina.sln /t:neblina /p:Configuration=Release && cd Release && tar.exe -a -c -f neblina.zip neblina.exe
+        run: cd build && msbuild neblina.sln /t:neblina /p:Configuration=Release && cd Release && tar.exe -a -c -f neblina-{{ steps.version.outputs.version }}-win64.zip neblina.exe
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
+        if: ${{ github.event_name == 'push' }}
         with:
           files: Release\neblina.zip
