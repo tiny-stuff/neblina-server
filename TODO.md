@@ -14,7 +14,7 @@
   - [x] Document stuff
   - [x] Proper error handling
   - [x] Github actions to build/test in all envs
-  - [ ] Create class creator
+  - [x] Create class creator
   - [ ] Additional tests (for parrot)
     - [ ] Create TCPClient (?)
 - [ ] SSL server + SParrot
