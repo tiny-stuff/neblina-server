@@ -127,6 +127,15 @@ static void test_parrot()
 }
 
 //
+// PARROT (load testing)
+//
+
+static void test_parrot_load()
+{
+
+}
+
+//
 // MAIN
 //
 
@@ -137,8 +146,9 @@ int main()
     logs_verbose = true;
 
     test_commbuf();
-    // test_watchdog();
+    test_watchdog();
     test_parrot();
+    test_parrot_load();
 
     socket_finalize();
 

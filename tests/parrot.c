@@ -37,9 +37,10 @@ static Session* parrot_session_create(SOCKET fd, void* data)
     return (Session *) psession;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    logs_verbose = true;
+    if (argc == 2 && strcmp(argv[1], "-d") == 0)
+        logs_verbose = true;
     os_handle_ctrl_c();
 
     Server* server = tcp_server_create(23456, false, parrot_session_create, 0);
