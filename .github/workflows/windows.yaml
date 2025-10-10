@@ -25,4 +25,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: ${{ github.event_name == 'push' }}
         with:
-          files: Release\neblina.zip
+          files: Release\neblina-{{ steps.version.outputs.version }}-win64.zip
