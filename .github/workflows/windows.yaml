@@ -1,6 +1,8 @@
 name: Windows (with MSVC)
 
-on: push
+on:
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build:
@@ -12,11 +14,4 @@ jobs:
         with:
           arch: x64
       - name: Run tests
-        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina-tests && cd Debug && dir && .\neblina-tests.exe && cd ..
-      - name: Create executable
-        run: cd build && msbuild neblina.sln /t:neblina /p:Configuration=Release && cd Release && 7z a neblina-win64.zip neblina.exe
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        if: ${{ github.event_name == 'push' }}
-        with:
-          files: Release\neblina-win64.zip
+        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina;neblina-tests && cd Debug && dir && .\neblina-tests.exe && cd ..

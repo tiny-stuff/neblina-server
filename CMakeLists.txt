@@ -4,7 +4,7 @@
 
 cmake_minimum_required(VERSION 3.16)
 project(neblina
-    VERSION 0.1
+    VERSION 0.0.1
     DESCRIPTION "A tiny multi-protocol server"
     LANGUAGES C)
 
