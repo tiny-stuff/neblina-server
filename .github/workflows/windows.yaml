@@ -14,7 +14,7 @@ jobs:
       - name: Run tests
         run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina-tests && cd Debug && dir && .\neblina-tests.exe && cd ..
       - name: Create executable
-        run: cd build && msbuild neblina.sln /t:neblina-tests /p:Configuration=Release && tar.exe -a -c -f neblina.zip neblina.exe
+        run: cd build && msbuild neblina.sln /t:neblina-tests /p:Configuration=Release && cd Release && tar.exe -a -c -f neblina.zip neblina.exe
       - name: Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
