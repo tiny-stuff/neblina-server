@@ -1,0 +1,22 @@
+name: MacOS (with Clang)
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install make
+        run: brew install make
+      - name: Configure CMake
+        run: mkdir build && cd build && cmake ..
+      - name: Build executable
+        working-directory: ./build
+        run: make neblina
+      - name: Build and run tests
+        working-directory: ./build
+        run: make neblina-tests && ./neblina-tests

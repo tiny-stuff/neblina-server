@@ -7,17 +7,15 @@
 
 #include "tcp_server_priv.h"
 #include "util/logs.h"
-
-#ifdef _WIN32
-typedef long ssize_t;
-#endif
+#include "socket.h"
+#include "util/alloc.h"
 
 static const char* ERR_PRX = "TCP server error:";
 
 static int tcp_server_recv(SOCKET fd, uint8_t** data)
 {
-    *data = malloc(RECV_BUF_SZ);
-    ssize_t r = recv(fd, *data, RECV_BUF_SZ, 0);
+    *data = MALLOC(RECV_BUF_SZ);
+    ssize_t r = recv(fd, (char *) *data, RECV_BUF_SZ, 0);
     if (r < 0)
         ERR("%s recv error: %s", ERR_PRX, strerror(errno));
     return (int) r;
@@ -25,7 +23,7 @@ static int tcp_server_recv(SOCKET fd, uint8_t** data)
 
 static int tcp_server_send(SOCKET fd, uint8_t const* data, size_t data_sz)
 {
-    ssize_t r = send(fd, data, data_sz, 0);
+    ssize_t r = send(fd, (const char *) data, (int) data_sz, 0);
     if (r < 0)
         ERR("%s send error: %s", ERR_PRX, strerror(errno));
     return (int) r;
@@ -33,22 +31,17 @@ static int tcp_server_send(SOCKET fd, uint8_t const* data, size_t data_sz)
 
 static void tcp_server_free(Server* server)
 {
+    socket_finalize();
+
     TCPServer* tserver = (TCPServer *) server;
     free(tserver);
 }
 
 static SOCKET tcp_server_get_listener(int port, bool open_to_world)
 {
-#define FATAL(...) { ERR(__VA_ARGS__); return -1; }
+#define FATAL(...) { ERR(__VA_ARGS__); if (listener != INVALID_SOCKET) close(listener); return INVALID_SOCKET; }
 
-    SOCKET listener = -1;
-
-#ifdef _WIN32
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-        FATAL("WSAStartup() error!");
-    DBG("WSAStartup() succeeded");
-#endif
+    SOCKET listener = INVALID_SOCKET;
 
     // find internet address to bind
     struct addrinfo hints;
@@ -75,16 +68,12 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
             FATAL("%s socket error: %s", ERR_PRX, strerror(errno));
 
         // set socket as reusable
-#ifdef _WIN32
-        char yes = '1';
-#else
-        int yes = 1;
-#endif
+        SOCKETOPT_YES
         if (setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == SOCKET_ERROR)
             FATAL("%s setsocket error: %s", ERR_PRX, strerror(errno));
 
         // bind to port
-        if (bind(listener, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
+        if (bind(listener, p->ai_addr, (int) p->ai_addrlen) == SOCKET_ERROR) {
             server_close_socket(listener);
             continue;  // not possible, try next
         }
@@ -108,6 +97,9 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
 
 static SOCKET tcp_accept_new_connection(Server* server)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wanalyzer-fd-leak"
+
     // accept connection
     struct sockaddr_storage remoteaddr; // Client address
     memset(&remoteaddr, 0, sizeof remoteaddr);
@@ -122,10 +114,12 @@ static SOCKET tcp_accept_new_connection(Server* server)
     // find connecter IP/port
     char hoststr[1024] = "Unknown";
     char portstr[24] = "0";
-    getnameinfo((struct sockaddr const*)(&remoteaddr), addrlen, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
-    DBG("New connection from %s:%s as fd %d", hoststr, portstr, client_fd);
+    if (getnameinfo((struct sockaddr const*)(&remoteaddr), addrlen, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV) == 0)
+        DBG("New connection from %s:%s as fd %d", hoststr, portstr, client_fd);
 
     return client_fd;
+
+#pragma GCC diagnostic pop
 }
 
 Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_session_cb, size_t n_threads)
@@ -137,9 +131,13 @@ Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_se
         .accept_new_connection = tcp_accept_new_connection,
     };
 
-    SOCKET fd = tcp_server_get_listener(port, open_to_world);
+    socket_init();
 
-    TCPServer* tcp_server = calloc(1, sizeof(TCPServer));
+    SOCKET fd = tcp_server_get_listener(port, open_to_world);
+    if (fd == INVALID_SOCKET)
+        return NULL;
+
+    TCPServer* tcp_server = CALLOC(1, sizeof(TCPServer));
     server_init(&tcp_server->server, fd, create_session_cb, NULL, n_threads);
     tcp_server->server.vt = &vtable;
     tcp_server->port = port;

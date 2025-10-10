@@ -4,8 +4,9 @@
 #include <stdlib.h>
 
 #include "util/logs.h"
-#include "os/os.h"
+#include "os.h"
 #include "util/error.h"
+#include "util/alloc.h"
 
 typedef struct {
     size_t program_idx;
@@ -60,7 +61,7 @@ void watchdog_init(WatchdogProgram const* programs_, size_t programs_sz_)
 {
     programs = programs_;
     programs_sz = programs_sz_;
-    tasks = calloc(programs_sz, sizeof(Task));
+    tasks = CALLOC(programs_sz, sizeof(Task));
 
     // create list of services
     n_tasks = programs_sz;

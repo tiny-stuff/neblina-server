@@ -1,0 +1,23 @@
+name: Linux (with GCC)
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/mattkretz/cplusplus-ci/gcc16
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CMake
+        run: mkdir build && cd build && cmake ..
+      - name: Build executable
+        working-directory: ./build
+        run: make neblina
+      - name: Build and run tests
+        working-directory: ./build
+        run: make neblina-tests && ./neblina-tests

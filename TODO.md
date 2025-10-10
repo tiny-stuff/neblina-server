@@ -3,17 +3,20 @@
 - [x] Rename project
 - [x] Orchestrator
 - [x] TCP server + Line by Line + Parrot
-- [ ] Improve OS independence
-  - [ ] Migrate to CMake
-  - [ ] Improve OS separation of concerns (posix by default)
+- [x] Multithreaded connection pool
+- [x] Improve OS independence
+  - [x] Migrate to CMake
+  - [x] Improve OS separation of concerns (posix by default)
+  - [x] Tests
 - [ ] Code review
+  - [x] Fix all warnings
+  - [x] Move CommunicationBuffer inside Session (as ConnectionBuffer)
+  - [x] Document stuff
+  - [x] Proper error handling
+  - [ ] Github actions to build/test in all envs
+  - [ ] Create class creator
   - [ ] Additional tests (for parrot)
-  - [ ] Better isolation of subsystems?
-  - [ ] Reorganize header files
-  - [ ] init/create pattern
-  - [ ] Proper error handling
-  - [ ] Fix all warnings
-- [ ] Multithreaded connection pool
+    - [ ] Create TCPClient (?)
 - [ ] SSL server + SParrot
 - [ ] Process config file
 - [ ] Multithreading
@@ -62,7 +65,7 @@
 
 - [ ] Require Host request (otherwise 400)
 - [ ] Automatic error according to request type
-- [ ] Persistent connections (check Connection header)
+- [ ] Persistent connections (check CommunicationBuffer header)
 - [ ] Transfer encoding: gzip, deflate
 - [ ] Redirects
 - [ ] Conditional requests: If-None-Match, ETag

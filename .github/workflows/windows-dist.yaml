@@ -1,0 +1,29 @@
+name: Windows (distribute executable)
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: TheMrMilchmann/setup-msvc-dev@v4
+        with:
+          arch: x64
+      - name: Create executable
+        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina /p:Configuration=Release && cd Release && 7z a neblina-win64.zip neblina.exe && dir
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          name: Windows executable
+          draft: false
+          make_latest: true
+          files: build/Release/neblina-win64.zip

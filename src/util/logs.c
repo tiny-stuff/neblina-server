@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "os/window.h"
+#include "window.h"
 
 bool logs_verbose = false;
 int  logging_color = 0;
