@@ -18,12 +18,10 @@ jobs:
         with:
           arch: x64
       - name: Create executable
-        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina /p:Configuration=Release && cd Release && 7z a neblina-win64.zip neblina.exe
-      - name: Replace part of tag
-        run: echo "custom_tag=latest-unstable" >> $GITHUB_ENV
+        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina /p:Configuration=Release && cd Release && 7z a neblina-win64.zip neblina.exe && dir
       - name: Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
           name: Windows executable
-          files: build\Release\neblina-win64.zip
+          files: build/Release/neblina-win64.zip
