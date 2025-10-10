@@ -12,12 +12,12 @@
 
 #define BUF_SZ (16 * 1024)
 
-static int recv_(SOCKET fd, uint8_t* data, size_t sz)
+static ssize_t recv_(SOCKET fd, uint8_t* data, size_t sz)
 {
     return recv(fd, data, sz, 0);
 }
 
-static int send_(SOCKET fd, uint8_t const* data, size_t sz)
+static ssize_t send_(SOCKET fd, uint8_t const* data, size_t sz)
 {
     return send(fd, data, sz, 0);
 }
@@ -129,20 +129,20 @@ void tcpclient_destroy(TCPClient* tcpclient)
     free(tcpclient);
 }
 
-int tcpclient_send(TCPClient* t, uint8_t* data, size_t sz)
+ssize_t tcpclient_send(TCPClient* t, uint8_t* data, size_t sz)
 {
     return t->vt.send(t->fd, data, sz);
 }
 
-int tcpclient_send_text(TCPClient* t, const char* data)
+ssize_t tcpclient_send_text(TCPClient* t, const char* data)
 {
     return t->vt.send(t->fd, (uint8_t const *) data, strlen(data));
 }
 
-int tcpclient_recv(TCPClient* t, uint8_t** data)
+ssize_t tcpclient_recv(TCPClient* t, uint8_t** data)
 {
     *data = MALLOC(BUF_SZ);
-    int r = t->vt.recv(t->fd, *data, BUF_SZ);
+    ssize_t r = t->vt.recv(t->fd, *data, BUF_SZ);
     if (r <= 0) {
         free(data);
     }
@@ -150,11 +150,11 @@ int tcpclient_recv(TCPClient* t, uint8_t** data)
     return r;
 }
 
-int tcpclient_recv_spinlock(TCPClient* t, uint8_t* data, size_t sz)
+ssize_t tcpclient_recv_spinlock(TCPClient* t, uint8_t* data, size_t sz)
 {
     size_t total_sz = 0;
     while (total_sz < sz) {
-        int r = t->vt.recv(t->fd, data, sz - total_sz);
+        ssize_t r = t->vt.recv(t->fd, data, sz - total_sz);
         if (r <= 0 && errno != EAGAIN) {
             ERR("client: recv: %s", strerror(errno));
             return r;

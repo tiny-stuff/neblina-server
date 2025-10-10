@@ -112,18 +112,18 @@ static void test_commbuf()
 
 static void test_parrot()
 {
-    // pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
-    // os_sleep_ms(100);
+    pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
+    os_sleep_ms(100);
 
     TCPClient* t = tcpclient_create("localhost", 23456);
-    assert(tcpclient_send_text(t, "hello") == 5);
+    assert(tcpclient_send_text(t, "hello\r\n") == 7);
 
     char resp[6] = {0};
     tcpclient_recv_spinlock(t, (uint8_t *) resp, 5);
     assert(strcmp(resp, "hello") == 0);
 
     tcpclient_destroy(t);
-    // os_kill(parrot_pid);
+    os_kill(parrot_pid);
 }
 
 //
