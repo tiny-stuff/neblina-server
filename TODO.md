@@ -15,8 +15,9 @@
   - [x] Proper error handling
   - [x] Github actions to build/test in all envs
   - [x] Create class creator
-  - [ ] Additional tests (for parrot)
-    - [ ] Create TCPClient (?)
+  - [x] Additional tests (for parrot)
+    - [x] Create TCPClient (?)
+    - [x] Load testing
 - [ ] SSL server + SParrot
 - [ ] Process config file
 - [ ] Multithreading

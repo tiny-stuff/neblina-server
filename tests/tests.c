@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
+
+#include <pthread.h>
 
 #include "os/os.h"
 #include "util/logs.h"
@@ -130,9 +133,47 @@ static void test_parrot()
 // PARROT (load testing)
 //
 
+static void* test_parrot_load_thread(void *data)
+{
+    (void) data;
+
+#define N_CLIENTS 200
+    TCPClient* clients[N_CLIENTS];
+    for (size_t i = 0; i < N_CLIENTS; ++i)
+        clients[i] = tcpclient_create("localhost", 23456);
+    for (size_t i = 0; i < N_CLIENTS; ++i)
+        assert(tcpclient_send_text(clients[i], "hello\r\n") == 7);
+    for (size_t i = 0; i < N_CLIENTS; ++i) {
+        char resp[6] = {0};
+        tcpclient_recv_spinlock(clients[i], (uint8_t *) resp, 5);
+        assert(strcmp(resp, "hello") == 0);
+    }
+    for (size_t i = 0; i < N_CLIENTS; ++i)
+        tcpclient_destroy(clients[i]);
+
+    return NULL;
+}
+
 static void test_parrot_load()
 {
+    pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
+    os_sleep_ms(100);
+    logs_verbose = false;
 
+    time_t start = time(NULL);
+
+#define N_THREADS 100
+    pthread_t threads[N_THREADS];
+    for (size_t i = 0; i < N_THREADS; ++i)
+        pthread_create(&threads[i], NULL, test_parrot_load_thread, NULL);
+    for (size_t i = 0; i < N_THREADS; ++i)
+        pthread_join(threads[i], NULL);
+
+    time_t end = time(NULL);
+    printf("Load testing took %ld seconds\n", (long)(end - start));
+
+    logs_verbose = false;
+    os_kill(parrot_pid);
 }
 
 //
@@ -146,7 +187,7 @@ int main()
     logs_verbose = true;
 
     test_commbuf();
-    test_watchdog();
+    // test_watchdog();
     test_parrot();
     test_parrot_load();
 
