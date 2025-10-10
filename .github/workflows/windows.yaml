@@ -11,5 +11,12 @@ jobs:
       - uses: TheMrMilchmann/setup-msvc-dev@v4
         with:
           arch: x64
-      - name: Run
-        run: mkdir build && cd build && cmake .. && msbuild neblina.sln && Debug\neblina-tests.exe
+      - name: Run tests
+        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina-tests && Debug\neblina-tests.exe
+      - name: Create executable
+        run: msbuild neblina.sln /t:neblina-tests /p:Configuration=Release && tar.exe -a -c -f neblina.zip neblina.exe
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: Release\neblina.exe

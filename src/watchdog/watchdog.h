@@ -5,7 +5,7 @@
 
 #include "os.h"
 
-#define PID_NOT_RUNNING ((pid_t) -1)
+#define PID_NOT_RUNNING ((pid_t) 2147483646)
 
 typedef struct {
     const char*  name;

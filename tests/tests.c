@@ -113,8 +113,8 @@ int main()
 {
     logs_verbose = true;
 
-    test_watchdog();
     test_connection();
+    test_watchdog();
     // test_commbuf_pool(SINGLE_THREADED);
     // test_commbuf_pool(3);
 

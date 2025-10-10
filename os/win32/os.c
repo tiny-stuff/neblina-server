@@ -97,7 +97,8 @@ bool os_process_still_running(DWORD dwProcessId, int* status)
 {
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, dwProcessId);
     if (!hProcess) {
-        *status = 1;
+        if (status)
+            *status = 1;
         return false;
 	}
 
