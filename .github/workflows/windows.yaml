@@ -12,7 +12,7 @@ jobs:
         with:
           arch: x64
       - name: Run tests
-        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina-tests && cd Debug && neblina-tests.exe && cd ..
+        run: mkdir build && cd build && cmake .. && msbuild neblina.sln /t:neblina-tests && cd Debug && dir && .\neblina-tests.exe && cd ..
       - name: Create executable
         run: msbuild neblina.sln /t:neblina-tests /p:Configuration=Release && tar.exe -a -c -f neblina.zip neblina.exe
       - name: Release
