@@ -193,7 +193,9 @@ int main()
 
     test_commbuf();
     test_parrot();
+#ifndef _WIN32          // rewrite server logic using IOPS instead of WSaPoll
     test_parrot_load();
+#endif
     test_watchdog();
 
     socket_finalize();

@@ -20,8 +20,6 @@
     - [x] Load testing
 - [ ] SSL server + SParrot
 - [ ] Process config file
-- [ ] Multithreading
-- [ ] TCP client
 - [ ] HTTP structs
 - [ ] HTTP server and request handlers
   - [ ] Default 404
@@ -29,6 +27,7 @@
   - [ ] Static website
   - [ ] Redirect
   - [ ] Proxy
+- [ ] Rewrite queue handling in Windows using IOCP instead of WSApoll
 - [ ] HTTPS
 - [ ] HTTP-to-HTTPS
 - [ ] FTP
