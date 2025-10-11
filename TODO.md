@@ -8,7 +8,7 @@
   - [x] Migrate to CMake
   - [x] Improve OS separation of concerns (posix by default)
   - [x] Tests
-- [ ] Code review
+- [x] Code review
   - [x] Fix all warnings
   - [x] Move CommunicationBuffer inside Session (as ConnectionBuffer)
   - [x] Document stuff
