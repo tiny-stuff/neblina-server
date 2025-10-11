@@ -6,6 +6,9 @@ on:
 
 jobs:
   build:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
 
     container:
@@ -14,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure CMake
-        run: mkdir build && cd build && cmake ..
+        run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug ..
       - name: Build executable
         working-directory: ./build
         run: make neblina

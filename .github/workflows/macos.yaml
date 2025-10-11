@@ -7,16 +7,19 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@v4
       - name: Install make
         run: brew install make
       - name: Configure CMake
-        run: mkdir build && cd build && cmake ..
+        run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug  ..
       - name: Build executable
         working-directory: ./build
-        run: make neblina
-      - name: Build and run tests
+        run: make neblina neblina-tests
+      - name: Run tests
         working-directory: ./build
-        run: make neblina-tests && ./neblina-tests
+        run: ./neblina-tests

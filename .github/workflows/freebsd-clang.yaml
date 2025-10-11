@@ -7,11 +7,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - name: Build & Test
         uses: vmactions/freebsd-vm@v1
         with:
-          usesh: true
           prepare: pkg install -y cmake
-          run: mkdir build && cd build && cmake .. && make neblina && make neblina-tests && ./neblina-tests
+          copyback: false
+          run: |
+            pwd
+            ls -lah
+            echo "---------------"
+            mkdir build
+            cd build
+            cmake -DCMAKE_BUILD_TYPE=Debug ..
+            make neblina
+            make neblina-tests
+            ./neblina-tests

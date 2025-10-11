@@ -21,6 +21,7 @@ void close(SOCKET fd);
 #  include <arpa/inet.h>
 #  include <sys/socket.h>
 #  include <netdb.h>
+#  include <netinet/in.h>
 
 #  define INVALID_SOCKET (-1)
 #  define SOCKET_ERROR (-1)
@@ -34,5 +35,7 @@ typedef struct sockaddr SOCKADDR;
 #define socket_finalize() {}
 
 #endif
+
+#include <fcntl.h>
 
 #endif
