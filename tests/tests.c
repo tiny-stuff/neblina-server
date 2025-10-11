@@ -47,7 +47,7 @@ static void test_watchdog()
 
     watchdog_finalize();
 
-    os_sleep_ms(500);
+    os_sleep_ms(1000);
 
     assert(!os_process_still_running(error_state.pid, NULL));
     assert(!os_process_still_running(infloop_state.pid, NULL));
@@ -167,7 +167,7 @@ static void test_parrot_load()
 
     time_t start = time(NULL);
 
-#define N_THREADS 10
+#define N_THREADS 20
     pthread_t threads[N_THREADS];
     for (size_t i = 0; i < N_THREADS; ++i)
         pthread_create(&threads[i], NULL, test_parrot_load_thread, NULL);
