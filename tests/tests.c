@@ -117,15 +117,6 @@ static void test_commbuf()
 
 static void test_parrot()
 {
-    pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
-#ifdef _WIN32
-    os_sleep_ms(1000);
-#else
-    os_sleep_ms(100);
-#endif
-
-    assert(os_process_still_running(parrot_pid, NULL));
-
     TCPClient* t = tcpclient_create("localhost", 23456);
     assert(t);
     assert(tcpclient_send_text(t, "hello\r\n") == 7);
@@ -140,7 +131,7 @@ static void test_parrot()
     assert(memcmp(resp, "hello", r) == 0);
 
     tcpclient_destroy(t);
-    os_kill(parrot_pid);
+    os_sleep_ms(500);
 }
 
 //
@@ -155,7 +146,7 @@ static void* test_parrot_load_thread(void *data)
     TCPClient* clients[N_CLIENTS];
     for (size_t i = 0; i < N_CLIENTS; ++i) {
         clients[i] = tcpclient_create("localhost", 23456);
-	assert(clients[i]);
+        assert(clients[i]);
     }
     for (size_t i = 0; i < N_CLIENTS; ++i)
         assert(tcpclient_send_text(clients[i], "hello\r\n") == 7);
@@ -174,7 +165,6 @@ static void test_parrot_load()
 {
     printf("Performing load test...\n");
 
-    pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
     logs_verbose = false;
 
     time_t start = time(NULL);
@@ -190,7 +180,6 @@ static void test_parrot_load()
     printf("Load testing took %ld seconds\n", (long)(end - start));
 
     logs_verbose = false;
-    os_kill(parrot_pid);
 }
 
 //
@@ -204,10 +193,15 @@ int main()
     logs_verbose = true;
 
     test_commbuf();
+
+    pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
+    os_sleep_ms(1000);
     test_parrot();
-#ifndef _WIN32          // rewrite server logic using IOPS instead of WSaPoll
+#ifndef _WIN32
     test_parrot_load();
 #endif
+    os_kill(parrot_pid);
+
     test_watchdog();
 
     socket_finalize();
