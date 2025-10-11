@@ -166,8 +166,14 @@ ssize_t tcpclient_recv_spinlock(TCPClient* t, uint8_t* data, size_t sz, size_t t
     size_t pos = 0;
     while (pos < sz) {
         ssize_t r = t->vt.recv(t->fd, &data[pos], sz - pos);
+#ifdef _WIN32
+		int err = WSAGetLastError();
+        if (r < 0 && err != EWOULDBLOCK && err != WSAEWOULDBLOCK) {
+            ERR("client: recv: %d", err);
+#else
         if (r <= 0 && errno != EAGAIN) {
             ERR("client: recv: %s", strerror(errno));
+#endif
             return r;
         }
 
