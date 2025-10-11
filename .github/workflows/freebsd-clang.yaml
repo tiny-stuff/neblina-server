@@ -13,5 +13,6 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           usesh: true
+          sync: no
           prepare: pkg install -y cmake
           run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make neblina && make neblina-tests && ./neblina-tests

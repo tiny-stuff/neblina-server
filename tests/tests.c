@@ -123,7 +123,7 @@ static void test_parrot()
     assert(tcpclient_send_text(t, "hello\r\n") == 7);
 
     char resp[6] = {0};
-    tcpclient_recv_spinlock(t, (uint8_t *) resp, 5);
+    tcpclient_recv_spinlock(t, (uint8_t *) resp, 5, 5000);
     assert(strcmp(resp, "hello") == 0);
 
     tcpclient_destroy(t);
@@ -148,7 +148,7 @@ static void* test_parrot_load_thread(void *data)
         assert(tcpclient_send_text(clients[i], "hello\r\n") == 7);
     for (size_t i = 0; i < N_CLIENTS; ++i) {
         char resp[6] = {0};
-        tcpclient_recv_spinlock(clients[i], (uint8_t *) resp, 5);
+        tcpclient_recv_spinlock(clients[i], (uint8_t *) resp, 5, 5000);
         assert(strcmp(resp, "hello") == 0);
     }
     for (size_t i = 0; i < N_CLIENTS; ++i)
@@ -162,7 +162,11 @@ static void test_parrot_load()
     printf("Performing load test...\n");
 
     pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
+#ifdef _WIN32
+    os_sleep_ms(1000);
+#else
     os_sleep_ms(100);
+#endif
     logs_verbose = false;
 
     time_t start = time(NULL);

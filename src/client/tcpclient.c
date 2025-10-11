@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "os.h"
 #include "tcpclient_priv.h"
@@ -151,24 +152,33 @@ ssize_t tcpclient_recv(TCPClient* t, uint8_t** data)
     return r;
 }
 
-ssize_t tcpclient_recv_spinlock(TCPClient* t, uint8_t* data, size_t sz)
+ssize_t tcpclient_recv_spinlock(TCPClient* t, uint8_t* data, size_t sz, size_t timeout_ms)
 {
-    size_t total_sz = 0;
-    while (total_sz < sz) {
-        ssize_t r = t->vt.recv(t->fd, data, sz - total_sz);
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
+    size_t pos = 0;
+    while (pos < sz) {
+        ssize_t r = t->vt.recv(t->fd, &data[pos], sz - pos);
         if (r <= 0 && errno != EAGAIN) {
             ERR("client: recv: %s", strerror(errno));
             return r;
         }
 
         if (r > 0) {
-            total_sz += r;
+            pos += r;
             data += r;
         }
 
-        if (total_sz < sz)
+        if (pos < sz)
             os_sleep_ms(1);
+
+        clock_gettime(CLOCK_MONOTONIC, &end);
+
+        double elapsed = (double) (end.tv_sec - start.tv_sec) + (double) (end.tv_nsec - start.tv_nsec) / (double) 1e6;
+        if (elapsed > (double) timeout_ms)
+            return (ssize_t) pos;
     }
 
-    return 0;
+    return (ssize_t) pos;
 }
