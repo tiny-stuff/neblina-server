@@ -192,9 +192,9 @@ int main()
     logs_verbose = true;
 
     test_commbuf();
-    // test_parrot();
+    test_parrot();
     test_parrot_load();
-    //test_watchdog();
+    test_watchdog();
 
     socket_finalize();
 
