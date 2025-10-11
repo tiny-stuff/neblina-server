@@ -179,12 +179,11 @@ ssize_t tcpclient_recv_spinlock(TCPClient* t, uint8_t* data, size_t sz, size_t t
         if (pos < sz)
             os_sleep_ms(1);
 
-        clock_gettime(CLOCK_MONOTONIC, &end);
-
 #ifdef _WIN32
         QueryPerformanceCounter(&end);
         double elapsed = (double)(end.QuadPart - start.QuadPart) * 1000.0 / freq.QuadPart;
 #else
+        clock_gettime(CLOCK_MONOTONIC, &end);
         double elapsed = (double) (end.tv_sec - start.tv_sec) + (double) (end.tv_nsec - start.tv_nsec) / (double) 1e6;
 #endif
         if (elapsed > (double) timeout_ms)
