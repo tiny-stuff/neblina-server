@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
       - name: Build & Test
@@ -17,6 +20,7 @@ jobs:
           run: |
             pwd
             ls -lah
+            ls work
 
           # mkdir build
           # cd build
