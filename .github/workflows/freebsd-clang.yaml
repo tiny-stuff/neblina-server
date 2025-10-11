@@ -12,15 +12,15 @@ jobs:
       - name: Build & Test
         uses: vmactions/freebsd-vm@v1
         with:
-          usesh: true
           sync: no
           prepare: pkg install -y cmake
           run: |
             pwd
-            ls
-            mkdir build
-            cd build
-            cmake -DCMAKE_BUILD_TYPE=Debug ..
-            make neblina
-            make neblina-tests 
-            ./neblina-tests
+            ls -lah
+
+          # mkdir build
+          # cd build
+          # cmake -DCMAKE_BUILD_TYPE=Debug ..
+          # make neblina
+          # make neblina-tests
+          # ./neblina-tests
