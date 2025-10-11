@@ -20,7 +20,8 @@ jobs:
           run: |
             pwd
             ls -lah
-            ls work
+            echo "---------------"
+            ls -lah work/
 
           # mkdir build
           # cd build

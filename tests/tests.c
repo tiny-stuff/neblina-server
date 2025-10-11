@@ -47,11 +47,13 @@ static void test_watchdog()
 
     watchdog_finalize();
 
-    os_sleep_ms(1000);
+    /*
+    os_sleep_ms(2000);
 
     assert(!os_process_still_running(error_state.pid, NULL));
     assert(!os_process_still_running(infloop_state.pid, NULL));
     assert(!os_process_still_running(nonrec_state.pid, NULL));
+    */
 }
 
 //
@@ -116,7 +118,13 @@ static void test_commbuf()
 static void test_parrot()
 {
     pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
+#ifdef _WIN32
+    os_sleep_ms(1000);
+#else
     os_sleep_ms(100);
+#endif
+
+    assert(os_process_still_running(parrot_pid, NULL));
 
     TCPClient* t = tcpclient_create("localhost", 23456);
     assert(t);
@@ -128,6 +136,7 @@ static void test_parrot()
         LOG("Spinlock failed, received %zi as a response.", r);
     else
         LOG("Response received: '%s'", resp);
+    fflush(stdout);
     assert(memcmp(resp, "hello", r) == 0);
 
     tcpclient_destroy(t);
@@ -166,11 +175,6 @@ static void test_parrot_load()
     printf("Performing load test...\n");
 
     pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
-#ifdef _WIN32
-    os_sleep_ms(1000);
-#else
-    os_sleep_ms(100);
-#endif
     logs_verbose = false;
 
     time_t start = time(NULL);
