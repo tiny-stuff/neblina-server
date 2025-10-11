@@ -126,6 +126,8 @@ static void test_parrot()
     ssize_t r = tcpclient_recv_spinlock(t, (uint8_t *) resp, 5, 5000);
     if (r != 5)
         printf("Spinlock failed, received %zi as a response.", r);
+    else
+        printf("Response received: '%s'", resp);
     assert(memcmp(resp, "hello", r) == 0);
 
     tcpclient_destroy(t);
