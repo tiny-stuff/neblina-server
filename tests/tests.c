@@ -123,8 +123,10 @@ static void test_parrot()
     assert(tcpclient_send_text(t, "hello\r\n") == 7);
 
     char resp[6] = {0};
-    tcpclient_recv_spinlock(t, (uint8_t *) resp, 5, 5000);
-    assert(strcmp(resp, "hello") == 0);
+    ssize_t r = tcpclient_recv_spinlock(t, (uint8_t *) resp, 5, 5000);
+    if (r != 5)
+        printf("Spinlock failed, received %zi as a response.", r);
+    assert(memcmp(resp, "hello", r) == 0);
 
     tcpclient_destroy(t);
     os_kill(parrot_pid);
