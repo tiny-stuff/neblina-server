@@ -14,4 +14,4 @@ jobs:
         with:
           usesh: true
           prepare: pkg install -y cmake
-          run: mkdir build && cd build && cmake .. && make neblina && make neblina-tests && ./neblina-tests
+          run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make neblina && make neblina-tests && ./neblina-tests
