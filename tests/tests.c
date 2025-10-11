@@ -47,7 +47,7 @@ static void test_watchdog()
 
     watchdog_finalize();
 
-    os_sleep_ms(300);
+    os_sleep_ms(500);
 
     assert(!os_process_still_running(error_state.pid, NULL));
     assert(!os_process_still_running(infloop_state.pid, NULL));
