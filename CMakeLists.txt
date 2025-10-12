@@ -84,7 +84,7 @@ add_executable(${PROJECT_NAME}-tests EXCLUDE_FROM_ALL tests/tests.c ${SRC_FILES}
 add_dependencies(${PROJECT_NAME}-tests tests-infloop tests-error tests-nonrecoverable parrot-test sparrot-test)
 
 # add special targets
-set(FINAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests parrot-test)
+set(FINAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests parrot-test sparrot-test)
 include(cmake/special-targets.cmake)
 
 # add common things to all final targets
