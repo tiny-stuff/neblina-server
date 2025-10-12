@@ -186,24 +186,28 @@ static void test_parrot_load()
 // MAIN
 //
 
-int main()
+int main(int argc, char* argv[])
 {
-    socket_init();
-
     logs_verbose = true;
-
-    test_commbuf();
+    socket_init();
 
     pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
     os_sleep_ms(1000);
+
+    // fast tests
+    test_commbuf();
     test_parrot();
+
+    // slow tests
+    if (argc == 2 && strcmp(argv[1], "-k") == 0)
+        goto skip_slow_tests;
 #ifndef _WIN32
     test_parrot_load();
 #endif
-    os_kill(parrot_pid);
-
     test_watchdog();
 
+skip_slow_tests:
+    os_kill(parrot_pid);
     socket_finalize();
 
     printf("\x1b[0;32mTests successful!\x1b[0m\n");

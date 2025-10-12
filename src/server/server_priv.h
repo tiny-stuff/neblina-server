@@ -15,8 +15,6 @@ typedef struct SessionHash {
 } SessionHash;
 
 typedef struct ServerVTable {
-    void   (*free)(Server* server);
-
     int    (*recv)(SOCKET fd, uint8_t** data);
     int    (*send)(SOCKET fd, uint8_t const* data, size_t data_sz);
 
@@ -32,5 +30,8 @@ typedef struct Server {
     Poller*             poller;
     SessionHash*        session_hash;
 } Server;
+
+void server_initialize(Server* server, SOCKET fd, CreateSessionF create_session_cb, void* session_data, size_t n_threads);
+void server_finalize(Server* server);
 
 #endif //NEBLINA_SERVER_SERVER_PRIV_H

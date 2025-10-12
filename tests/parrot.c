@@ -43,12 +43,12 @@ int main(int argc, char* argv[])
         logs_verbose = true;
     os_handle_ctrl_c();
 
-    Server* server = tcp_server_create(23456, false, parrot_session_create, 0);
-    if (!server) {
+    TCPServer* tcp_server = tcp_server_create(23456, false, parrot_session_create, 0);
+    if (!tcp_server) {
         perror("tcp_create_socket");
         return EXIT_FAILURE;
     }
 
-    server_run(server);
-    server_destroy(server);
+    server_run((Server *) tcp_server);
+    tcp_server_destroy(tcp_server);
 }

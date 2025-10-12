@@ -15,7 +15,6 @@ typedef struct Session Session;
 
 typedef Session*(*CreateSessionF)(SOCKET fd, void* data);
 
-void    server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, void* session_data, size_t n_threads);
 void    server_destroy(Server* server);
 
 int     server_iterate(Server* server, size_t timeout_ms);

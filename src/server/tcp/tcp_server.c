@@ -122,25 +122,47 @@ static SOCKET tcp_accept_new_connection(Server* server)
 #pragma GCC diagnostic pop
 }
 
-Server* tcp_server_create(int port, bool open_to_world, CreateSessionF create_session_cb, size_t n_threads)
+int tcp_server_initialize(TCPServer* tcp_server, int port, bool open_to_world, CreateSessionF create_session_cb, size_t n_threads)
 {
     static const ServerVTable vtable = {
-        .free = tcp_server_free,
-        .recv = tcp_server_recv,
-        .send = tcp_server_send,
-        .accept_new_connection = tcp_accept_new_connection,
+            .recv = tcp_server_recv,
+            .send = tcp_server_send,
+            .accept_new_connection = tcp_accept_new_connection,
     };
 
     socket_init();
 
     SOCKET fd = tcp_server_get_listener(port, open_to_world);
     if (fd == INVALID_SOCKET)
-        return NULL;
+        return -1;
 
-    TCPServer* tcp_server = CALLOC(1, sizeof(TCPServer));
-    server_init(&tcp_server->server, fd, create_session_cb, NULL, n_threads);
+    server_initialize(&tcp_server->server, fd, create_session_cb, NULL, n_threads);
     tcp_server->server.vt = &vtable;
     tcp_server->port = port;
     tcp_server->open_to_world = open_to_world;
-    return (Server *) tcp_server;
+
+    return 0;
+}
+
+TCPServer* tcp_server_create(int port, bool open_to_world, CreateSessionF create_session_cb, size_t n_threads)
+{
+    TCPServer* tcp_server = CALLOC(1, sizeof(TCPServer));
+    int r = tcp_server_initialize(tcp_server, port, open_to_world, create_session_cb, n_threads);
+    if (r < 0) {
+        tcp_server_free((Server *) tcp_server);
+        return NULL;
+    }
+    return tcp_server;
+}
+
+void tcp_server_finalize(TCPServer* tcp_server)
+{
+    (void) tcp_server;
+}
+
+void tcp_server_destroy(TCPServer* tcp_server)
+{
+    tcp_server_finalize(tcp_server);
+    server_finalize((Server *) tcp_server);
+    free(tcp_server);
 }

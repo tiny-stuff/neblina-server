@@ -9,7 +9,7 @@
 #include "util/logs.h"
 #include "os/os.h"
 
-const char* service = "parrot";
+const char* service = "sparrot";
 
 typedef struct ParrotSession {
     Session session;
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
         logs_verbose = true;
     os_handle_ctrl_c();
 
-    Server* server = ssl_server_create(23457, false, parrot_session_create, 0);
+    Server* server = (Server *) ssl_server_create(23457, false, parrot_session_create, 0);
     if (!server) {
         perror("ssl_create_socket");
         return EXIT_FAILURE;

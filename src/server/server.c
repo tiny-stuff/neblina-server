@@ -15,7 +15,7 @@
 
 extern volatile bool termination_requested;
 
-void server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, void* session_data, size_t n_threads)
+void server_initialize(Server* server, SOCKET fd, CreateSessionF create_session_cb, void* session_data, size_t n_threads)
 {
     server->create_session_cb = create_session_cb;
     server->session_data = session_data;
@@ -154,7 +154,7 @@ void server_close_socket(SOCKET fd)
 #endif
 }
 
-void server_destroy(Server* server)
+void server_finalize(Server* server)
 {
     // close all connections
     SessionHash *conn_hash, *tmp;
@@ -165,7 +165,12 @@ void server_destroy(Server* server)
     server_close_socket(server->fd);
     poller_destroy(server->poller);
     spool_destroy(server->spool);
-    server->vt->free(server);
     DBG("Server destroyed");
+}
+
+void server_destroy(Server* server)
+{
+    server_finalize(server);
+    free(server);
 }
 
