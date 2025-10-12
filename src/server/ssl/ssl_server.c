@@ -10,15 +10,15 @@ typedef struct SSLServer {
     TCPServer tcp_server;
 } SSLServer;
 
-static void ssl_server_initialize(SSLServer* ssl_server)
+static void ssl_server_initialize(SSLServer* ssl_server, int port, bool open_to_world, CreateSessionF create_session_cb, size_t n_threads)
 {
     memset(ssl_server, 0, sizeof(*ssl_server));
-    // TODO: initialize fields here
+    tcp_server_initialize((TCPServer *) ssl_server, port, open_to_world, create_session_cb, n_threads);
 }
 
 static void ssl_server_finalize(SSLServer* ssl_server)
 {
-    // TODO: finalize fields here
+    tcp_server_finalize((TCPServer *) ssl_server);
 }
 
 SSLServer* ssl_server_create(int port, bool open_to_world, CreateSessionF create_session_cb, size_t n_threads)
@@ -28,7 +28,7 @@ SSLServer* ssl_server_create(int port, bool open_to_world, CreateSessionF create
         fprintf(stderr, "Memory exausted.\n");
         exit(EXIT_FAILURE);
     }
-    ssl_server_initialize(ssl_server);
+    ssl_server_initialize(ssl_server, port, open_to_world, create_session_cb, n_threads);
     return ssl_server;
 }
 
