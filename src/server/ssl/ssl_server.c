@@ -60,6 +60,19 @@ static SOCKET ssl_accept_new_connection(Server* server)
     return fd;
 }
 
+static void ssl_client_disconnected(Server* server, SOCKET fd)
+{
+    SSLServer* ssl_server = (SSLServer *) server;
+    SSL_FD_Map* found;
+    HASH_FIND_INT(ssl_server->ssl_fd_map, &fd, found);
+    if (found) {
+        SSL_free(found->ssl);
+        HASH_DEL(ssl_server->ssl_fd_map, found);
+        free(found);
+    }
+}
+
+
 static SSL* find_ssl(Server* server, SOCKET fd)
 {
     SSLServer* ssl_server = (SSLServer *) server;
@@ -110,6 +123,7 @@ static int ssl_server_initialize(SSLServer* ssl_server, int port, bool open_to_w
             .recv = ssl_server_recv,
             .send = ssl_server_send,
             .accept_new_connection = ssl_accept_new_connection,
+            .client_disconnected = ssl_client_disconnected,
     };
     ssl_server->tcp_server.server.vt = &ssl_vtable;
 

@@ -86,6 +86,9 @@ static void handle_disconnect(Server* server, SOCKET client_fd)
 {
     DBG("Client disconnected from socket %d", client_fd);
 
+    if (server->vt->client_disconnected)
+        server->vt->client_disconnected(server, client_fd);
+
     // find connection in list
     SessionHash* conn_hash;
     HASH_FIND_INT(server->session_hash, &client_fd, conn_hash);

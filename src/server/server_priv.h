@@ -19,6 +19,7 @@ typedef struct ServerVTable {
     int    (*send)(Server* server, SOCKET fd, uint8_t const* data, size_t data_sz);
 
     SOCKET (*accept_new_connection)(Server* server);
+    void   (*client_disconnected)(Server* server, SOCKET fd);
 } ServerVTable;
 
 typedef struct Server {
