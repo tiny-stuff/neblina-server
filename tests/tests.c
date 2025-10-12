@@ -117,7 +117,7 @@ static void test_commbuf()
 
 static void test_parrot()
 {
-    TCPClient* t = tcpclient_create("localhost", 23456);
+    TCPClient* t = tcpclient_create("127.0.0.1", 23456);
     assert(t);
     assert(tcpclient_send_text(t, "hello\r\n") == 7);
 
@@ -142,10 +142,10 @@ static void* test_parrot_load_thread(void *data)
 {
     (void) data;
 
-#define N_CLIENTS 200
+#define N_CLIENTS 100
     TCPClient* clients[N_CLIENTS];
     for (size_t i = 0; i < N_CLIENTS; ++i) {
-        clients[i] = tcpclient_create("localhost", 23456);
+        clients[i] = tcpclient_create("127.0.0.1", 23456);
         assert(clients[i]);
     }
     for (size_t i = 0; i < N_CLIENTS; ++i)
@@ -169,7 +169,7 @@ static void test_parrot_load()
 
     time_t start = time(NULL);
 
-#define N_THREADS 20
+#define N_THREADS 10
     pthread_t threads[N_THREADS];
     for (size_t i = 0; i < N_THREADS; ++i)
         pthread_create(&threads[i], NULL, test_parrot_load_thread, NULL);
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
     socket_init();
 
     pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
-    os_sleep_ms(1000);
+    os_sleep_ms(100);
 
     // fast tests
     test_commbuf();

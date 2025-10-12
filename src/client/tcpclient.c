@@ -43,7 +43,7 @@ static SOCKET open_connection_(const char* host, int port)
     struct addrinfo* servinfo;
     char sport[15]; snprintf(sport, sizeof sport, "%d", port);
     if ((rv = getaddrinfo(host, sport, &hints, &servinfo)) != 0) {
-        ERR("getaddrinfo: %s", gai_strerror(rv));
+        ERR("getaddrinfo: %s // %s", strerror(errno), gai_strerror(rv));
         return INVALID_SOCKET;
     }
 
