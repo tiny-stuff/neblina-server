@@ -15,8 +15,8 @@ typedef struct SessionHash {
 } SessionHash;
 
 typedef struct ServerVTable {
-    int    (*recv)(SOCKET fd, uint8_t** data);
-    int    (*send)(SOCKET fd, uint8_t const* data, size_t data_sz);
+    int    (*recv)(Server* server, SOCKET fd, uint8_t** data);
+    int    (*send)(Server* server, SOCKET fd, uint8_t const* data, size_t data_sz);
 
     SOCKET (*accept_new_connection)(Server* server);
 } ServerVTable;

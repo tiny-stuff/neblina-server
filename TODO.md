@@ -19,6 +19,8 @@
     - [x] Create TCPClient (?)
     - [x] Load testing
 - [ ] SSL server + SParrot
+  - [ ] Leaks
+  - [ ] Handle disconnect (free SSL)
 - [ ] Process config file
 - [ ] HTTP structs
 - [ ] HTTP server and request handlers

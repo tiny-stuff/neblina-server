@@ -12,8 +12,9 @@
 
 static const char* ERR_PRX = "TCP server error:";
 
-static int tcp_server_recv(SOCKET fd, uint8_t** data)
+static int tcp_server_recv(Server* server, SOCKET fd, uint8_t** data)
 {
+    (void) server;
     *data = MALLOC(RECV_BUF_SZ);
     ssize_t r = recv(fd, (char *) *data, RECV_BUF_SZ, 0);
     if (r < 0)
@@ -21,8 +22,9 @@ static int tcp_server_recv(SOCKET fd, uint8_t** data)
     return (int) r;
 }
 
-static int tcp_server_send(SOCKET fd, uint8_t const* data, size_t data_sz)
+static int tcp_server_send(Server* server, SOCKET fd, uint8_t const* data, size_t data_sz)
 {
+    (void) server;
     ssize_t r = send(fd, (const char *) data, (int) data_sz, 0);
     if (r < 0)
         ERR("%s send error: %s", ERR_PRX, strerror(errno));
@@ -95,7 +97,7 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
     return listener;
 }
 
-static SOCKET tcp_accept_new_connection(Server* server)
+SOCKET tcp_accept_new_connection(Server* server)
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wanalyzer-fd-leak"
@@ -157,12 +159,11 @@ TCPServer* tcp_server_create(int port, bool open_to_world, CreateSessionF create
 
 void tcp_server_finalize(TCPServer* tcp_server)
 {
-    (void) tcp_server;
+    server_finalize((Server *) tcp_server);
 }
 
 void tcp_server_destroy(TCPServer* tcp_server)
 {
     tcp_server_finalize(tcp_server);
-    server_finalize((Server *) tcp_server);
     free(tcp_server);
 }

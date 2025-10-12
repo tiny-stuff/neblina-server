@@ -29,7 +29,7 @@ int server_process_session(Server* server, Session* session)
 {
     // receive data
     uint8_t* recv_buf;
-    int r = server->vt->recv(session->fd, &recv_buf);
+    int r = server->vt->recv(server, session->fd, &recv_buf);
     if (r < 0) {
         ERR("Error receiving data from socket %d: %s", session->fd, strerror(errno));
         return r;
@@ -47,7 +47,7 @@ int server_process_session(Server* server, Session* session)
     // send pending data
     size_t sz;
     uint8_t const* data_to_send = commbuf_send_buffer(session->connection, &sz);
-    r = server->vt->send(session->fd, data_to_send, sz);
+    r = server->vt->send(server, session->fd, data_to_send, sz);
     if (r < 0) {
         ERR("Error sending data to socket %d: %s", session->fd, strerror(errno));
         return r;
@@ -63,6 +63,7 @@ static int handle_new_connection(Server* server)
     SOCKET client_fd = server->vt->accept_new_connection(server);
     if (client_fd == INVALID_SOCKET) {
         ERR("error accepting a new connection: %s", strerror(errno));
+        close(client_fd);
         return -1;
     }
 
