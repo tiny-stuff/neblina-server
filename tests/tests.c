@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
     socket_init();
 
     pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
-    os_sleep_ms(100);
+    os_sleep_ms(500);
 
     // fast tests
     test_commbuf();
