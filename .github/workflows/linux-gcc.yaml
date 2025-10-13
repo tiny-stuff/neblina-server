@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: apt-get install -y openssl
       - name: Configure CMake
         run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug ..
       - name: Build executable
