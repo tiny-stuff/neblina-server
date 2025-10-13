@@ -13,5 +13,5 @@ jobs:
         uses: vmactions/freebsd-vm@v1
         with:
           usesh: true
-          prepare: pkg install -y cmake
+          prepare: pkg install -y cmake openssl
           run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make neblina && make neblina-tests && ./neblina-tests
