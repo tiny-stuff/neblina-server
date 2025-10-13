@@ -33,7 +33,7 @@ static Session* parrot_session_create(SOCKET fd, void* data)
     (void) data;
 
     ParrotSession* psession = calloc(1, sizeof(ParrotSession));
-    session_init(&psession->session, fd, sparrot_on_recv, NULL);
+    session_init(&psession->session, fd, parrot_on_recv, NULL);
     return (Session *) psession;
 }
 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
         logs_verbose = true;
     os_handle_ctrl_c();
 
-    TCPServer* tcp_server = tcp_server_create(23456, false, sparrot_session_create, 8);
+    TCPServer* tcp_server = tcp_server_create(23456, false, parrot_session_create, 8);
     if (!tcp_server) {
         perror("tcp_create_socket");
         return EXIT_FAILURE;
