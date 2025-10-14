@@ -6,6 +6,8 @@
 
 #include <pthread.h>
 
+#include "alloc.h"
+
 struct ThreadData {
     FutureThread f;
     Future*      future;
@@ -59,7 +61,7 @@ static void future_finalize(Future* future)
 
 Future* future_create(FutureThread future_thread, void* data)
 {
-    Future* future = malloc(sizeof(Future));
+    Future* future = MALLOC(sizeof(Future));
     if (future == NULL) {
         fprintf(stderr, "Memory exausted.\n");
         exit(EXIT_FAILURE);
