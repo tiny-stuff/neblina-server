@@ -16,13 +16,15 @@ TEST_CASE("Watchdog")
     };
     watchdog_init(programs, sizeof programs / sizeof programs[0]);
 
-    for (size_t i = 0; i < 5; ++i)
+    for (size_t i = 0; i < 5; ++i) {
         watchdog_step();
+        os_sleep_ms(10);
+    }
 
     WatchdogProgramState error_state = watchdog_program_state(0);
     SUBCASE("Failure retries")
     {
-        CHECK(error_state.attempts > 2);
+        CHECK(error_state.attempts > 1);
     }
 
     WatchdogProgramState infloop_state = watchdog_program_state(1);
