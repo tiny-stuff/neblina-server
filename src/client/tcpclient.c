@@ -141,11 +141,13 @@ ssize_t tcpclient_send_text(TCPClient* t, const char* data)
     return t->vt.send(t->fd, (uint8_t const *) data, strlen(data));
 }
 
-ssize_t tcpclient_recv(TCPClient* t, uint8_t** data)
+ssize_t tcpclient_recv_nonblock(TCPClient* t, uint8_t** data)
 {
     *data = MALLOC(BUF_SZ);
     ssize_t r = t->vt.recv(t->fd, *data, BUF_SZ);
     if (r <= 0) {
+        if (r < 0 && errno == EAGAIN)
+            r = 0;
         free(data);
     }
 
