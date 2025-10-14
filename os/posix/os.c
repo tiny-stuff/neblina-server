@@ -76,5 +76,5 @@ bool os_process_still_running(pid_t pid, int* status)
 
 void os_kill(pid_t pid)
 {
-    kill(pid, SIGINT);
+    kill(pid, SIGTERM);
 }

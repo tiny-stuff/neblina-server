@@ -48,7 +48,7 @@ TEST_CASE("Watchdog")
     CHECK(os_process_still_running(infloop_state.pid, NULL));
 
     watchdog_finalize();
-    os_sleep_ms(1000);
+    os_sleep_ms(200);
 
     SUBCASE("Programs finalized when watchdog ended")
     {
