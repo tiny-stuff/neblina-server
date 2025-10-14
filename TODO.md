@@ -18,9 +18,13 @@
   - [x] Additional tests (for parrot)
     - [x] Create TCPClient (?)
     - [x] Load testing
-- [x] SSL server + SParrot
-  - [x] Leaks
-  - [x] Handle disconnect (free SSL)
+- [ ] General Improvements
+  - [x] Doctest
+  - [ ] Futures
+  - [ ] String library?
+- [ ] SSL server + SParrot
+  - [ ] Handle disconnect (free SSL)
+  - [ ] SSL client
 - [ ] Process config file
 - [ ] HTTP structs
 - [ ] HTTP server and request handlers
