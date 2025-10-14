@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdatomic.h>
 
+#include <atomic>
 #include <thread>
 
 extern "C" {
