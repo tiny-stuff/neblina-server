@@ -1,6 +1,7 @@
 #include "doctest.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 extern "C" {
 #include "server/commbuf.h"

@@ -1,5 +1,7 @@
 #include "doctest.h"
 
+#include <stdlib.h>
+
 extern "C" {
 #include "watchdog/watchdog.h"
 extern bool logs_enabled;
