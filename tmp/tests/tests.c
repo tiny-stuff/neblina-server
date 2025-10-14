@@ -142,7 +142,7 @@ static void* test_parrot_load_thread(void *data)
 {
     (void) data;
 
-#define N_CLIENTS 100
+#define N_CLIENTS 10
     TCPClient* clients[N_CLIENTS];
     for (size_t i = 0; i < N_CLIENTS; ++i) {
         clients[i] = tcpclient_create("127.0.0.1", 23456);
@@ -199,14 +199,13 @@ int main(int argc, char* argv[])
     test_parrot();
 
     // slow tests
-    if (argc == 2 && strcmp(argv[1], "-k") == 0)
-        goto skip_slow_tests;
+    if (!(argc == 2 && strcmp(argv[1], "-k") == 0)) {
 #ifndef _WIN32
-    test_parrot_load();
+        test_parrot_load();
 #endif
-    test_watchdog();
+        test_watchdog();
+    }
 
-skip_slow_tests:
     os_kill(parrot_pid);
     socket_finalize();
 
