@@ -13,7 +13,7 @@ typedef long ssize_t;
 void socket_init();
 void socket_finalize();
 
-void close(SOCKET fd);
+#define close_socket closesocket
 
 #else
 
@@ -33,6 +33,8 @@ typedef struct sockaddr SOCKADDR;
 
 #define socket_init() {}
 #define socket_finalize() {}
+
+#define close_socket close
 
 #endif
 

@@ -60,7 +60,7 @@ static SOCKET open_connection_(const char* host, int port)
 
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
             DBG("connect() to %s:%s failed: %s", address, sport, strerror(errno));
-            close(sockfd);
+            close_socket(sockfd);
             continue;
         }
 
@@ -107,7 +107,7 @@ int tcpclient_initialize(TCPClient* t, const char* host, int port)
 void tcpclient_finalize(TCPClient* t)
 {
     if (t->fd != INVALID_SOCKET)
-        close(t->fd);
+        close_socket(t->fd);
 }
 
 TCPClient* tcpclient_create(const char* host, int port)
