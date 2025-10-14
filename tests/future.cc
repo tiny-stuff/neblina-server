@@ -19,6 +19,15 @@ static void* task_immediate_failure(Future* future, void*)
 
 TEST_CASE("Futures")
 {
+    SUBCASE("Failure")
+    {
+        Future* future = future_create(task_immediate_failure, NULL);
+        void* result;
+        CHECK(future_await(future, &result) == FU_ERROR);
+        CHECK(result == (void *) EXIT_FAILURE);
+        future_destroy(future);
+    }
+
     SUBCASE("Success")
     {
         Future* future = future_create(task_success_after_50ms, NULL);
@@ -26,15 +35,6 @@ TEST_CASE("Futures")
         void* result;
         CHECK(future_await(future, &result) == FU_SUCCESS);
         CHECK(result == (void *) EXIT_SUCCESS);
-        future_destroy(future);
-    }
-
-    SUBCASE("Failure")
-    {
-        Future* future = future_create(task_immediate_failure, NULL);
-        void* result;
-        CHECK(future_await(future, &result) == FU_ERROR);
-        CHECK(result == (void *) EXIT_FAILURE);
         future_destroy(future);
     }
 }

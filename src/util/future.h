@@ -10,7 +10,6 @@ Future*      future_create(FutureThread future_thread, void* data);
 void         future_destroy(Future* future);
 
 FutureStatus future_status(Future* future);
-void*        future_result(Future* future);
 
 FutureStatus future_await(Future* future, void** result);
 
