@@ -25,8 +25,18 @@ void server_initialize(Server* server, SOCKET fd, CreateSessionF create_session_
     server->session_hash = NULL;
 }
 
+static bool server_is_session_active(Server* server, Session* session)
+{
+    SessionHash* conn_hash;
+    HASH_FIND_INT(server->session_hash, &session->fd, conn_hash);
+    return conn_hash != NULL;
+}
+
 int server_process_session(Server* server, Session* session)
 {
+    if (!server_is_session_active(server, session))
+        return 0;
+
     // receive data
     uint8_t* recv_buf;
     int r = server->vt->recv(server, session->fd, &recv_buf);
