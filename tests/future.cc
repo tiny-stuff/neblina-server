@@ -1,5 +1,7 @@
 #include "doctest.h"
 
+#include <stdlib.h>
+
 extern "C" {
 #include "util/future.h"
 #include "os.h"
