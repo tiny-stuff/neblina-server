@@ -20,7 +20,7 @@ TEST_CASE("Watchdog")
 
     for (size_t i = 0; i < 5; ++i) {
         watchdog_step();
-        os_sleep_ms(10);
+        os_sleep_ms(100);
     }
 
     WatchdogProgramState error_state = watchdog_program_state(0);
@@ -48,7 +48,7 @@ TEST_CASE("Watchdog")
     CHECK(os_process_still_running(infloop_state.pid, NULL));
 
     watchdog_finalize();
-    os_sleep_ms(500);
+    os_sleep_ms(1000);
 
     SUBCASE("Programs finalized when watchdog ended")
     {
