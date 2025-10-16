@@ -20,7 +20,7 @@ typedef struct {
 
 void watchdog_init(WatchdogProgram const* programs, size_t programs_sz);
 void watchdog_step();
-void watchdog_finalize();
+void watchdog_finalize(bool immediate);
 
 typedef enum { WPS_RUNNING, WPS_STOPPED, WPS_GAVE_UP } WatchdogProgramStatus;
 typedef struct {
