@@ -49,7 +49,6 @@ auto server_thread_function = []() {
     TCPServer* server = tcp_server_create(23456, false, parrot_session_create, 8);
     while (server_running)
         server_iterate((Server *) server, 50);
-    os_sleep_ms(20);
     tcp_server_destroy(server);
 };
 
