@@ -54,7 +54,6 @@ auto server_thread_function = []() {
 
 TEST_SUITE("TCP")
 {
-    /*
     TEST_CASE("TCP (server single threaded, client single threaded)")
     {
         logs_enabled = false;
@@ -81,7 +80,6 @@ TEST_SUITE("TCP")
 
         logs_enabled = true;
     }
-    */
 
     TEST_CASE("TCP (server multithreaded, client single threaded)")
     {
@@ -111,13 +109,12 @@ TEST_SUITE("TCP")
         logs_enabled = true;
     }
 
-    /*
     TEST_CASE("TCP (server multithreaded, multiple single-threaded clients)")
     {
         logs_enabled = false;
 
         auto server_thread = std::thread(server_thread_function);
-        os_sleep_ms(50);
+        os_sleep_ms(300);
 
 #define N_CLIENTS 7
         TCPClient* clients[N_CLIENTS];
@@ -125,10 +122,11 @@ TEST_SUITE("TCP")
             clients[i] = tcpclient_create("127.0.0.1", 23456);
             CHECK(clients[i]);
         }
+        os_sleep_ms(300);
 
         for (size_t i = 0; i < N_CLIENTS; ++i)
             CHECK(tcpclient_send_text(clients[i], "hello\r\n") == 7);
-        os_sleep_ms(50);
+        os_sleep_ms(300);
 
         for (size_t i = 0; i < N_CLIENTS; ++i) {
             char resp[6] = {0};
@@ -139,9 +137,9 @@ TEST_SUITE("TCP")
         for (size_t i = 0; i < N_CLIENTS; ++i)
             tcpclient_destroy(clients[i]);
         server_running = false;
+        os_sleep_ms(300);
         server_thread.join();
 
         logs_enabled = true;
     }
-    */
 }
