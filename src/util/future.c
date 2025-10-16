@@ -44,7 +44,7 @@ static void future_initialize(Future* future, FutureThread future_thread, void* 
     future->status = FU_RUNNING;
     future->result = NULL;
 
-    future->dt = malloc(sizeof *future->dt);
+    future->dt = MALLOC(sizeof *future->dt);
     future->dt->f = future_thread;
     future->dt->future = future;
     future->dt->data = data;
