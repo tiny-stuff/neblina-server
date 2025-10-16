@@ -47,13 +47,11 @@ static void test_watchdog()
 
     watchdog_finalize();
 
-    /*
     os_sleep_ms(2000);
 
     assert(!os_process_still_running(error_state.pid, NULL));
     assert(!os_process_still_running(infloop_state.pid, NULL));
     assert(!os_process_still_running(nonrec_state.pid, NULL));
-    */
 }
 
 //
