@@ -81,7 +81,6 @@ TEST_SUITE("TCP")
         logs_enabled = true;
     }
 
-    /*
     TEST_CASE("TCP (client single threaded, server multithreaded)")
     {
         logs_enabled = false;
@@ -109,6 +108,7 @@ TEST_SUITE("TCP")
         logs_enabled = true;
     }
 
+    /*
     TEST_CASE("TCP (server multithreaded, single client)")
     {
         logs_enabled = false;
