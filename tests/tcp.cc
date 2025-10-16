@@ -137,7 +137,7 @@ TEST_SUITE("TCP")
         for (size_t i = 0; i < N_CLIENTS; ++i)
             tcpclient_destroy(clients[i]);
         server_running = false;
-        os_sleep_ms(300);
+        os_sleep_ms(2000);
         server_thread.join();
 
         logs_enabled = true;
