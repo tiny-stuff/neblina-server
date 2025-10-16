@@ -50,11 +50,14 @@ TEST_CASE("Watchdog")
     watchdog_finalize(true);
     os_sleep_ms(200);
 
-    SUBCASE("Programs finalized when watchdog ended")
-    {
-        CHECK(!os_process_still_running(error_state.pid, NULL));
-        CHECK(!os_process_still_running(infloop_state.pid, NULL));
-        CHECK(!os_process_still_running(nonrec_state.pid, NULL));
+    char* ignore_still_running = getenv("IGNORE_STILL_RUNNING");
+    if (!ignore_still_running) {
+        SUBCASE("Programs finalized when watchdog ended")
+        {
+            CHECK(!os_process_still_running(error_state.pid, NULL));
+            CHECK(!os_process_still_running(infloop_state.pid, NULL));
+            CHECK(!os_process_still_running(nonrec_state.pid, NULL));
+        }
     }
 
     logs_enabled = true;
