@@ -50,10 +50,11 @@ static void* thread_function(void* arg)
         ctx->should_wake = false;
         pthread_mutex_unlock(&ctx->mutex);
 
+        pthread_mutex_lock(&ctx->cpool->session_threads_mutex);      //-----------------LOCK--------------------
+
         // make a list of sessions that are ready for work
         Session** sessions = NULL;
         size_t sessions_sz = 0;
-        pthread_mutex_lock(&ctx->cpool->session_threads_mutex);
         for (SessionThread* session_th = ctx->cpool->session_thread_map; session_th != NULL; session_th = session_th->hh.next) {
             if (session_th->ready && session_th->thread_n == ctx->thread_n) {
                 ++sessions_sz;
@@ -62,11 +63,12 @@ static void* thread_function(void* arg)
                 session_th->ready = false;
             }
         }
-        pthread_mutex_unlock(&ctx->cpool->session_threads_mutex);
 
         // do the work
         for (size_t i = 0; i < sessions_sz; ++i)
             server_process_session(ctx->cpool->server, sessions[i]);
+
+        pthread_mutex_unlock(&ctx->cpool->session_threads_mutex);    //-----------------UNLOCK-------------------
 
         free(sessions);
     }

@@ -94,7 +94,6 @@ TEST_SUITE("TCP")
         SUBCASE("Send data to server and get echo")
         {
             CHECK(tcpclient_send_text(client, "hello\r\n") == 7);
-            os_sleep_ms(300);
 
             char resp[6] = {0};
             ssize_t r = tcpclient_recv_spinlock(client, (uint8_t *) resp, 5, 5000);
@@ -103,7 +102,6 @@ TEST_SUITE("TCP")
 
         tcpclient_destroy(client);
         server_running = false;
-        os_sleep_ms(300);
         server_thread.join();
 
         logs_enabled = true;
@@ -126,7 +124,6 @@ TEST_SUITE("TCP")
 
         for (size_t i = 0; i < N_CLIENTS; ++i)
             CHECK(tcpclient_send_text(clients[i], "hello\r\n") == 7);
-        os_sleep_ms(300);
 
         for (size_t i = 0; i < N_CLIENTS; ++i) {
             char resp[6] = {0};
@@ -137,7 +134,6 @@ TEST_SUITE("TCP")
         for (size_t i = 0; i < N_CLIENTS; ++i)
             tcpclient_destroy(clients[i]);
         server_running = false;
-        os_sleep_ms(2000);
         server_thread.join();
 
         logs_enabled = true;
