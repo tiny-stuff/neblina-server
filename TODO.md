@@ -20,7 +20,7 @@
     - [x] Load testing
 - [ ] General Improvements
   - [x] Doctest
-  - [ ] Futures
+  - [x] Futures
   - [ ] String library?
 - [ ] SSL server + SParrot
   - [ ] Handle disconnect (free SSL)
