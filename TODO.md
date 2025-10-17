@@ -21,6 +21,10 @@
 - [x] SSL server + SParrot
   - [x] Leaks
   - [x] Handle disconnect (free SSL)
+  - [ ] Write tests
+  - [ ] Refactor
+    - [ ] Use void* for polymorhism
+    - [ ] Consider composition over inheritance
 - [ ] Process config file
 - [ ] HTTP structs
 - [ ] HTTP server and request handlers
