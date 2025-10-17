@@ -25,8 +25,18 @@ void server_initialize(Server* server, SOCKET fd, CreateSessionF create_session_
     server->session_hash = NULL;
 }
 
+static bool server_is_session_active(Server* server, Session* session)
+{
+    SessionHash* conn_hash;
+    HASH_FIND_INT(server->session_hash, &session->fd, conn_hash);
+    return conn_hash != NULL;
+}
+
 int server_process_session(Server* server, Session* session)
 {
+    if (!server_is_session_active(server, session))
+        return 0;
+
     // receive data
     uint8_t* recv_buf;
     int r = server->vt->recv(server, session->fd, &recv_buf);
@@ -40,7 +50,7 @@ int server_process_session(Server* server, Session* session)
         free(recv_buf);
         if (rr < 0) {
             ERR("Error on session connected to socket %d: %s (possible description)", session->fd, strerror(errno));
-            close(session->fd);
+            close_socket(session->fd);
         }
     }
 
@@ -63,7 +73,7 @@ static int handle_new_connection(Server* server)
     SOCKET client_fd = server->vt->accept_new_connection(server);
     if (client_fd == INVALID_SOCKET) {
         ERR("error accepting a new connection: %s", strerror(errno));
-        close(client_fd);
+        close_socket(client_fd);
         return -1;
     }
 
@@ -151,11 +161,7 @@ void server_run(Server* server)
 
 void server_close_socket(SOCKET fd)
 {
-#ifdef _WIN32
-    closesocket(fd);
-#else
-    close(fd);
-#endif
+    close_socket(fd);
 }
 
 void server_finalize(Server* server)

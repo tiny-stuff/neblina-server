@@ -94,11 +94,11 @@ void watchdog_step()
     os_sleep_ms(MS_BETWEEN_RETRIES);
 }
 
-void watchdog_finalize()
+void watchdog_finalize(bool immediate)
 {
     for (size_t i = 0; i < n_tasks; ++i)
         if (tasks[i].pid != PID_NOT_RUNNING)
-            os_kill(tasks[i].pid);
+            os_kill(tasks[i].pid, immediate);
     free(tasks);
 }
 

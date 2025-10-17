@@ -18,6 +18,13 @@
   - [x] Additional tests (for parrot)
     - [x] Create TCPClient (?)
     - [x] Load testing
+- [ ] General Improvements
+  - [x] Doctest
+  - [ ] Futures
+  - [ ] String library?
+- [ ] SSL server + SParrot
+  - [ ] Handle disconnect (free SSL)
+  - [ ] SSL client
 - [x] SSL server + SParrot
   - [x] Leaks
   - [x] Handle disconnect (free SSL)

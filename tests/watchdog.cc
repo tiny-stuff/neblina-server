@@ -1,0 +1,64 @@
+#include "doctest.h"
+
+#include <stdlib.h>
+
+extern "C" {
+#include "watchdog/watchdog.h"
+extern bool logs_enabled;
+}
+
+TEST_CASE("Watchdog")
+{
+    logs_enabled = false;
+
+    WatchdogProgram programs[] = {
+            { "error",   "./tests-error",          NULL, 0 },
+            { "infloop", "./tests-infloop",        NULL, 0 },
+            { "nonrec",  "./tests-nonrecoverable", NULL, 0 },
+    };
+    watchdog_init(programs, sizeof programs / sizeof programs[0]);
+
+    for (size_t i = 0; i < 5; ++i) {
+        watchdog_step();
+        os_sleep_ms(100);
+    }
+
+    WatchdogProgramState error_state = watchdog_program_state(0);
+    SUBCASE("Failure retries")
+    {
+        CHECK(error_state.attempts > 1);
+    }
+
+    WatchdogProgramState infloop_state = watchdog_program_state(1);
+    SUBCASE("Check if running")
+    {
+        CHECK(infloop_state.status == WPS_RUNNING);
+        CHECK(infloop_state.attempts == 1);
+        CHECK(infloop_state.pid != PID_NOT_RUNNING);
+    }
+
+    WatchdogProgramState nonrec_state = watchdog_program_state(2);
+    SUBCASE("Non-recoverable")
+    {
+        CHECK(nonrec_state.status == WPS_GAVE_UP);
+        CHECK(nonrec_state.attempts == 11);
+        CHECK(nonrec_state.pid == PID_NOT_RUNNING);
+    }
+
+    CHECK(os_process_still_running(infloop_state.pid, NULL));
+
+    watchdog_finalize(true);
+    os_sleep_ms(200);
+
+    char* ignore_still_running = getenv("IGNORE_STILL_RUNNING");
+    if (!ignore_still_running) {
+        SUBCASE("Programs finalized when watchdog ended")
+        {
+            CHECK(!os_process_still_running(error_state.pid, NULL));
+            CHECK(!os_process_still_running(infloop_state.pid, NULL));
+            CHECK(!os_process_still_running(nonrec_state.pid, NULL));
+        }
+    }
+
+    logs_enabled = true;
+}

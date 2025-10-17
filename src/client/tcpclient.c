@@ -60,7 +60,7 @@ static SOCKET open_connection_(const char* host, int port)
 
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
             DBG("connect() to %s:%s failed: %s", address, sport, strerror(errno));
-            close(sockfd);
+            close_socket(sockfd);
             continue;
         }
 
@@ -107,7 +107,7 @@ int tcpclient_initialize(TCPClient* t, const char* host, int port)
 void tcpclient_finalize(TCPClient* t)
 {
     if (t->fd != INVALID_SOCKET)
-        close(t->fd);
+        close_socket(t->fd);
 }
 
 TCPClient* tcpclient_create(const char* host, int port)
@@ -141,11 +141,13 @@ ssize_t tcpclient_send_text(TCPClient* t, const char* data)
     return t->vt.send(t->fd, (uint8_t const *) data, strlen(data));
 }
 
-ssize_t tcpclient_recv(TCPClient* t, uint8_t** data)
+ssize_t tcpclient_recv_nonblock(TCPClient* t, uint8_t** data)
 {
     *data = MALLOC(BUF_SZ);
     ssize_t r = t->vt.recv(t->fd, *data, BUF_SZ);
     if (r <= 0) {
+        if (r < 0 && errno == EAGAIN)
+            r = 0;
         free(data);
     }
 

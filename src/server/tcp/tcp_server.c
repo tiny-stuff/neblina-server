@@ -41,7 +41,7 @@ static void tcp_server_free(Server* server)
 
 static SOCKET tcp_server_get_listener(int port, bool open_to_world)
 {
-#define FATAL(...) { ERR(__VA_ARGS__); if (listener != INVALID_SOCKET) close(listener); return INVALID_SOCKET; }
+#define FATAL(...) { ERR(__VA_ARGS__); if (listener != INVALID_SOCKET) close_socket(listener); return INVALID_SOCKET; }
 
     SOCKET listener = INVALID_SOCKET;
 

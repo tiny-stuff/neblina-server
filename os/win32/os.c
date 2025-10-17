@@ -114,8 +114,10 @@ bool os_process_still_running(DWORD dwProcessId, int* status)
     return code == STILL_ACTIVE;
 }
 
-void os_kill(DWORD pid)
+void os_kill(pid_t pid, bool immediate)
 {
+    (void) immediate;
+
     // Open the process with rights to terminate it
     HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
     if (hProcess == NULL) {

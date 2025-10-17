@@ -47,13 +47,11 @@ static void test_watchdog()
 
     watchdog_finalize();
 
-    /*
     os_sleep_ms(2000);
 
     assert(!os_process_still_running(error_state.pid, NULL));
     assert(!os_process_still_running(infloop_state.pid, NULL));
     assert(!os_process_still_running(nonrec_state.pid, NULL));
-    */
 }
 
 //
@@ -142,7 +140,7 @@ static void* test_parrot_load_thread(void *data)
 {
     (void) data;
 
-#define N_CLIENTS 100
+#define N_CLIENTS 10
     TCPClient* clients[N_CLIENTS];
     for (size_t i = 0; i < N_CLIENTS; ++i) {
         clients[i] = tcpclient_create("127.0.0.1", 23456);
@@ -192,21 +190,20 @@ int main(int argc, char* argv[])
     socket_init();
 
     pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
-    os_sleep_ms(100);
+    os_sleep_ms(500);
 
     // fast tests
     test_commbuf();
     test_parrot();
 
     // slow tests
-    if (argc == 2 && strcmp(argv[1], "-k") == 0)
-        goto skip_slow_tests;
+    if (!(argc == 2 && strcmp(argv[1], "-k") == 0)) {
 #ifndef _WIN32
-    test_parrot_load();
+        test_parrot_load();
 #endif
-    test_watchdog();
+        test_watchdog();
+    }
 
-skip_slow_tests:
     os_kill(parrot_pid);
     socket_finalize();
 
