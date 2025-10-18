@@ -111,10 +111,10 @@ TEST_SUITE("TCP")
     {
         logs_enabled = false;
 
-        auto server_thread = std::thread(server_thread_function, 2);
+        auto server_thread = std::thread(server_thread_function, 8);
         os_sleep_ms(300);
 
-#define N_CLIENTS 7
+#define N_CLIENTS 30
         TCPClient* clients[N_CLIENTS];
         for (size_t i = 0; i < N_CLIENTS; ++i) {
             clients[i] = tcpclient_create("127.0.0.1", 23456);
