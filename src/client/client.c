@@ -35,18 +35,18 @@ void client_destroy(Client* client)
 
 ssize_t client_send(Client* t, uint8_t* data, size_t sz)
 {
-    return t->vt.send(t->fd, data, sz);
+    return t->vt.send(t, data, sz);
 }
 
 ssize_t client_send_text(Client* t, const char* data)
 {
-    return t->vt.send(t->fd, (uint8_t const *) data, strlen(data));
+    return t->vt.send(t, (uint8_t const *) data, strlen(data));
 }
 
 ssize_t client_recv_nonblock(Client* t, uint8_t** data)
 {
     *data = MALLOC(BUF_SZ);
-    ssize_t r = t->vt.recv(t->fd, *data, BUF_SZ);
+    ssize_t r = t->vt.recv(t, *data, BUF_SZ);
     if (r <= 0) {
         if (r < 0 && errno == EAGAIN)
             r = 0;
@@ -69,7 +69,7 @@ ssize_t client_recv_spinlock(Client* t, uint8_t* data, size_t sz, size_t timeout
 
     size_t pos = 0;
     while (pos < sz) {
-        ssize_t r = t->vt.recv(t->fd, &data[pos], sz - pos);
+        ssize_t r = t->vt.recv(t, &data[pos], sz - pos);
 #ifdef _WIN32
 		int err = WSAGetLastError();
         if (r < 0 && err != EWOULDBLOCK && err != WSAEWOULDBLOCK) {

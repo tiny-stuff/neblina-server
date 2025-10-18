@@ -4,8 +4,8 @@
 #include "socket.h"
 
 typedef struct ClientVTable {
-    ssize_t (*recv)(SOCKET fd, uint8_t* data, size_t sz);
-    ssize_t (*send)(SOCKET fd, uint8_t const* data, size_t sz);
+    ssize_t (*recv)(Client* client, uint8_t* data, size_t sz);
+    ssize_t (*send)(Client* client, uint8_t const* data, size_t sz);
 } ClientVTable;
 
 typedef struct Client {

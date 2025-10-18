@@ -10,14 +10,14 @@
 #include "client_priv.h"
 #include "tcpclient_priv.h"
 
-static ssize_t recv_(SOCKET fd, uint8_t* data, size_t sz)
+static ssize_t recv_(Client* client, uint8_t* data, size_t sz)
 {
-    return recv(fd, data, sz, 0);
+    return recv(client->fd, data, sz, 0);
 }
 
-static ssize_t send_(SOCKET fd, uint8_t const* data, size_t sz)
+static ssize_t send_(Client* client, uint8_t const* data, size_t sz)
 {
-    return send(fd, data, sz, 0);
+    return send(client->fd, data, sz, 0);
 }
 
 static void *get_in_addr(struct sockaddr *sa)
