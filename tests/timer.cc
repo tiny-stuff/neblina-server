@@ -14,5 +14,6 @@ TEST_SUITE("Timer")
         uint64_t t = timer_current_ms(timer);
         CHECK(t >= 9);
         CHECK(t < 100);
+        timer_destroy(timer);
     }
 }
