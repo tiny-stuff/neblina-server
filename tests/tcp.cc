@@ -47,7 +47,7 @@ static Session* parrot_session_create(SOCKET fd, void* data)
 static std::atomic_bool server_running { true };
 static std::atomic_bool server_connected { false };
 
-auto server_thread_function = [](int n_threads) {
+static auto server_thread_function = [](int n_threads) {
     server_running = true;
     TCPServer* server = tcp_server_create(23456, false, parrot_session_create, n_threads);
     server_connected = true;

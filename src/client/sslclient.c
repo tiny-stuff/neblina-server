@@ -9,6 +9,7 @@
 
 #include "util/error.h"
 #include "tcpclient_priv.h"
+#include "os.h"
 
 static int on_error(const char* str, size_t sz, void* data)
 {
@@ -74,6 +75,27 @@ static SSL* wrap_socket(SSLClient* sslclient)
     SSL_set_fd(ssl, sslclient->base.base.fd);
 
     // handshake
+    while (1) {
+        int ret = SSL_connect(ssl);
+        if (ret == 1) {
+            DBG("sslclient: handshake complete!\n");
+            break;
+        }
+
+        int err = SSL_get_error(ssl, ret);
+        if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
+            os_sleep_ms(1);
+            continue;
+        } else {
+            ERR("Could not open a SSL connection");
+            ERR_print_errors_fp(stderr);
+            ERR_print_errors_cb(on_error, NULL);
+            ERR_print_errors_fp(stderr);
+            SSL_free(ssl);
+            return NULL;
+        }
+    }
+
     if (SSL_connect(ssl) <= 0) {
         ERR("SSL client: handshake failed");
         ERR_print_errors_cb(on_error, NULL);
@@ -82,12 +104,14 @@ static SSL* wrap_socket(SSLClient* sslclient)
     }
 
     // verify certificate
+    /*
     if (SSL_get_verify_result(ssl) != X509_V_OK) {
         ERR("Certificate verification failed!");
         ERR_print_errors_cb(on_error, NULL);
         SSL_free(ssl);
         return NULL;
     }
+     */
 
     return ssl;
 
