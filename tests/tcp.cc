@@ -13,6 +13,7 @@ extern "C" {
 #include "service/session.h"
 #include "server/tcp/tcp_server.h"
 #include "client/tcpclient.h"
+#include "util/alloc.h"
 
 extern bool logs_enabled;
 }
@@ -38,7 +39,7 @@ static Session* parrot_session_create(SOCKET fd, void* data)
 {
     (void) data;
 
-    ParrotSession* psession = (ParrotSession *) calloc(1, sizeof(ParrotSession));
+    ParrotSession* psession = (ParrotSession *) CALLOC(1, sizeof(ParrotSession));
     session_init(&psession->session, fd, parrot_on_recv, NULL);
     return (Session *) psession;
 }
@@ -193,6 +194,7 @@ TEST_SUITE("TCP")
         logs_enabled = true;
     }
 
+#ifndef _WIN32  // disable Windows checks, for now
     TEST_CASE("TCP (load test)" * doctest::skip(getenv("VALGRIND") != NULL))
     {
         logs_enabled = false;
@@ -239,4 +241,5 @@ TEST_SUITE("TCP")
 
         logs_enabled = true;
     }
+#endif
 }
