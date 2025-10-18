@@ -4,9 +4,9 @@
 
 cmake_minimum_required(VERSION 3.16)
 project(neblina
-    VERSION 0.0.1
+    VERSION 0.0.2
     DESCRIPTION "A tiny multi-protocol server"
-    LANGUAGES C)
+    LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -24,6 +24,7 @@ endif()
 
 if(NOT WIN32)
     find_package(Threads REQUIRED)
+    # find_package(OpenSSL COMPONENTS SSL REQUIRED)
 endif ()
 
 #-------------------------
@@ -71,25 +72,23 @@ set(SRC_FILES "${SRC_FILES};${ADDITIONAL_FILES}")
 # main executable
 add_executable(${PROJECT_NAME} main/main.c ${SRC_FILES})
 
-# protocol testing
-add_executable(parrot-test EXCLUDE_FROM_ALL tests/parrot.c ${SRC_FILES})
-
-# unit tests targets and their dependencies
+# tests
+file(GLOB TEST_FILES CONFIGURE_DEPENDS tests/*.cc tests/doctest.h)
+add_executable(${PROJECT_NAME}-tests EXCLUDE_FROM_ALL ${TEST_FILES} ${SRC_FILES})
 add_executable(tests-infloop EXCLUDE_FROM_ALL tests/watchdog/infloop.c)
 add_executable(tests-error EXCLUDE_FROM_ALL tests/watchdog/error.c)
 add_executable(tests-nonrecoverable EXCLUDE_FROM_ALL tests/watchdog/nonrecoverable.c)
-add_executable(${PROJECT_NAME}-tests EXCLUDE_FROM_ALL tests/tests.c ${SRC_FILES})
-add_dependencies(${PROJECT_NAME}-tests tests-infloop tests-error tests-nonrecoverable parrot-test)
+add_dependencies(${PROJECT_NAME}-tests tests-infloop tests-error tests-nonrecoverable)
 
 # add special targets
-set(FINAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests parrot-test)
+set(FINAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests) #parrot-test sparrot-test)
 include(cmake/special-targets.cmake)
 
 # add common things to all final targets
 foreach (TARGET ${FINAL_TARGETS})
     if (NOT MSVC)
         # add POSIX libraries
-        target_link_libraries(${TARGET} PRIVATE Threads::Threads)
+        target_link_libraries(${TARGET} PRIVATE Threads::Threads) # OpenSSL::SSL)
 
         # strip executable
         if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -5,12 +5,6 @@
 
 #include "os.h"
 
-#ifdef _WIN32
-#  define PID_NOT_RUNNING ((pid_t) 2147483646)
-#else
-#  define PID_NOT_RUNNING ((pid_t) -1)
-#endif
-
 typedef struct {
     const char*  name;
     const char*  program;
@@ -20,7 +14,7 @@ typedef struct {
 
 void watchdog_init(WatchdogProgram const* programs, size_t programs_sz);
 void watchdog_step();
-void watchdog_finalize();
+void watchdog_finalize(bool wait);
 
 typedef enum { WPS_RUNNING, WPS_STOPPED, WPS_GAVE_UP } WatchdogProgramStatus;
 typedef struct {

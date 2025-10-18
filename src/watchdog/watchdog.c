@@ -7,6 +7,7 @@
 #include "os.h"
 #include "util/error.h"
 #include "util/alloc.h"
+#include "timer.h"
 
 typedef struct {
     size_t program_idx;
@@ -94,11 +95,30 @@ void watchdog_step()
     os_sleep_ms(MS_BETWEEN_RETRIES);
 }
 
-void watchdog_finalize()
+void watchdog_finalize(bool wait)
 {
+    // kill processes
     for (size_t i = 0; i < n_tasks; ++i)
         if (tasks[i].pid != PID_NOT_RUNNING)
-            os_kill(tasks[i].pid);
+            os_kill(tasks[i].pid, false);
+
+    // wait for processes death
+    if (wait) {
+        Timer* timer = timer_create_();
+        bool still_running;
+    again:
+        if (timer_current_ms(timer) < 5000) {
+            still_running = false;
+            for (size_t i = 0; i < n_tasks; ++i)
+                if (tasks[i].pid != PID_NOT_RUNNING && os_process_still_running(tasks[i].pid, NULL))
+                    still_running = true;
+            if (still_running)
+                goto again;
+        }
+        timer_destroy(timer);
+    }
+
+    // free other stuff
     free(tasks);
 }
 

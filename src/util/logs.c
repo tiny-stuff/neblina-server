@@ -6,12 +6,13 @@
 
 #include "window.h"
 
+bool logs_enabled = true;
 bool logs_verbose = false;
 int  logging_color = 0;
 
 void DBG(const char* fmt, ...)
 {
-    if (!logs_verbose)
+    if (!logs_verbose || !logs_enabled)
         return;
     va_list ap;
     va_start(ap, fmt);
@@ -21,6 +22,8 @@ void DBG(const char* fmt, ...)
 
 void LOG(const char* fmt, ...)
 {
+    if (!logs_enabled)
+        return;
     va_list ap;
     va_start(ap, fmt);
     vnprintf(fmt, ap);
@@ -29,6 +32,8 @@ void LOG(const char* fmt, ...)
 
 void ERR(const char* fmt, ...)
 {
+    if (!logs_enabled)
+        return;
     va_list ap;
     va_start(ap, fmt);
     vnprintf_error(fmt, ap);

@@ -8,7 +8,7 @@
   - [x] Migrate to CMake
   - [x] Improve OS separation of concerns (posix by default)
   - [x] Tests
-- [ ] Code review
+- [x] Code review
   - [x] Fix all warnings
   - [x] Move CommunicationBuffer inside Session (as ConnectionBuffer)
   - [x] Document stuff
@@ -18,8 +18,16 @@
   - [x] Additional tests (for parrot)
     - [x] Create TCPClient (?)
     - [x] Load testing
+- [x] General Improvements
+  - [x] Doctest
+  - [x] Futures
 - [ ] SSL server + SParrot
-- [ ] Process config file
+  - [ ] Handle disconnect (free SSL)
+  - [ ] SSL client
+- [ ] SSL server + SParrot
+  - [ ] Leaks
+  - [ ] Handle disconnect (free SSL)
+  - [ ] Write tests
 - [ ] HTTP structs
 - [ ] HTTP server and request handlers
   - [ ] Default 404
@@ -27,6 +35,8 @@
   - [ ] Static website
   - [ ] Redirect
   - [ ] Proxy
+- [ ] Create executable
+  - [ ] Process config file
 - [ ] Rewrite queue handling in Windows using IOCP instead of WSApoll
 - [ ] HTTPS
 - [ ] HTTP-to-HTTPS

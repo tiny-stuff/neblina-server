@@ -15,7 +15,7 @@
 
 extern volatile bool termination_requested;
 
-void server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, void* session_data, size_t n_threads)
+void server_initialize(Server* server, SOCKET fd, CreateSessionF create_session_cb, void* session_data, size_t n_threads)
 {
     server->create_session_cb = create_session_cb;
     server->session_data = session_data;
@@ -25,11 +25,21 @@ void server_init(Server* server, SOCKET fd, CreateSessionF create_session_cb, vo
     server->session_hash = NULL;
 }
 
+static bool server_is_session_active(Server* server, Session* session)
+{
+    SessionHash* conn_hash;
+    HASH_FIND_INT(server->session_hash, &session->fd, conn_hash);
+    return conn_hash != NULL;
+}
+
 int server_process_session(Server* server, Session* session)
 {
+    if (!server_is_session_active(server, session))
+        return 0;
+
     // receive data
     uint8_t* recv_buf;
-    int r = server->vt->recv(session->fd, &recv_buf);
+    int r = server->vt->recv(server, session->fd, &recv_buf);
     if (r < 0) {
         ERR("Error receiving data from socket %d: %s", session->fd, strerror(errno));
         return r;
@@ -40,14 +50,14 @@ int server_process_session(Server* server, Session* session)
         free(recv_buf);
         if (rr < 0) {
             ERR("Error on session connected to socket %d: %s (possible description)", session->fd, strerror(errno));
-            close(session->fd);
+            close_socket(session->fd);
         }
     }
 
     // send pending data
     size_t sz;
     uint8_t const* data_to_send = commbuf_send_buffer(session->connection, &sz);
-    r = server->vt->send(session->fd, data_to_send, sz);
+    r = server->vt->send(server, session->fd, data_to_send, sz);
     if (r < 0) {
         ERR("Error sending data to socket %d: %s", session->fd, strerror(errno));
         return r;
@@ -63,6 +73,7 @@ static int handle_new_connection(Server* server)
     SOCKET client_fd = server->vt->accept_new_connection(server);
     if (client_fd == INVALID_SOCKET) {
         ERR("error accepting a new connection: %s", strerror(errno));
+        close_socket(client_fd);
         return -1;
     }
 
@@ -84,6 +95,9 @@ static int handle_new_connection(Server* server)
 static void handle_disconnect(Server* server, SOCKET client_fd)
 {
     DBG("Client disconnected from socket %d", client_fd);
+
+    if (server->vt->client_disconnected)
+        server->vt->client_disconnected(server, client_fd);
 
     // find connection in list
     SessionHash* conn_hash;
@@ -147,14 +161,10 @@ void server_run(Server* server)
 
 void server_close_socket(SOCKET fd)
 {
-#ifdef _WIN32
-    closesocket(fd);
-#else
-    close(fd);
-#endif
+    close_socket(fd);
 }
 
-void server_destroy(Server* server)
+void server_finalize(Server* server)
 {
     // close all connections
     SessionHash *conn_hash, *tmp;
@@ -165,7 +175,12 @@ void server_destroy(Server* server)
     server_close_socket(server->fd);
     poller_destroy(server->poller);
     spool_destroy(server->spool);
-    server->vt->free(server);
     DBG("Server destroyed");
+}
+
+void server_destroy(Server* server)
+{
+    server_finalize(server);
+    free(server);
 }
 

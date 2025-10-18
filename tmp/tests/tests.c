@@ -47,13 +47,11 @@ static void test_watchdog()
 
     watchdog_finalize();
 
-    /*
     os_sleep_ms(2000);
 
     assert(!os_process_still_running(error_state.pid, NULL));
     assert(!os_process_still_running(infloop_state.pid, NULL));
     assert(!os_process_still_running(nonrec_state.pid, NULL));
-    */
 }
 
 //
@@ -117,7 +115,7 @@ static void test_commbuf()
 
 static void test_parrot()
 {
-    TCPClient* t = tcpclient_create("localhost", 23456);
+    TCPClient* t = tcpclient_create("127.0.0.1", 23456);
     assert(t);
     assert(tcpclient_send_text(t, "hello\r\n") == 7);
 
@@ -142,10 +140,10 @@ static void* test_parrot_load_thread(void *data)
 {
     (void) data;
 
-#define N_CLIENTS 200
+#define N_CLIENTS 10
     TCPClient* clients[N_CLIENTS];
     for (size_t i = 0; i < N_CLIENTS; ++i) {
-        clients[i] = tcpclient_create("localhost", 23456);
+        clients[i] = tcpclient_create("127.0.0.1", 23456);
         assert(clients[i]);
     }
     for (size_t i = 0; i < N_CLIENTS; ++i)
@@ -169,7 +167,7 @@ static void test_parrot_load()
 
     time_t start = time(NULL);
 
-#define N_THREADS 20
+#define N_THREADS 10
     pthread_t threads[N_THREADS];
     for (size_t i = 0; i < N_THREADS; ++i)
         pthread_create(&threads[i], NULL, test_parrot_load_thread, NULL);
@@ -186,24 +184,27 @@ static void test_parrot_load()
 // MAIN
 //
 
-int main()
+int main(int argc, char* argv[])
 {
+    logs_verbose = true;
     socket_init();
 
-    logs_verbose = true;
-
-    test_commbuf();
-
     pid_t parrot_pid = os_start_service("./parrot-test", NULL, 0);
-    os_sleep_ms(1000);
+    os_sleep_ms(500);
+
+    // fast tests
+    test_commbuf();
     test_parrot();
+
+    // slow tests
+    if (!(argc == 2 && strcmp(argv[1], "-k") == 0)) {
 #ifndef _WIN32
-    test_parrot_load();
+        test_parrot_load();
 #endif
+        test_watchdog();
+    }
+
     os_kill(parrot_pid);
-
-    test_watchdog();
-
     socket_finalize();
 
     printf("\x1b[0;32mTests successful!\x1b[0m\n");

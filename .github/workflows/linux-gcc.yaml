@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: apt-get install -y libssl-dev valgrind
       - name: Configure CMake
         run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug ..
       - name: Build executable
@@ -24,3 +26,15 @@ jobs:
       - name: Build and run tests
         working-directory: ./build
         run: make neblina-tests && ./neblina-tests
+      - name: Check for leaks
+        continue-on-error: true
+        working-directory: ./build
+        run: make neblina-tests-leaks
+      - name: Check threads (drd)
+        continue-on-error: true
+        working-directory: ./build
+        run: make neblina-tests-drd
+      - name: Check threads (helgrind)
+        continue-on-error: true
+        working-directory: ./build
+        run: make neblina-tests-helgrind
