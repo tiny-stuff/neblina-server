@@ -119,6 +119,16 @@ SOCKET tcp_accept_new_connection(Server* server)
     if (getnameinfo((struct sockaddr const*)(&remoteaddr), addrlen, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV) == 0)
         DBG("New connection from %s:%s as fd %d", hoststr, portstr, client_fd);
 
+    // mark socket as non-blocking
+    int flags = fcntl(client_fd, F_GETFL, 0);
+    if (flags == -1) {
+        ERR("fcntl: %s", strerror(errno));
+        return false;
+    }
+    flags |= O_NONBLOCK;
+    if (fcntl(client_fd, F_SETFL, flags) < 0)
+        ERR("client: error marking socket as non-blocking");
+
     return client_fd;
 
 #pragma GCC diagnostic pop
