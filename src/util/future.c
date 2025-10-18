@@ -54,8 +54,8 @@ static void future_initialize(Future* future, FutureThread future_thread, void* 
 
 static void future_finalize(Future* future)
 {
-    free(future->dt);
     future_await(future, NULL);
+    free(future->dt);
     pthread_mutex_destroy(&future->mutex);
 }
 
