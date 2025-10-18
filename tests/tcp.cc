@@ -70,12 +70,12 @@ TEST_SUITE("TCP")
 
         SUBCASE("Send data to server and get echo")
         {
-            CHECK(tcpclient_send_text(client, "hello\r\n") == 7);
+            CHECK(client_send_text((Client *) client, "hello\r\n") == 7);
             server_iterate((Server *) server, 50);  // 1st iteration, accept connection
             server_iterate((Server *) server, 50);  // 2nd iteration, process incoming data
 
             char resp[6] = {0};
-            ssize_t r = tcpclient_recv_spinlock(client, (uint8_t *) resp, 5, 5000);
+            ssize_t r = client_recv_spinlock((Client *) client, (uint8_t *) resp, 5, 5000);
             CHECK(memcmp(resp, "hello", r) == 0);
         }
 
@@ -98,10 +98,10 @@ TEST_SUITE("TCP")
 
         SUBCASE("Send data to server and get echo")
         {
-            CHECK(tcpclient_send_text(client, "hello\r\n") == 7);
+            CHECK(client_send_text((Client *) client, "hello\r\n") == 7);
 
             char resp[6] = {0};
-            ssize_t r = tcpclient_recv_spinlock(client, (uint8_t *) resp, 5, 5000);
+            ssize_t r = client_recv_spinlock((Client *) client, (uint8_t *) resp, 5, 5000);
             CHECK(memcmp(resp, "hello", r) == 0);
         }
 
@@ -129,11 +129,11 @@ TEST_SUITE("TCP")
         os_sleep_ms(300);
 
         for (size_t i = 0; i < N_CLIENTS; ++i)
-            CHECK(tcpclient_send_text(clients[i], "hello\r\n") == 7);
+            CHECK(client_send_text((Client *) clients[i], "hello\r\n") == 7);
 
         for (size_t i = 0; i < N_CLIENTS; ++i) {
             char resp[6] = {0};
-            ssize_t r = tcpclient_recv_spinlock(clients[i], (uint8_t *) resp, 5, 5000);
+            ssize_t r = client_recv_spinlock((Client *) clients[i], (uint8_t *) resp, 5, 5000);
             CHECK(memcmp(resp, "hello", r) == 0);
         }
 
@@ -169,11 +169,11 @@ TEST_SUITE("TCP")
                 os_sleep_ms(300);
 
                 for (size_t i = 0; i < N_CLIENTS; ++i)
-                    CHECK(tcpclient_send_text(clients[i], "hello\r\n") == 7);
+                    CHECK(client_send_text((Client *) clients[i], "hello\r\n") == 7);
 
                 for (size_t i = 0; i < N_CLIENTS; ++i) {
                     char resp[6] = {0};
-                    ssize_t r = tcpclient_recv_spinlock(clients[i], (uint8_t *) resp, 5, 5000);
+                    ssize_t r = client_recv_spinlock((Client *) clients[i], (uint8_t *) resp, 5, 5000);
                     CHECK(memcmp(resp, "hello", r) == 0);
                 }
 
@@ -217,11 +217,11 @@ TEST_SUITE("TCP")
                 os_sleep_ms(300);
 
                 for (size_t i = 0; i < N_CLIENTS; ++i)
-                    CHECK(tcpclient_send_text(clients[i], "hello\r\n") == 7);
+                    CHECK(client_send_text((Client *) clients[i], "hello\r\n") == 7);
 
                 for (size_t i = 0; i < N_CLIENTS; ++i) {
                     char resp[6] = {0};
-                    ssize_t r = tcpclient_recv_spinlock(clients[i], (uint8_t *) resp, 5, 5000);
+                    ssize_t r = client_recv_spinlock((Client *) clients[i], (uint8_t *) resp, 5, 5000);
                     CHECK(memcmp(resp, "hello", r) == 0);
                 }
 
