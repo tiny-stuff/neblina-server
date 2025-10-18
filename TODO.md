@@ -18,21 +18,16 @@
   - [x] Additional tests (for parrot)
     - [x] Create TCPClient (?)
     - [x] Load testing
-- [ ] General Improvements
+- [x] General Improvements
   - [x] Doctest
   - [x] Futures
-  - [ ] String library?
 - [ ] SSL server + SParrot
   - [ ] Handle disconnect (free SSL)
   - [ ] SSL client
-- [x] SSL server + SParrot
-  - [x] Leaks
-  - [x] Handle disconnect (free SSL)
+- [ ] SSL server + SParrot
+  - [ ] Leaks
+  - [ ] Handle disconnect (free SSL)
   - [ ] Write tests
-  - [ ] Refactor
-    - [ ] Use void* for polymorhism
-    - [ ] Consider composition over inheritance
-- [ ] Process config file
 - [ ] HTTP structs
 - [ ] HTTP server and request handlers
   - [ ] Default 404
@@ -40,6 +35,8 @@
   - [ ] Static website
   - [ ] Redirect
   - [ ] Proxy
+- [ ] Create executable
+  - [ ] Process config file
 - [ ] Rewrite queue handling in Windows using IOCP instead of WSApoll
 - [ ] HTTPS
 - [ ] HTTP-to-HTTPS
