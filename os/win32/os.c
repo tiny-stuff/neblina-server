@@ -95,6 +95,9 @@ DWORD os_start_service(const char* program, const char** args, size_t args_sz)
 
 bool os_process_still_running(DWORD dwProcessId, int* status)
 {
+    if (dwProcessId == PID_NOT_RUNNING)
+        return false;
+
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, dwProcessId);
     if (!hProcess) {
         if (status)

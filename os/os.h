@@ -12,6 +12,12 @@
 #  include <sys/types.h>
 #endif
 
+#ifdef _WIN32
+#  define PID_NOT_RUNNING ((pid_t) 2147483646)
+#else
+#  define PID_NOT_RUNNING ((pid_t) -1)
+#endif
+
 void os_handle_ctrl_c();
 void os_sleep_ms(size_t ms);
 

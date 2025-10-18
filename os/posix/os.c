@@ -66,9 +66,16 @@ pid_t os_start_service(const char* program, const char** args, size_t args_sz)
     return pid;
 }
 
+#include <stdio.h>
 bool os_process_still_running(pid_t pid, int* status)
 {
-    bool r = waitpid(pid, status, WNOHANG) != pid;
+    if (pid == PID_NOT_RUNNING)
+        return false;
+
+    int n = waitpid(pid, status, WNOHANG);
+    if (n < 0)
+        return false;
+    bool r = (n != pid);
     if (status)
         *status = WEXITSTATUS(*status);
     return r;
