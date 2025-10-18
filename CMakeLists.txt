@@ -24,7 +24,7 @@ endif()
 
 if(NOT WIN32)
     find_package(Threads REQUIRED)
-    # find_package(OpenSSL COMPONENTS SSL REQUIRED)
+    find_package(OpenSSL COMPONENTS SSL REQUIRED)
 endif ()
 
 #-------------------------
@@ -81,14 +81,14 @@ add_executable(tests-nonrecoverable EXCLUDE_FROM_ALL tests/watchdog/nonrecoverab
 add_dependencies(${PROJECT_NAME}-tests tests-infloop tests-error tests-nonrecoverable)
 
 # add special targets
-set(FINAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests) #parrot-test sparrot-test)
+set(FINAL_TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-tests)
 include(cmake/special-targets.cmake)
 
 # add common things to all final targets
 foreach (TARGET ${FINAL_TARGETS})
     if (NOT MSVC)
         # add POSIX libraries
-        target_link_libraries(${TARGET} PRIVATE Threads::Threads) # OpenSSL::SSL)
+        target_link_libraries(${TARGET} PRIVATE Threads::Threads OpenSSL::SSL)
 
         # strip executable
         if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
