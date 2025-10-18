@@ -44,9 +44,12 @@ static Session* parrot_session_create(SOCKET fd, void* data)
 }
 
 static std::atomic_bool server_running { true };
+static std::atomic_bool server_connected { false };
+
 auto server_thread_function = [](int n_threads) {
     server_running = true;
     TCPServer* server = tcp_server_create(23456, false, parrot_session_create, n_threads);
+    server_connected = true;
     while (server_running)
         server_iterate((Server *) server, 50);
     tcp_server_destroy(server);
@@ -85,8 +88,9 @@ TEST_SUITE("TCP")
     {
         logs_enabled = false;
 
+        server_connected = false;
         auto server_thread = std::thread(server_thread_function, 8);
-        os_sleep_ms(300);
+        while (!server_connected);
 
         TCPClient* client = tcpclient_create("127.0.0.1", 23456);
         CHECK(client);
@@ -111,8 +115,9 @@ TEST_SUITE("TCP")
     {
         logs_enabled = false;
 
+        server_connected = false;
         auto server_thread = std::thread(server_thread_function, 8);
-        os_sleep_ms(300);
+        while (!server_connected);
 
 #define N_CLIENTS 30
         TCPClient* clients[N_CLIENTS];
@@ -138,4 +143,5 @@ TEST_SUITE("TCP")
 
         logs_enabled = true;
     }
+
 }
