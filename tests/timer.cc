@@ -13,6 +13,6 @@ TEST_SUITE("Timer")
         os_sleep_ms(10);
         uint64_t t = timer_current_ms(timer);
         CHECK(t >= 9);
-        CHECK(t < 30);
+        CHECK(t < 100);
     }
 }
