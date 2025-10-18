@@ -10,7 +10,7 @@
 #include "util/logs.h"
 #include "server/commbuf.h"
 #include "watchdog/watchdog.h"
-#include "client/tcpclient.h"
+#include "client/client.h"
 
 const char* service = "tests";
 

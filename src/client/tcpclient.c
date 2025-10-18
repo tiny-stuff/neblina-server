@@ -1,27 +1,23 @@
 #include "tcpclient.h"
 
-#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
+#include <errno.h>
 
-#include "os.h"
-#include "tcpclient_priv.h"
-#include "util/alloc.h"
-#include "util/logs.h"
 #include "socket.h"
+#include "util/logs.h"
+#include "client_priv.h"
+#include "tcpclient_priv.h"
 
-#define BUF_SZ (16 * 1024)
-
-static ssize_t recv_(SOCKET fd, uint8_t* data, size_t sz)
+static ssize_t recv_(Client* client, uint8_t* data, size_t sz)
 {
-    return recv(fd, data, sz, 0);
+    return recv(client->fd, data, sz, 0);
 }
 
-static ssize_t send_(SOCKET fd, uint8_t const* data, size_t sz)
+static ssize_t send_(Client* client, uint8_t const* data, size_t sz)
 {
-    return send(fd, data, sz, 0);
+    return send(client->fd, data, sz, 0);
 }
 
 static void *get_in_addr(struct sockaddr *sa)
@@ -96,19 +92,17 @@ static SOCKET open_connection_(const char* host, int port)
     return sockfd;
 }
 
-int tcpclient_initialize(TCPClient* t, const char* host, int port)
+void tcpclient_initialize(TCPClient* tcpclient, const char* host, int port)
 {
-    memset(t, 0, sizeof(*t));
-    t->vt.recv = recv_;
-    t->vt.send = send_;
-    t->fd = open_connection_(host, port);
-    return (t->fd != INVALID_SOCKET) ? 0 : -1;
+    memset(tcpclient, 0, sizeof(*tcpclient));
+    client_initialize((Client *) tcpclient, open_connection_(host, port));
+    tcpclient->base.vt.recv = recv_;
+    tcpclient->base.vt.send = send_;
 }
 
-void tcpclient_finalize(TCPClient* t)
+void tcpclient_finalize(TCPClient* tcpclient)
 {
-    if (t->fd != INVALID_SOCKET)
-        close_socket(t->fd);
+    client_finalize((Client *) tcpclient);
 }
 
 TCPClient* tcpclient_create(const char* host, int port)
@@ -118,11 +112,7 @@ TCPClient* tcpclient_create(const char* host, int port)
         fprintf(stderr, "Memory exausted.\n");
         exit(EXIT_FAILURE);
     }
-    int r = tcpclient_initialize(tcpclient, host, port);
-    if (r < 0) {
-        tcpclient_destroy(tcpclient);
-        return NULL;
-    }
+    tcpclient_initialize(tcpclient, host, port);
     return tcpclient;
 }
 
@@ -130,74 +120,4 @@ void tcpclient_destroy(TCPClient* tcpclient)
 {
     tcpclient_finalize(tcpclient);
     free(tcpclient);
-}
-
-ssize_t tcpclient_send(TCPClient* t, uint8_t* data, size_t sz)
-{
-    return t->vt.send(t->fd, data, sz);
-}
-
-ssize_t tcpclient_send_text(TCPClient* t, const char* data)
-{
-    return t->vt.send(t->fd, (uint8_t const *) data, strlen(data));
-}
-
-ssize_t tcpclient_recv_nonblock(TCPClient* t, uint8_t** data)
-{
-    *data = MALLOC(BUF_SZ);
-    ssize_t r = t->vt.recv(t->fd, *data, BUF_SZ);
-    if (r <= 0) {
-        if (r < 0 && errno == EAGAIN)
-            r = 0;
-        free(data);
-    }
-
-    return r;
-}
-
-ssize_t tcpclient_recv_spinlock(TCPClient* t, uint8_t* data, size_t sz, size_t timeout_ms)
-{
-#ifdef _WIN32
-    LARGE_INTEGER freq, start, end;
-    QueryPerformanceFrequency(&freq);
-    QueryPerformanceCounter(&start);
-#else
-    struct timespec start, end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-#endif
-
-    size_t pos = 0;
-    while (pos < sz) {
-        ssize_t r = t->vt.recv(t->fd, &data[pos], sz - pos);
-#ifdef _WIN32
-		int err = WSAGetLastError();
-        if (r < 0 && err != EWOULDBLOCK && err != WSAEWOULDBLOCK) {
-            ERR("client: recv: %d", err);
-#else
-        if (r <= 0 && errno != EAGAIN) {
-            ERR("client: recv: %s", strerror(errno));
-#endif
-            return r;
-        }
-
-        if (r > 0) {
-            pos += r;
-            data += r;
-        }
-
-        if (pos < sz)
-            os_sleep_ms(1);
-
-#ifdef _WIN32
-        QueryPerformanceCounter(&end);
-        double elapsed = (double)(end.QuadPart - start.QuadPart) * 1000.0 / freq.QuadPart;
-#else
-        clock_gettime(CLOCK_MONOTONIC, &end);
-        double elapsed = (double) (end.tv_sec - start.tv_sec) + (double) (end.tv_nsec - start.tv_nsec) / (double) 1e6;
-#endif
-        if (elapsed > (double) timeout_ms)
-            return (ssize_t) pos;
-    }
-
-    return (ssize_t) pos;
 }
