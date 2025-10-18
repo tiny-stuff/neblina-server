@@ -10,6 +10,7 @@
 #include "tcpclient_priv.h"
 #include "util/alloc.h"
 #include "util/logs.h"
+#include "socket.h"
 
 #define BUF_SZ (16 * 1024)
 
