@@ -120,6 +120,11 @@ SOCKET tcp_accept_new_connection(Server* server)
         DBG("New connection from %s:%s as fd %d", hoststr, portstr, client_fd);
 
     // mark socket as non-blocking
+#ifdef _WIN32
+    unsigned long mode = 1;
+    if (ioctlsocket(client_fd, FIONBIO, &mode) != 0)
+        ERR("client: error marking socket as non-blocking");
+#else
     int flags = fcntl(client_fd, F_GETFL, 0);
     if (flags == -1) {
         ERR("fcntl: %s", strerror(errno));
@@ -128,7 +133,7 @@ SOCKET tcp_accept_new_connection(Server* server)
     flags |= O_NONBLOCK;
     if (fcntl(client_fd, F_SETFL, flags) < 0)
         ERR("client: error marking socket as non-blocking");
-
+#endif
     return client_fd;
 
 #pragma GCC diagnostic pop
