@@ -192,4 +192,51 @@ TEST_SUITE("TCP")
 
         logs_enabled = true;
     }
+
+    TEST_CASE("TCP (load test)" * doctest::skip(getenv("VALGRIND") != NULL))
+    {
+        logs_enabled = false;
+
+        server_connected = false;
+        auto server_thread = std::thread(server_thread_function, 8);
+        while (!server_connected);
+
+#define N_THREADS 16
+#define N_CLIENTS 120
+
+        std::thread threads[N_THREADS];
+        for (size_t i = 0; i < N_THREADS; ++i) {
+            threads[i] = std::thread([]() {
+                TCPClient* clients[N_CLIENTS];
+                for (size_t i = 0; i < N_CLIENTS; ++i) {
+                    clients[i] = tcpclient_create("127.0.0.1", 23456);
+                    CHECK(clients[i]);
+                }
+                os_sleep_ms(300);
+
+                for (size_t i = 0; i < N_CLIENTS; ++i)
+                    CHECK(tcpclient_send_text(clients[i], "hello\r\n") == 7);
+
+                for (size_t i = 0; i < N_CLIENTS; ++i) {
+                    char resp[6] = {0};
+                    ssize_t r = tcpclient_recv_spinlock(clients[i], (uint8_t *) resp, 5, 5000);
+                    CHECK(memcmp(resp, "hello", r) == 0);
+                }
+
+                for (size_t i = 0; i < N_CLIENTS; ++i)
+                    tcpclient_destroy(clients[i]);
+            });
+        }
+
+        for (size_t i = 0; i < N_THREADS; ++i)
+            threads[i].join();
+
+#undef N_THREADS
+#undef N_CLIENTS
+
+        server_running = false;
+        server_thread.join();
+
+        logs_enabled = true;
+    }
 }
