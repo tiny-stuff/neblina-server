@@ -55,7 +55,7 @@ void poller_remove_connection(Poller* p, SOCKET fd)
                 p->poll_fds[j] = p->poll_fds[j + 1];
             }
             p->poll_count--;
-            return true;
+            return;
         }
     }
     FATAL_NON_RECOVERABLE("Socket not found in poll list");

@@ -99,8 +99,10 @@ static SOCKET tcp_server_get_listener(int port, bool open_to_world)
 
 SOCKET tcp_accept_new_connection(Server* server)
 {
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wanalyzer-fd-leak"
+#endif
 
     // accept connection
     struct sockaddr_storage remoteaddr; // Client address
@@ -136,7 +138,9 @@ SOCKET tcp_accept_new_connection(Server* server)
 #endif
     return client_fd;
 
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 }
 
 int tcp_server_initialize(TCPServer* tcp_server, int port, bool open_to_world, CreateSessionF create_session_cb, size_t n_threads)
