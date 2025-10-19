@@ -197,7 +197,7 @@ TEST_SUITE("TCP")
 #ifndef _WIN32  // disable Windows checks, for now
     TEST_CASE("TCP (load test)" * doctest::skip(getenv("VALGRIND") != NULL))
     {
-        logs_enabled = false;
+        // logs_enabled = false;
 
         server_connected = false;
         auto server_thread = std::thread(server_thread_function, 8);
@@ -222,6 +222,7 @@ TEST_SUITE("TCP")
                 for (size_t i = 0; i < N_CLIENTS; ++i) {
                     char resp[6] = {0};
                     ssize_t r = client_recv_spinlock((Client *) clients[i], (uint8_t *) resp, 5, 5000);
+                    CHECK(r == 5);
                     CHECK(memcmp(resp, "hello", r) == 0);
                 }
 

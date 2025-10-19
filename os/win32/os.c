@@ -139,3 +139,8 @@ void os_kill(pid_t pid, bool immediate)
 
     CloseHandle(hProcess);
 }
+
+void os_set_max_files(size_t count)
+{
+    (void) count;
+}

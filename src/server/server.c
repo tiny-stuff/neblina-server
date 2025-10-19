@@ -10,6 +10,7 @@
 #include "spool/spool.h"
 #include "util/logs.h"
 #include "util/alloc.h"
+#include "os.h"
 
 #define MAX_EVENTS 64
 
@@ -17,6 +18,7 @@ extern volatile bool termination_requested;
 
 void server_initialize(Server* server, SOCKET fd, CreateSessionF create_session_cb, void* session_data, size_t n_threads)
 {
+    os_set_max_files(65535);
     server->create_session_cb = create_session_cb;
     server->session_data = session_data;
     server->spool = spool_create(n_threads, server);

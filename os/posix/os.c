@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <stdint.h>
+#include <sys/resource.h>
 
 #include "util/error.h"
 #include "util/logs.h"
@@ -84,4 +85,15 @@ bool os_process_still_running(pid_t pid, int* status)
 void os_kill(pid_t pid, bool immediate)
 {
     kill(pid, immediate ? SIGKILL : SIGTERM);
+}
+
+void os_set_max_files(size_t count)
+{
+    struct rlimit rl = {count, count};
+    if (setrlimit(RLIMIT_NOFILE, &rl) != 0) {
+        ERR("Could not set file limit: %s", strerror(errno));
+    } else {
+        getrlimit(RLIMIT_NOFILE, &rl);
+        DBG("File limit increased: %lu %lu", rl.rlim_cur, rl.rlim_max);
+    }
 }

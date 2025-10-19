@@ -17,7 +17,10 @@ static ssize_t recv_(Client* client, uint8_t* data, size_t sz)
 
 static ssize_t send_(Client* client, uint8_t const* data, size_t sz)
 {
-    return send(client->fd, data, sz, 0);
+    ssize_t r = send(client->fd, data, sz, 0);
+    if (r < 0)
+        ERR("tcpclient: error sending data: %s", strerror(errno));
+    return r;
 }
 
 static void *get_in_addr(struct sockaddr *sa)
