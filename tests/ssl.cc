@@ -100,7 +100,7 @@ static Session* sparrot_session_create(SOCKET fd, void* data)
 static std::atomic_bool server_running { true };
 static std::atomic_bool server_connected { false };
 
-SSLKey ssl_key = { .public_key = public_key, .private_key = private_key };
+static SSLKey ssl_key = { .public_key = public_key, .private_key = private_key };
 
 static auto server_thread_function = [](int n_threads) {
     server_running = true;

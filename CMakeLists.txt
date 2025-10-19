@@ -23,6 +23,7 @@ endif()
 #------------------------
 
 if(NOT WIN32)
+    set(THREADS_PREFER_PTHREAD_FLAG TRUE)
     find_package(Threads REQUIRED)
     find_package(OpenSSL COMPONENTS SSL REQUIRED)
 endif ()
