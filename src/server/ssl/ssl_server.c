@@ -12,6 +12,7 @@
 #include "util/error.h"
 #include "util/alloc.h"
 #include "uthash/uthash.h"
+#include "os.h"
 
 static const char* ERR_PRX = "SSL server error:";
 
@@ -44,11 +45,26 @@ static SOCKET ssl_accept_new_connection(Server* server)
     // add SSL wrapper
     SSL* ssl = SSL_new(ssl_server->ctx);
     SSL_set_fd(ssl, fd);
-    if (SSL_accept(ssl) <= 0) {
-        ERR("Could not open a SSL connection");
-        ERR_print_errors_fp(stderr);
-        ERR_print_errors_cb(on_error, NULL);
-        return INVALID_SOCKET;
+
+    // accept connection
+    while (1) {
+        int ret = SSL_accept(ssl);
+        if (ret == 1) {
+            DBG("sslserver: handshake complete!");
+            break;
+        }
+
+        int err = SSL_get_error(ssl, ret);
+        if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
+            os_sleep_ms(1);
+            continue;
+        } else {
+            ERR("Could not open a SSL connection");
+            ERR_print_errors_fp(stderr);
+            ERR_print_errors_cb(on_error, NULL);
+            ERR_print_errors_fp(stderr);
+            return INVALID_SOCKET;
+        }
     }
 
     // store the pair ssl/fd
